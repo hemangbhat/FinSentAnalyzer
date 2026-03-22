@@ -1,0 +1,51 @@
+# Virtual environments
+venv/
+.venv/
+venvMlProject/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+.eggs/
+
+# Data (keep structure, ignore large files)
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# Models (keep .joblib baseline models, ignore large transformers)
+models/*.pkl
+models/*.pt
+models/*.bin
+models/*.safetensors
+models/finbert/*
+models/*_finetuned/
+!models/.gitkeep
+!models/*.joblib
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+
+# Cache
+.cache/
+huggingface/
+
+# Claude
+.claude/
