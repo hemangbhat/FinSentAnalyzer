@@ -3,20 +3,16 @@ Data preprocessing module for Financial Sentiment Analysis.
 Handles data loading, cleaning, and preparation for model training.
 """
 
-import os
 import re
 import pandas as pd
-from pathlib import Path
 from sklearn.model_selection import train_test_split
 
-# Label mapping
-LABEL_MAP = {"negative": 0, "neutral": 1, "positive": 2}
-LABEL_MAP_INV = {v: k for k, v in LABEL_MAP.items()}
+from utils import get_project_root, setup_logging, LABEL_MAP, LABEL_MAP_INV
+
+logger = setup_logging(__name__)
 
 
-def get_project_root() -> Path:
-    """Get the project root directory."""
-    return Path(__file__).parent.parent
+
 
 
 def load_raw_data(agreement_level: str = "AllAgree") -> pd.DataFrame:
@@ -167,10 +163,10 @@ def save_processed_data(train_df: pd.DataFrame, val_df: pd.DataFrame, test_df: p
     val_df.to_csv(processed_dir / "val.csv", index=False)
     test_df.to_csv(processed_dir / "test.csv", index=False)
 
-    print(f"Saved processed data to {processed_dir}")
-    print(f"  Train: {len(train_df)} samples")
-    print(f"  Val:   {len(val_df)} samples")
-    print(f"  Test:  {len(test_df)} samples")
+    logger.info("Saved processed data to %s", processed_dir)
+    logger.info("  Train: %d samples", len(train_df))
+    logger.info("  Val:   %d samples", len(val_df))
+    logger.info("  Test:  %d samples", len(test_df))
 
 
 def prepare_data(clean: bool = True, save: bool = True) -> tuple:
@@ -186,11 +182,11 @@ def prepare_data(clean: bool = True, save: bool = True) -> tuple:
     """
     # Load raw data
     df = load_raw_data()
-    print(f"Loaded {len(df)} samples from raw data")
+    logger.info("Loaded %d samples from raw data", len(df))
 
     # Preprocess
     df = preprocess_dataframe(df, clean=clean)
-    print(f"After preprocessing: {len(df)} samples")
+    logger.info("After preprocessing: %d samples", len(df))
 
     # Create splits
     train_df, val_df, test_df = create_splits(df)

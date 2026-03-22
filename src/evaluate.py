@@ -7,7 +7,6 @@ import json
 import joblib
 import numpy as np
 import matplotlib.pyplot as plt
-from pathlib import Path
 from sklearn.metrics import (
     accuracy_score,
     f1_score,
@@ -18,12 +17,10 @@ from sklearn.metrics import (
     ConfusionMatrixDisplay,
 )
 
-from preprocess import load_processed_data, LABEL_MAP_INV
+from utils import get_project_root, get_model_dir, get_results_dir, setup_logging, LABEL_MAP_INV
+from preprocess import load_processed_data
 
-
-def get_project_root() -> Path:
-    """Get the project root directory."""
-    return Path(__file__).parent.parent
+logger = setup_logging(__name__)
 
 
 def evaluate_baseline(model_name: str, split: str = "test") -> dict:
@@ -37,7 +34,7 @@ def evaluate_baseline(model_name: str, split: str = "test") -> dict:
     Returns:
         Dictionary with all metrics
     """
-    model_path = get_project_root() / "models" / f"baseline_{model_name}.joblib"
+    model_path = get_model_dir() / f"baseline_{model_name}.joblib"
 
     if not model_path.exists():
         raise FileNotFoundError(f"Model not found: {model_path}. Train the model first.")
@@ -65,7 +62,7 @@ def evaluate_transformer(model_name: str, split: str = "test") -> dict:
     """
     from model import FinancialSentimentModel
 
-    model_path = get_project_root() / "models" / f"{model_name}_finetuned"
+    model_path = get_model_dir() / f"{model_name}_finetuned"
 
     if not model_path.exists():
         raise FileNotFoundError(f"Model not found: {model_path}. Train the model first.")
@@ -172,7 +169,7 @@ def compare_models(model_names: list = None, split: str = "test") -> list:
     """
     if model_names is None:
         # Find all available models
-        model_dir = get_project_root() / "models"
+        model_dir = get_model_dir()
         model_names = []
 
         # Check for baseline models
@@ -196,9 +193,9 @@ def compare_models(model_names: list = None, split: str = "test") -> list:
                 metrics = evaluate_transformer(name, split)
 
             results.append(metrics)
-            print(f"Evaluated: {name}")
+            logger.info("Evaluated: %s", name)
         except Exception as e:
-            print(f"Error evaluating {name}: {e}")
+            logger.error("Error evaluating %s: %s", name, e)
 
     # Print comparison table
     if results:
@@ -310,7 +307,7 @@ def error_analysis(model_name: str = "baseline_svm", split: str = "test", num_sa
 
 def save_results(results: list, filename: str = "evaluation_results.json"):
     """Save evaluation results to JSON."""
-    output_dir = get_project_root() / "results"
+    output_dir = get_results_dir()
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Convert numpy arrays to lists for JSON serialization
@@ -325,7 +322,7 @@ def save_results(results: list, filename: str = "evaluation_results.json"):
     with open(output_path, "w") as f:
         json.dump(json_results, f, indent=2)
 
-    print(f"Results saved to: {output_path}")
+    logger.info("Results saved to: %s", output_path)
 
 
 if __name__ == "__main__":

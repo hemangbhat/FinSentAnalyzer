@@ -7,15 +7,12 @@ import json
 import joblib
 import pandas as pd
 import numpy as np
-from pathlib import Path
 from typing import Union, List
 
-from preprocess import LABEL_MAP_INV, clean_text
+from utils import get_project_root, get_model_dir, setup_logging, LABEL_MAP_INV
+from preprocess import clean_text
 
-
-def get_project_root() -> Path:
-    """Get the project root directory."""
-    return Path(__file__).parent.parent
+logger = setup_logging(__name__)
 
 
 class SentimentPredictor:
@@ -41,7 +38,7 @@ class SentimentPredictor:
 
     def _load_model(self):
         """Load the model based on type."""
-        model_dir = get_project_root() / "models"
+        model_dir = get_model_dir()
 
         # Handle pre-trained FinBERT (no training needed)
         if self.is_pretrained_finbert:
@@ -73,7 +70,7 @@ class SentimentPredictor:
                 self.model = loaded
                 self.is_ensemble = False
 
-        print(f"Loaded model: {self.model_type}")
+        logger.info("Loaded model: %s", self.model_type)
 
     def predict(self, text: Union[str, List[str]]) -> Union[dict, List[dict]]:
         """
@@ -208,7 +205,7 @@ class SentimentPredictor:
         else:
             raise ValueError(f"Unsupported file format: {file_path.suffix}")
 
-        print(f"Predicting {len(texts)} texts...")
+        logger.info("Predicting %d texts...", len(texts))
         results = self._predict_batch(texts)
 
         # Add predictions to dataframe
@@ -251,7 +248,7 @@ def predict_batch(texts: List[str], model_type: str = "baseline_svm") -> List[di
 
 def get_available_models() -> List[str]:
     """Get list of available trained models."""
-    model_dir = get_project_root() / "models"
+    model_dir = get_model_dir()
     models = []
 
     # Check baseline models (including new ones)
@@ -289,11 +286,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.list_models:
-        print("Available models:")
+        logger.info("Available models:")
         for m in get_available_models():
-            print(f"  - {m}")
+            logger.info("  - %s", m)
     elif args.text:
-        result = predict_single(args.text, args.model)
         print(f"\nText: {args.text}")
         print(f"Sentiment: {result['label']}")
         if "confidence" in result:

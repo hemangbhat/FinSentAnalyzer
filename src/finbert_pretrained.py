@@ -8,6 +8,10 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from typing import List, Union
 import numpy as np
 
+from utils import setup_logging
+
+logger = setup_logging(__name__)
+
 
 class PretrainedFinBERT:
     """Pre-trained FinBERT model for instant predictions."""
@@ -22,16 +26,16 @@ class PretrainedFinBERT:
         Args:
             model_name: HuggingFace model name
         """
-        print(f"Loading pre-trained FinBERT from {model_name}...")
+        logger.info("Loading pre-trained FinBERT from %s...", model_name)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        print(f"Using device: {self.device}")
+        logger.info("Using device: %s", self.device)
 
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         self.model = AutoModelForSequenceClassification.from_pretrained(model_name)
         self.model.to(self.device)
         self.model.eval()
 
-        print("FinBERT loaded successfully!")
+        logger.info("FinBERT loaded successfully!")
 
     def predict(self, texts: Union[str, List[str]]) -> List[dict]:
         """

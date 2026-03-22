@@ -4,15 +4,6 @@ Provides natural language explanations and market outlook summaries.
 """
 
 from typing import List, Dict, Optional
-import os
-
-# Try to import LangChain components
-try:
-    from langchain_core.prompts import ChatPromptTemplate
-    from langchain_core.output_parsers import StrOutputParser
-    LANGCHAIN_AVAILABLE = True
-except ImportError:
-    LANGCHAIN_AVAILABLE = False
 
 
 def generate_explanation_template(

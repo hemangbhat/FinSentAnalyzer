@@ -1,0 +1,20 @@
+[project]
+name = "financial-sentiment-analyzer"
+version = "1.0.0"
+description = "Financial Sentiment Analysis with ML models and Streamlit dashboard"
+requires-python = ">=3.10"
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+check_untyped_defs = false
+disallow_untyped_defs = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"

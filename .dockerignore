@@ -1,0 +1,16 @@
+venvMlProject/
+.git/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.cache/
+.mypy_cache/
+.pytest_cache/
+notebooks/
+.gitignore
+README.md
+*.md
+.github/
+tests/
+*.tmp

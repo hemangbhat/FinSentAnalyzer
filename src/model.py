@@ -14,9 +14,10 @@ from transformers import (
 from sklearn.metrics import accuracy_score, f1_score, classification_report
 import numpy as np
 from tqdm import tqdm
-from pathlib import Path
 
-from preprocess import LABEL_MAP_INV
+from utils import get_project_root, setup_logging, LABEL_MAP_INV
+
+logger = setup_logging(__name__)
 
 # Available pre-trained models for financial sentiment
 MODELS = {
@@ -26,10 +27,6 @@ MODELS = {
     "bert": "bert-base-uncased",
 }
 
-
-def get_project_root() -> Path:
-    """Get the project root directory."""
-    return Path(__file__).parent.parent
 
 
 class SentimentDataset(Dataset):
@@ -83,8 +80,8 @@ class FinancialSentimentModel:
         self.num_labels = num_labels
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
 
-        print(f"Loading {model_name} ({self.pretrained_name})...")
-        print(f"Device: {self.device}")
+        logger.info("Loading %s (%s)...", model_name, self.pretrained_name)
+        logger.info("Device: %s", self.device)
 
         self.tokenizer = AutoTokenizer.from_pretrained(self.pretrained_name)
         self.model = AutoModelForSequenceClassification.from_pretrained(
@@ -130,8 +127,8 @@ class FinancialSentimentModel:
 
         history = {"train_loss": [], "val_loss": [], "val_accuracy": [], "val_f1": []}
 
-        print(f"\nTraining {self.model_name} for {epochs} epochs...")
-        print(f"Train batches: {len(train_loader)}, Val batches: {len(val_loader)}")
+        logger.info("Training %s for %d epochs...", self.model_name, epochs)
+        logger.info("Train batches: %d, Val batches: %d", len(train_loader), len(val_loader))
 
         for epoch in range(epochs):
             # Training
@@ -167,10 +164,11 @@ class FinancialSentimentModel:
             history["val_accuracy"].append(val_metrics["accuracy"])
             history["val_f1"].append(val_metrics["f1_macro"])
 
-            print(f"Epoch {epoch+1}: Train Loss={avg_train_loss:.4f}, "
-                  f"Val Loss={val_metrics['loss']:.4f}, "
-                  f"Val Acc={val_metrics['accuracy']:.4f}, "
-                  f"Val F1={val_metrics['f1_macro']:.4f}")
+            logger.info(
+                "Epoch %d: Train Loss=%.4f, Val Loss=%.4f, Val Acc=%.4f, Val F1=%.4f",
+                epoch + 1, avg_train_loss, val_metrics['loss'],
+                val_metrics['accuracy'], val_metrics['f1_macro'],
+            )
 
         return history
 
@@ -266,7 +264,7 @@ class FinancialSentimentModel:
         path.mkdir(parents=True, exist_ok=True)
         self.model.save_pretrained(path)
         self.tokenizer.save_pretrained(path)
-        print(f"Model saved to: {path}")
+        logger.info("Model saved to: %s", path)
 
     @classmethod
     def load(cls, path: str, device: str = None):
@@ -282,7 +280,7 @@ class FinancialSentimentModel:
         instance.model.to(device)
         instance.num_labels = instance.model.config.num_labels
 
-        print(f"Loaded model from: {path}")
+        logger.info("Loaded model from: %s", path)
         return instance
 
 
@@ -308,9 +306,9 @@ def train_transformer(
     """
     from preprocess import load_processed_data
 
-    print(f"\n{'='*60}")
-    print(f"Training Transformer: {model_name.upper()}")
-    print(f"{'='*60}")
+    logger.info("\n" + "=" * 60)
+    logger.info("Training Transformer: %s", model_name.upper())
+    logger.info("=" * 60)
 
     # Load data
     train_df = load_processed_data("train")
@@ -321,7 +319,7 @@ def train_transformer(
     X_val = val_df["sentence"].values
     y_val = val_df["label"].values
 
-    print(f"Train: {len(X_train)}, Val: {len(X_val)}")
+    logger.info("Train: %d, Val: %d", len(X_train), len(X_val))
 
     # Create and train model
     model = FinancialSentimentModel(model_name)
@@ -331,15 +329,15 @@ def train_transformer(
     )
 
     # Final evaluation
-    print("\nFinal Validation Results:")
+    logger.info("\nFinal Validation Results:")
     metrics = model.evaluate(X_val, y_val)
-    print(f"  Accuracy:    {metrics['accuracy']:.4f}")
-    print(f"  F1 (macro):  {metrics['f1_macro']:.4f}")
-    print(f"  F1 (weight): {metrics['f1_weighted']:.4f}")
+    logger.info("  Accuracy:    %.4f", metrics['accuracy'])
+    logger.info("  F1 (macro):  %.4f", metrics['f1_macro'])
+    logger.info("  F1 (weight): %.4f", metrics['f1_weighted'])
 
     target_names = [LABEL_MAP_INV[i] for i in sorted(LABEL_MAP_INV.keys())]
-    print("\nClassification Report:")
-    print(classification_report(metrics["y_true"], metrics["y_pred"], target_names=target_names))
+    logger.info("\nClassification Report:")
+    logger.info("\n%s", classification_report(metrics["y_true"], metrics["y_pred"], target_names=target_names))
 
     # Save model
     if save:

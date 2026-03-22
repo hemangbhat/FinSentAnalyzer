@@ -5,7 +5,6 @@ Trains baseline models (TF-IDF + classifiers) and transformer models (FinBERT).
 
 import argparse
 import joblib
-from pathlib import Path
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import MultinomialNB
@@ -16,12 +15,11 @@ from sklearn.pipeline import Pipeline
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.metrics import accuracy_score, f1_score, classification_report
 
-from preprocess import load_processed_data, LABEL_MAP_INV
+from utils import get_project_root, get_model_dir, setup_logging, LABEL_MAP_INV
+from preprocess import load_processed_data
 
+logger = setup_logging(__name__)
 
-def get_project_root() -> Path:
-    """Get the project root directory."""
-    return Path(__file__).parent.parent
 
 
 def create_baseline_pipeline(classifier_name: str = "logreg") -> Pipeline:
@@ -89,9 +87,9 @@ def train_baseline(classifier_name: str = "logreg", save: bool = True) -> dict:
     Returns:
         Dictionary with model, metrics, and predictions
     """
-    print(f"\n{'='*50}")
-    print(f"Training: TF-IDF + {classifier_name.upper()}")
-    print(f"{'='*50}")
+    logger.info("=" * 50)
+    logger.info("Training: TF-IDF + %s", classifier_name.upper())
+    logger.info("=" * 50)
 
     # Load data
     train_df = load_processed_data("train")
@@ -102,8 +100,8 @@ def train_baseline(classifier_name: str = "logreg", save: bool = True) -> dict:
     X_val = val_df["sentence"].values
     y_val = val_df["label"].values
 
-    print(f"Train samples: {len(X_train)}")
-    print(f"Val samples: {len(X_val)}")
+    logger.info("Train samples: %d", len(X_train))
+    logger.info("Val samples: %d", len(X_val))
 
     # Create and train pipeline
     pipeline = create_baseline_pipeline(classifier_name)
@@ -116,22 +114,21 @@ def train_baseline(classifier_name: str = "logreg", save: bool = True) -> dict:
     f1_macro = f1_score(y_val, y_pred, average="macro")
     f1_weighted = f1_score(y_val, y_pred, average="weighted")
 
-    print(f"\nValidation Results:")
-    print(f"  Accuracy:    {accuracy:.4f}")
-    print(f"  F1 (macro):  {f1_macro:.4f}")
-    print(f"  F1 (weight): {f1_weighted:.4f}")
+    logger.info("Validation Results:")
+    logger.info("  Accuracy:    %.4f", accuracy)
+    logger.info("  F1 (macro):  %.4f", f1_macro)
+    logger.info("  F1 (weight): %.4f", f1_weighted)
 
-    print(f"\nClassification Report:")
+    logger.info("Classification Report:")
     target_names = [LABEL_MAP_INV[i] for i in sorted(LABEL_MAP_INV.keys())]
-    print(classification_report(y_val, y_pred, target_names=target_names))
+    logger.info("\n%s", classification_report(y_val, y_pred, target_names=target_names))
 
     # Save model
     if save:
-        model_dir = get_project_root() / "models"
-        model_dir.mkdir(parents=True, exist_ok=True)
+        model_dir = get_model_dir()
         model_path = model_dir / f"baseline_{classifier_name}.joblib"
         joblib.dump(pipeline, model_path)
-        print(f"Model saved to: {model_path}")
+        logger.info("Model saved to: %s", model_path)
 
     return {
         "model": pipeline,
@@ -159,17 +156,17 @@ def train_all_baselines() -> list:
         results.append(result)
 
     # Print comparison
-    print("\n" + "=" * 60)
-    print("MODEL COMPARISON")
-    print("=" * 60)
-    print(f"{'Model':<20} {'Accuracy':<12} {'F1 (macro)':<12} {'F1 (weight)':<12}")
-    print("-" * 60)
+    logger.info("\n" + "=" * 60)
+    logger.info("MODEL COMPARISON")
+    logger.info("=" * 60)
+    logger.info("%-20s %-12s %-12s %-12s", "Model", "Accuracy", "F1 (macro)", "F1 (weight)")
+    logger.info("-" * 60)
     for r in results:
-        print(f"{r['classifier']:<20} {r['accuracy']:<12.4f} {r['f1_macro']:<12.4f} {r['f1_weighted']:<12.4f}")
+        logger.info("%-20s %-12.4f %-12.4f %-12.4f", r['classifier'], r['accuracy'], r['f1_macro'], r['f1_weighted'])
 
     # Find best model
     best = max(results, key=lambda x: x["f1_macro"])
-    print(f"\nBest model: {best['classifier']} (F1 macro: {best['f1_macro']:.4f})")
+    logger.info("Best model: %s (F1 macro: %.4f)", best['classifier'], best['f1_macro'])
 
     return results
 
@@ -181,9 +178,9 @@ def train_ensemble(save: bool = True) -> dict:
     Returns:
         Dictionary with model and metrics
     """
-    print(f"\n{'='*50}")
-    print(f"Training: VOTING ENSEMBLE")
-    print(f"{'='*50}")
+    logger.info("=" * 50)
+    logger.info("Training: VOTING ENSEMBLE")
+    logger.info("=" * 50)
 
     # Load data
     train_df = load_processed_data("train")
@@ -194,8 +191,8 @@ def train_ensemble(save: bool = True) -> dict:
     X_val = val_df["sentence"].values
     y_val = val_df["label"].values
 
-    print(f"Train samples: {len(X_train)}")
-    print(f"Val samples: {len(X_val)}")
+    logger.info("Train samples: %d", len(X_train))
+    logger.info("Val samples: %d", len(X_val))
 
     # Create TF-IDF vectorizer
     tfidf = TfidfVectorizer(
@@ -225,7 +222,7 @@ def train_ensemble(save: bool = True) -> dict:
         voting='soft'  # Use probabilities for voting
     )
 
-    print("Training ensemble (this may take a minute)...")
+    logger.info("Training ensemble (this may take a minute)...")
     ensemble.fit(X_train_tfidf, y_train)
 
     # Evaluate
@@ -235,22 +232,21 @@ def train_ensemble(save: bool = True) -> dict:
     f1_macro = f1_score(y_val, y_pred, average="macro")
     f1_weighted = f1_score(y_val, y_pred, average="weighted")
 
-    print(f"\nValidation Results:")
-    print(f"  Accuracy:    {accuracy:.4f}")
-    print(f"  F1 (macro):  {f1_macro:.4f}")
-    print(f"  F1 (weight): {f1_weighted:.4f}")
+    logger.info("Validation Results:")
+    logger.info("  Accuracy:    %.4f", accuracy)
+    logger.info("  F1 (macro):  %.4f", f1_macro)
+    logger.info("  F1 (weight): %.4f", f1_weighted)
 
-    print(f"\nClassification Report:")
+    logger.info("Classification Report:")
     target_names = [LABEL_MAP_INV[i] for i in sorted(LABEL_MAP_INV.keys())]
-    print(classification_report(y_val, y_pred, target_names=target_names))
+    logger.info("\n%s", classification_report(y_val, y_pred, target_names=target_names))
 
     # Save model (save both tfidf and ensemble)
     if save:
-        model_dir = get_project_root() / "models"
-        model_dir.mkdir(parents=True, exist_ok=True)
+        model_dir = get_model_dir()
         model_path = model_dir / "baseline_ensemble.joblib"
         joblib.dump({"tfidf": tfidf, "ensemble": ensemble}, model_path)
-        print(f"Model saved to: {model_path}")
+        logger.info("Model saved to: %s", model_path)
 
     return {
         "model": ensemble,
@@ -274,7 +270,7 @@ def load_model(model_name: str = "baseline_logreg"):
     Returns:
         Loaded model/pipeline
     """
-    model_path = get_project_root() / "models" / f"{model_name}.joblib"
+    model_path = get_model_dir() / f"{model_name}.joblib"
 
     if not model_path.exists():
         raise FileNotFoundError(f"Model not found: {model_path}")
@@ -320,9 +316,9 @@ def train_all_models(include_transformers: bool = True, transformer_epochs: int 
     results = {"baselines": [], "transformers": []}
 
     # Train baselines
-    print("\n" + "=" * 70)
-    print("TRAINING BASELINE MODELS")
-    print("=" * 70)
+    logger.info("\n" + "=" * 70)
+    logger.info("TRAINING BASELINE MODELS")
+    logger.info("=" * 70)
     for name in ["logreg", "naive_bayes", "svm"]:
         result = train_baseline(name, save=True)
         results["baselines"].append({
@@ -334,9 +330,9 @@ def train_all_models(include_transformers: bool = True, transformer_epochs: int 
 
     # Train transformers
     if include_transformers:
-        print("\n" + "=" * 70)
-        print("TRAINING TRANSFORMER MODELS")
-        print("=" * 70)
+        logger.info("\n" + "=" * 70)
+        logger.info("TRAINING TRANSFORMER MODELS")
+        logger.info("=" * 70)
         for name in ["finbert", "distilbert"]:
             try:
                 result = train_transformer(name, epochs=transformer_epochs, save=True)
@@ -347,22 +343,22 @@ def train_all_models(include_transformers: bool = True, transformer_epochs: int 
                     "f1_weighted": result["metrics"]["f1_weighted"],
                 })
             except Exception as e:
-                print(f"Error training {name}: {e}")
+                logger.error("Error training %s: %s", name, e)
 
     # Final comparison
-    print("\n" + "=" * 70)
-    print("FINAL MODEL COMPARISON")
-    print("=" * 70)
-    print(f"{'Model':<25} {'Accuracy':<12} {'F1 (macro)':<12} {'F1 (weight)':<12}")
-    print("-" * 70)
+    logger.info("\n" + "=" * 70)
+    logger.info("FINAL MODEL COMPARISON")
+    logger.info("=" * 70)
+    logger.info("%-25s %-12s %-12s %-12s", "Model", "Accuracy", "F1 (macro)", "F1 (weight)")
+    logger.info("-" * 70)
 
     all_results = results["baselines"] + results["transformers"]
     for r in all_results:
-        print(f"{r['name']:<25} {r['accuracy']:<12.4f} {r['f1_macro']:<12.4f} {r['f1_weighted']:<12.4f}")
+        logger.info("%-25s %-12.4f %-12.4f %-12.4f", r['name'], r['accuracy'], r['f1_macro'], r['f1_weighted'])
 
     # Find best overall
     best = max(all_results, key=lambda x: x["f1_macro"])
-    print(f"\nBest overall: {best['name']} (F1 macro: {best['f1_macro']:.4f})")
+    logger.info("Best overall: %s (F1 macro: %.4f)", best['name'], best['f1_macro'])
 
     return results
 
@@ -389,4 +385,4 @@ if __name__ == "__main__":
     elif args.model in ["logreg", "svm", "naive_bayes", "random_forest", "gradient_boosting", "mlp"]:
         train_baseline(args.model)
     else:
-        print(f"Unknown model: {args.model}")
+        logger.error("Unknown model: %s", args.model)

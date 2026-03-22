@@ -1,0 +1,160 @@
+============================= test session starts =============================
+platform win32 -- Python 3.10.11, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\jyoti\Desktop\repo\mlProjectFinancialSent\venvMlProject\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\jyoti\Desktop\repo\mlProjectFinancialSent
+configfile: pyproject.toml
+plugins: anyio-4.12.1, langsmith-0.7.22
+collecting ... collected 69 items
+
+tests/test_llm_enhanced.py::TestChainOfThoughtReasoner::test_analyze_returns_chain PASSED [  1%]
+tests/test_llm_enhanced.py::TestChainOfThoughtReasoner::test_final_sentiment_valid PASSED [  2%]
+tests/test_llm_enhanced.py::TestChainOfThoughtReasoner::test_confidence_in_range PASSED [  4%]
+tests/test_llm_enhanced.py::TestChainOfThoughtReasoner::test_explanation_not_empty PASSED [  5%]
+tests/test_llm_enhanced.py::TestChainOfThoughtReasoner::test_reasoning_trace_not_empty PASSED [  7%]
+tests/test_llm_enhanced.py::TestChainOfThoughtReasoner::test_with_model_prediction PASSED [  8%]
+tests/test_llm_enhanced.py::TestChainOfThoughtReasoner::test_key_factors_list PASSED [ 10%]
+tests/test_llm_enhanced.py::TestEliteExplanationGenerator::test_comprehensive_explanation PASSED [ 11%]
+tests/test_llm_enhanced.py::TestEliteExplanationGenerator::test_quick_explanation PASSED [ 13%]
+tests/test_llm_enhanced.py::TestMarketOutlook::test_generate_outlook PASSED [ 14%]
+tests/test_llm_enhanced.py::TestMarketOutlook::test_bullish_trend PASSED [ 15%]
+tests/test_llm_enhanced.py::TestMarketOutlook::test_bearish_trend PASSED [ 17%]
+tests/test_llm_enhanced.py::TestThoughtStep::test_to_dict PASSED         [ 18%]
+tests/test_nlp_advanced.py::TestAdvancedTextProcessor::test_process_returns_processed_text PASSED [ 20%]
+tests/test_nlp_advanced.py::TestAdvancedTextProcessor::test_clean_text_removes_urls PASSED [ 21%]
+tests/test_nlp_advanced.py::TestAdvancedTextProcessor::test_normalize_replaces_percentages PASSED [ 23%]
+tests/test_nlp_advanced.py::TestAdvancedTextProcessor::test_feature_extraction_counts_words PASSED [ 24%]
+tests/test_nlp_advanced.py::TestAdvancedTextProcessor::test_feature_extraction_detects_negation PASSED [ 26%]
+tests/test_nlp_advanced.py::TestAdvancedTextProcessor::test_feature_extraction_detects_positive_words PASSED [ 27%]
+tests/test_nlp_advanced.py::TestAdvancedTextProcessor::test_feature_extraction_detects_negative_words PASSED [ 28%]
+tests/test_nlp_advanced.py::TestFinancialTextAnalyzer::test_analyze_returns_dict PASSED [ 30%]
+tests/test_nlp_advanced.py::TestFinancialTextAnalyzer::test_positive_text_detected PASSED [ 31%]
+tests/test_nlp_advanced.py::TestFinancialTextAnalyzer::test_negative_text_detected PASSED [ 33%]
+tests/test_nlp_advanced.py::TestFinancialTextAnalyzer::test_batch_analyze PASSED [ 34%]
+tests/test_nlp_advanced.py::TestFinancialTextAnalyzer::test_aggregate_sentiment PASSED [ 36%]
+tests/test_nlp_advanced.py::TestConvenienceFunctions::test_analyze_financial_text PASSED [ 37%]
+tests/test_nlp_advanced.py::TestConvenienceFunctions::test_extract_financial_features PASSED [ 39%]
+tests/test_nlp_advanced.py::TestConvenienceFunctions::test_get_lexicon_sentiment PASSED [ 40%]
+tests/test_nlp_advanced.py::TestLexicons::test_positive_lexicon_populated PASSED [ 42%]
+tests/test_nlp_advanced.py::TestLexicons::test_negative_lexicon_populated PASSED [ 43%]
+tests/test_nlp_advanced.py::TestLexicons::test_uncertainty_lexicon_populated PASSED [ 44%]
+tests/test_nlp_advanced.py::TestLexicons::test_growth_is_positive PASSED [ 46%]
+tests/test_nlp_advanced.py::TestLexicons::test_loss_is_negative PASSED   [ 47%]
+tests/test_nlp_advanced.py::TestLexicons::test_may_is_uncertain PASSED   [ 49%]
+tests/test_predict.py::TestGetAvailableModels::test_returns_list PASSED  [ 50%]
+tests/test_predict.py::TestGetAvailableModels::test_finds_trained_models PASSED [ 52%]
+tests/test_predict.py::TestSentimentPredictor::test_predict_single PASSED [ 53%]
+tests/test_predict.py::TestSentimentPredictor::test_predict_returns_probabilities PASSED [ 55%]
+tests/test_predict.py::TestSentimentPredictor::test_predict_batch PASSED [ 56%]
+tests/test_predict.py::TestSentimentPredictor::test_predict_confidence_range PASSED [ 57%]
+tests/test_preprocess.py::TestCleanText::test_lowercase PASSED           [ 59%]
+tests/test_preprocess.py::TestCleanText::test_whitespace_normalization PASSED [ 60%]
+tests/test_preprocess.py::TestCleanText::test_removes_special_characters PASSED [ 62%]
+tests/test_preprocess.py::TestCleanText::test_empty_string PASSED        [ 63%]
+tests/test_preprocess.py::TestCleanText::test_preserves_meaningful_content PASSED [ 65%]
+tests/test_preprocess.py::TestPreprocessDataframe::test_basic_preprocessing FAILED [ 66%]
+tests/test_preprocess.py::TestPreprocessDataframe::test_label_encoding FAILED [ 68%]
+tests/test_preprocess.py::TestPreprocessDataframe::test_drops_empty_sentences FAILED [ 69%]
+tests/test_preprocess.py::TestCreateSplits::test_split_sizes PASSED      [ 71%]
+tests/test_preprocess.py::TestCreateSplits::test_no_overlap FAILED       [ 72%]
+tests/test_utils.py::TestGetProjectRoot::test_returns_path PASSED        [ 73%]
+tests/test_utils.py::TestGetProjectRoot::test_contains_src_dir PASSED    [ 75%]
+tests/test_utils.py::TestGetProjectRoot::test_contains_app_dir PASSED    [ 76%]
+tests/test_utils.py::TestPathHelpers::test_get_model_dir PASSED          [ 78%]
+tests/test_utils.py::TestPathHelpers::test_get_data_dir PASSED           [ 79%]
+tests/test_utils.py::TestPathHelpers::test_get_data_dir_with_subdir PASSED [ 81%]
+tests/test_utils.py::TestPathHelpers::test_get_results_dir PASSED        [ 82%]
+tests/test_utils.py::TestSetupLogging::test_returns_logger PASSED        [ 84%]
+tests/test_utils.py::TestSetupLogging::test_logger_has_handler PASSED    [ 85%]
+tests/test_utils.py::TestSetupLogging::test_logger_level_is_info PASSED  [ 86%]
+tests/test_utils.py::TestSetupLogging::test_no_duplicate_handlers PASSED [ 88%]
+tests/test_utils.py::TestConstants::test_label_map_has_three_entries PASSED [ 89%]
+tests/test_utils.py::TestConstants::test_label_map_values PASSED         [ 91%]
+tests/test_utils.py::TestConstants::test_label_map_inv_roundtrips PASSED [ 92%]
+tests/test_utils.py::TestConstants::test_baseline_classifiers PASSED     [ 94%]
+tests/test_utils.py::TestConstants::test_transformer_models PASSED       [ 95%]
+tests/test_utils.py::TestGetModelInfo::test_known_model_returns_dict PASSED [ 97%]
+tests/test_utils.py::TestGetModelInfo::test_unknown_model_returns_defaults PASSED [ 98%]
+tests/test_utils.py::TestGetModelInfo::test_finbert_pretrained_info PASSED [100%]
+
+================================== FAILURES ===================================
+______________ TestPreprocessDataframe.test_basic_preprocessing _______________
+venvMlProject\lib\site-packages\pandas\core\indexes\base.py:3812: in get_loc
+    return self._engine.get_loc(casted_key)
+pandas/_libs/index.pyx:167: in pandas._libs.index.IndexEngine.get_loc
+    ???
+pandas/_libs/index.pyx:196: in pandas._libs.index.IndexEngine.get_loc
+    ???
+pandas/_libs/hashtable_class_helper.pxi:7088: in pandas._libs.hashtable.PyObjectHashTable.get_item
+    ???
+pandas/_libs/hashtable_class_helper.pxi:7096: in pandas._libs.hashtable.PyObjectHashTable.get_item
+    ???
+E   KeyError: 'label'
+
+The above exception was the direct cause of the following exception:
+tests\test_preprocess.py:33: in test_basic_preprocessing
+    result = preprocess_dataframe(df, clean=True)
+src\preprocess.py:112: in preprocess_dataframe
+    if df["label"].dtype == object:
+venvMlProject\lib\site-packages\pandas\core\frame.py:4113: in __getitem__
+    indexer = self.columns.get_loc(key)
+venvMlProject\lib\site-packages\pandas\core\indexes\base.py:3819: in get_loc
+    raise KeyError(key) from err
+E   KeyError: 'label'
+_________________ TestPreprocessDataframe.test_label_encoding _________________
+venvMlProject\lib\site-packages\pandas\core\indexes\base.py:3812: in get_loc
+    return self._engine.get_loc(casted_key)
+pandas/_libs/index.pyx:167: in pandas._libs.index.IndexEngine.get_loc
+    ???
+pandas/_libs/index.pyx:196: in pandas._libs.index.IndexEngine.get_loc
+    ???
+pandas/_libs/hashtable_class_helper.pxi:7088: in pandas._libs.hashtable.PyObjectHashTable.get_item
+    ???
+pandas/_libs/hashtable_class_helper.pxi:7096: in pandas._libs.hashtable.PyObjectHashTable.get_item
+    ???
+E   KeyError: 'label'
+
+The above exception was the direct cause of the following exception:
+tests\test_preprocess.py:42: in test_label_encoding
+    result = preprocess_dataframe(df, clean=False)
+src\preprocess.py:112: in preprocess_dataframe
+    if df["label"].dtype == object:
+venvMlProject\lib\site-packages\pandas\core\frame.py:4113: in __getitem__
+    indexer = self.columns.get_loc(key)
+venvMlProject\lib\site-packages\pandas\core\indexes\base.py:3819: in get_loc
+    raise KeyError(key) from err
+E   KeyError: 'label'
+_____________ TestPreprocessDataframe.test_drops_empty_sentences ______________
+venvMlProject\lib\site-packages\pandas\core\indexes\base.py:3812: in get_loc
+    return self._engine.get_loc(casted_key)
+pandas/_libs/index.pyx:167: in pandas._libs.index.IndexEngine.get_loc
+    ???
+pandas/_libs/index.pyx:196: in pandas._libs.index.IndexEngine.get_loc
+    ???
+pandas/_libs/hashtable_class_helper.pxi:7088: in pandas._libs.hashtable.PyObjectHashTable.get_item
+    ???
+pandas/_libs/hashtable_class_helper.pxi:7096: in pandas._libs.hashtable.PyObjectHashTable.get_item
+    ???
+E   KeyError: 'label'
+
+The above exception was the direct cause of the following exception:
+tests\test_preprocess.py:50: in test_drops_empty_sentences
+    result = preprocess_dataframe(df, clean=True)
+src\preprocess.py:112: in preprocess_dataframe
+    if df["label"].dtype == object:
+venvMlProject\lib\site-packages\pandas\core\frame.py:4113: in __getitem__
+    indexer = self.columns.get_loc(key)
+venvMlProject\lib\site-packages\pandas\core\indexes\base.py:3819: in get_loc
+    raise KeyError(key) from err
+E   KeyError: 'label'
+______________________ TestCreateSplits.test_no_overlap _______________________
+tests\test_preprocess.py:75: in test_no_overlap
+    assert len(train_idx & val_idx) == 0
+E   assert 5 == 0
+E    +  where 5 = len(({0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39} & {0, 1, 2, 3, 4}))
+=========================== short test summary info ===========================
+FAILED tests/test_preprocess.py::TestPreprocessDataframe::test_basic_preprocessing - KeyError: 'label'
+FAILED tests/test_preprocess.py::TestPreprocessDataframe::test_label_encoding - KeyError: 'label'
+FAILED tests/test_preprocess.py::TestPreprocessDataframe::test_drops_empty_sentences - KeyError: 'label'
+FAILED tests/test_preprocess.py::TestCreateSplits::test_no_overlap - assert 5 == 0
+ +  where 5 = len(({0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39} & {0, 1, 2, 3, 4}))
+======================== 4 failed, 65 passed in 2.90s =========================

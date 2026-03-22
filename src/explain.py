@@ -5,16 +5,12 @@ Provides word importance and attention-based explanations.
 
 import numpy as np
 import joblib
-from pathlib import Path
 from typing import List, Tuple
 import re
 
-from preprocess import LABEL_MAP_INV
+from utils import get_project_root, get_model_dir, setup_logging, LABEL_MAP_INV
 
-
-def get_project_root() -> Path:
-    """Get the project root directory."""
-    return Path(__file__).parent.parent
+logger = setup_logging(__name__)
 
 
 def get_word_importance_baseline(
@@ -32,7 +28,7 @@ def get_word_importance_baseline(
     Returns:
         List of (word, importance_score, sentiment_direction) tuples
     """
-    model_path = get_project_root() / "models" / f"{model_name}.joblib"
+    model_path = get_model_dir() / f"{model_name}.joblib"
     if not model_path.exists():
         raise FileNotFoundError(f"Model not found: {model_path}")
 
@@ -105,7 +101,7 @@ def explain_prediction_baseline(
     Returns:
         Dictionary with prediction and explanation
     """
-    model_path = get_project_root() / "models" / f"{model_name}.joblib"
+    model_path = get_model_dir() / f"{model_name}.joblib"
     pipeline = joblib.load(model_path)
 
     # Get prediction
@@ -191,7 +187,7 @@ def get_feature_importance_summary(model_name: str = "baseline_svm") -> dict:
     Returns:
         Dictionary with top positive and negative features
     """
-    model_path = get_project_root() / "models" / f"{model_name}.joblib"
+    model_path = get_model_dir() / f"{model_name}.joblib"
     pipeline = joblib.load(model_path)
 
     tfidf = pipeline.named_steps["tfidf"]

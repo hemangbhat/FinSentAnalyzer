@@ -19,6 +19,3 @@ datasets>=2.18.0
 # Utilities
 tqdm>=4.66.0
 PyYAML>=6.0.0
-
-# LangChain (for LLM features)
-langchain-core>=0.2.0

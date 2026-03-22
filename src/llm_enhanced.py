@@ -14,13 +14,21 @@ try:
     from nlp_advanced import (
         FinancialTextAnalyzer,
         TextFeatures,
-        FINANCIAL_POSITIVE,
-        FINANCIAL_NEGATIVE,
-        FINANCIAL_UNCERTAINTY,
     )
     NLP_AVAILABLE = True
 except ImportError:
     NLP_AVAILABLE = False
+
+# Import lexicons directly
+try:
+    from lexicons import (
+        FINANCIAL_POSITIVE,
+        FINANCIAL_NEGATIVE,
+        FINANCIAL_UNCERTAINTY,
+    )
+    LEXICON_AVAILABLE = True
+except ImportError:
+    LEXICON_AVAILABLE = False
 
 
 # =============================================================================
@@ -224,15 +232,17 @@ class ChainOfThoughtReasoner:
 
     def _step_sentiment_detection(self, text: str) -> ThoughtStep:
         """Step 3: Detect sentiment signals."""
-        words = text.lower().split()
+        # Strip punctuation from words before matching against lexicon
+        words = [re.sub(r'[^\w]', '', w.lower()) for w in text.split()]
+        words = [w for w in words if w]  # Remove empty strings
 
         # Count sentiment words
-        positive_found = [w for w in words if w in FINANCIAL_POSITIVE] if NLP_AVAILABLE else []
-        negative_found = [w for w in words if w in FINANCIAL_NEGATIVE] if NLP_AVAILABLE else []
-        uncertainty_found = [w for w in words if w in FINANCIAL_UNCERTAINTY] if NLP_AVAILABLE else []
+        positive_found = [w for w in words if w in FINANCIAL_POSITIVE] if LEXICON_AVAILABLE else []
+        negative_found = [w for w in words if w in FINANCIAL_NEGATIVE] if LEXICON_AVAILABLE else []
+        uncertainty_found = [w for w in words if w in FINANCIAL_UNCERTAINTY] if LEXICON_AVAILABLE else []
 
         # Fallback if NLP not available
-        if not NLP_AVAILABLE:
+        if not LEXICON_AVAILABLE:
             positive_words = {"growth", "strong", "profit", "gain", "increase", "beat", "success", "improve", "positive", "rise", "record", "exceed"}
             negative_words = {"loss", "decline", "fall", "weak", "miss", "fail", "drop", "negative", "concern", "down", "risk", "cut"}
             uncertainty_words = {"may", "might", "could", "expect", "forecast", "uncertain", "potential", "possible"}

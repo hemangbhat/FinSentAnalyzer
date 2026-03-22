@@ -827,116 +827,35 @@ def main():
     with tab6:
         st.header("Model Information")
 
-        # Model performance data
-        MODEL_INFO = {
-            "baseline_logreg": {
-                "name": "Logistic Regression",
-                "type": "TF-IDF + Classifier",
-                "accuracy": "88.5%",
-                "f1_macro": "0.844",
-                "f1_weighted": "0.887",
-                "speed": "Very Fast",
-                "features": ["TF-IDF vectorization (unigrams + bigrams)", "Max 10,000 features", "Balanced class weights", "Linear decision boundary"],
-            },
-            "baseline_naive_bayes": {
-                "name": "Naive Bayes",
-                "type": "TF-IDF + Classifier",
-                "accuracy": "86.3%",
-                "f1_macro": "0.809",
-                "f1_weighted": "0.864",
-                "speed": "Very Fast",
-                "features": ["TF-IDF vectorization", "Multinomial distribution", "Good for text classification", "Alpha smoothing = 0.1"],
-            },
-            "baseline_svm": {
-                "name": "Support Vector Machine (SVM)",
-                "type": "TF-IDF + Classifier",
-                "accuracy": "92%",
-                "f1_macro": "0.90",
-                "f1_weighted": "0.93",
-                "speed": "Fast",
-                "features": ["TF-IDF vectorization", "Linear kernel", "Maximum margin classifier", "Balanced class weights", "Best for high-dimensional sparse data"],
-            },
-            "baseline_random_forest": {
-                "name": "Random Forest",
-                "type": "TF-IDF + Ensemble",
-                "accuracy": "87.6%",
-                "f1_macro": "0.827",
-                "f1_weighted": "0.871",
-                "speed": "Medium",
-                "features": ["200 decision trees", "Max depth 50", "Ensemble voting", "Handles non-linear patterns"],
-            },
-            "baseline_gradient_boosting": {
-                "name": "Gradient Boosting",
-                "type": "TF-IDF + Boosting",
-                "accuracy": "94%",
-                "f1_macro": "0.92",
-                "f1_weighted": "0.94",
-                "speed": "Medium",
-                "features": ["100 boosting iterations", "Sequential error correction", "Learning rate 0.1", "Highest accuracy baseline"],
-            },
-            "baseline_mlp": {
-                "name": "Multi-Layer Perceptron (Neural Network)",
-                "type": "TF-IDF + Deep Learning",
-                "accuracy": "87.6%",
-                "f1_macro": "0.827",
-                "f1_weighted": "0.876",
-                "speed": "Medium",
-                "features": ["2 hidden layers (256, 128 neurons)", "Early stopping", "Non-linear activation", "Learns complex patterns"],
-            },
-            "baseline_ensemble": {
-                "name": "Voting Ensemble",
-                "type": "TF-IDF + Combined Models",
-                "accuracy": "88.5%",
-                "f1_macro": "0.843",
-                "f1_weighted": "0.885",
-                "speed": "Slow",
-                "features": ["Combines LogReg + SVM + Random Forest", "Soft voting (probability-based)", "More robust predictions"],
-            },
-            "finbert_pretrained": {
-                "name": "FinBERT (Pre-trained)",
-                "type": "Transformer",
-                "accuracy": "~90%",
-                "f1_macro": "~0.88",
-                "f1_weighted": "~0.90",
-                "speed": "Slow (CPU) / Fast (GPU)",
-                "features": ["Pre-trained on financial text", "ProsusAI/finbert from HuggingFace", "Understands financial context", "No training required", "110M parameters"],
-            },
-        }
+        # Dynamic model info from utils
+        from utils import get_model_info
 
         # Get current model info
-        info = MODEL_INFO.get(selected_model, {
-            "name": selected_model,
-            "type": "Unknown",
-            "accuracy": "N/A",
-            "f1_macro": "N/A",
-            "f1_weighted": "N/A",
-            "speed": "N/A",
-            "features": [],
-        })
+        info = get_model_info(selected_model)
 
         # Display current model card
         st.markdown(f"""
         <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                     padding: 20px; border-radius: 15px; color: white; margin-bottom: 20px;'>
-            <h2 style='margin: 0; color: white;'>🎯 Current Model: {info['name']}</h2>
-            <p style='margin: 10px 0 0 0; opacity: 0.9;'>{info['type']}</p>
+            <h2 style='margin: 0; color: white;'>🎯 Current Model: {info.get('name', selected_model)}</h2>
+            <p style='margin: 10px 0 0 0; opacity: 0.9;'>{info.get('type', 'Unknown')}</p>
         </div>
         """, unsafe_allow_html=True)
 
         # Metrics in columns
         col1, col2, col3, col4 = st.columns(4)
         with col1:
-            st.metric("Accuracy", info["accuracy"])
+            st.metric("Accuracy", info.get("accuracy", "N/A"))
         with col2:
-            st.metric("F1 (Macro)", info["f1_macro"])
+            st.metric("F1 (Macro)", info.get("f1_macro", "N/A"))
         with col3:
-            st.metric("F1 (Weighted)", info["f1_weighted"])
+            st.metric("F1 (Weighted)", info.get("f1_weighted", "N/A"))
         with col4:
-            st.metric("Speed", info["speed"])
+            st.metric("Speed", info.get("speed", "N/A"))
 
         # Features
         st.markdown("### Model Features")
-        for feature in info["features"]:
+        for feature in info.get("features", []):
             st.markdown(f"- {feature}")
 
         st.markdown("---")
@@ -946,7 +865,7 @@ def main():
 
         comparison_data = []
         for model_key in available_models:
-            m_info = MODEL_INFO.get(model_key, {"name": model_key, "accuracy": "N/A", "f1_macro": "N/A", "speed": "N/A"})
+            m_info = get_model_info(model_key)
             is_current = "✅" if model_key == selected_model else ""
             comparison_data.append({
                 "Model": m_info.get("name", model_key),
