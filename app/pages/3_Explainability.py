@@ -95,19 +95,55 @@ if st.button("🔍 Explain Prediction", type="primary", use_container_width=True
         col1, col2, col3 = st.columns(3)
 
         with col1:
-            st.markdown("**Positive Indicators**")
-            for word, score in explanation["positive_words"]:
-                st.write(f"- {word} ({score:.3f})")
+            st.markdown("**✅ Positive Indicators**")
+            if explanation.get("lexicon_positive"):
+                st.caption("Lexicon-detected:")
+                for word in explanation["lexicon_positive"][:5]:
+                    st.markdown(
+                        f"<span style='background-color: rgba(40, 167, 69, 0.3); padding: 3px 10px; "
+                        f"border-radius: 15px; margin: 2px; display: inline-block;'>{word}</span>",
+                        unsafe_allow_html=True,
+                    )
+            if explanation["positive_words"]:
+                st.caption("Model-detected:")
+                for word, score in explanation["positive_words"]:
+                    st.write(f"- {word} ({score:.3f})")
+            if not explanation.get("lexicon_positive") and not explanation["positive_words"]:
+                st.markdown("*None detected*")
 
         with col2:
-            st.markdown("**Negative Indicators**")
-            for word, score in explanation["negative_words"]:
-                st.write(f"- {word} ({score:.3f})")
+            st.markdown("**❌ Negative Indicators**")
+            if explanation.get("lexicon_negative"):
+                st.caption("Lexicon-detected:")
+                for word in explanation["lexicon_negative"][:5]:
+                    st.markdown(
+                        f"<span style='background-color: rgba(220, 53, 69, 0.3); padding: 3px 10px; "
+                        f"border-radius: 15px; margin: 2px; display: inline-block;'>{word}</span>",
+                        unsafe_allow_html=True,
+                    )
+            if explanation["negative_words"]:
+                st.caption("Model-detected:")
+                for word, score in explanation["negative_words"]:
+                    st.write(f"- {word} ({score:.3f})")
+            if not explanation.get("lexicon_negative") and not explanation["negative_words"]:
+                st.markdown("*None detected*")
 
         with col3:
-            st.markdown("**Neutral Indicators**")
-            for word, score in explanation["neutral_words"]:
-                st.write(f"- {word} ({score:.3f})")
+            st.markdown("**⚠️ Uncertainty Indicators**")
+            if explanation.get("lexicon_uncertainty"):
+                st.caption("Lexicon-detected:")
+                for word in explanation["lexicon_uncertainty"][:5]:
+                    st.markdown(
+                        f"<span style='background-color: rgba(255, 193, 7, 0.3); padding: 3px 10px; "
+                        f"border-radius: 15px; margin: 2px; display: inline-block;'>{word}</span>",
+                        unsafe_allow_html=True,
+                    )
+            if explanation["neutral_words"]:
+                st.caption("Neutral words:")
+                for word, score in explanation["neutral_words"]:
+                    st.write(f"- {word} ({score:.3f})")
+            if not explanation.get("lexicon_uncertainty") and not explanation["neutral_words"]:
+                st.markdown("*None detected*")
 
         # Top words chart
         if explanation["word_importance"]:

@@ -1,6 +1,7 @@
 """
 Explainability module for Financial Sentiment Analysis.
 Provides word importance and attention-based explanations.
+Uses financial lexicon for reliable sentiment direction detection.
 """
 
 import numpy as np
@@ -9,6 +10,16 @@ from typing import List, Tuple
 import re
 
 from utils import get_project_root, get_model_dir, setup_logging, LABEL_MAP_INV
+
+# Import financial lexicons for reliable sentiment detection
+try:
+    from lexicons import FINANCIAL_POSITIVE, FINANCIAL_NEGATIVE, FINANCIAL_UNCERTAINTY
+    LEXICON_AVAILABLE = True
+except ImportError:
+    LEXICON_AVAILABLE = False
+    FINANCIAL_POSITIVE = set()
+    FINANCIAL_NEGATIVE = set()
+    FINANCIAL_UNCERTAINTY = set()
 
 logger = setup_logging(__name__)
 
@@ -19,7 +30,7 @@ def get_word_importance_baseline(
 ) -> List[Tuple[str, float, str]]:
     """
     Get word importance for baseline TF-IDF models.
-    Uses feature coefficients to determine word importance.
+    Uses TF-IDF scores for importance ranking and financial lexicon for sentiment direction.
 
     Args:
         text: Input text
@@ -50,7 +61,7 @@ def get_word_importance_baseline(
     if hasattr(classifier, "coef_"):
         coef = classifier.coef_
     else:
-        return []
+        coef = None
 
     # Calculate word importance
     word_scores = []
@@ -58,14 +69,22 @@ def get_word_importance_baseline(
         word = feature_names[idx]
         tfidf_val = tfidf_values[idx]
 
-        # Get coefficient contribution for each class
-        # coef shape: (n_classes, n_features) for multi-class
-        if coef.shape[0] == 3:  # Multi-class
+        # Clean word for lexicon lookup (handle bigrams by checking each part)
+        word_parts = word.lower().split()
+        word_clean = word_parts[0] if word_parts else word.lower()
+
+        # PRIORITY: Use financial lexicon for sentiment direction (more reliable)
+        if LEXICON_AVAILABLE and word_clean in FINANCIAL_POSITIVE:
+            direction = "positive"
+        elif LEXICON_AVAILABLE and word_clean in FINANCIAL_NEGATIVE:
+            direction = "negative"
+        elif coef is not None and coef.shape[0] == 3:
+            # Fallback to model coefficients for words not in lexicon
             pos_coef = coef[2, idx]  # positive class
             neg_coef = coef[0, idx]  # negative class
             neu_coef = coef[1, idx]  # neutral class
 
-            # Determine dominant sentiment direction
+            # Determine dominant sentiment direction from model
             max_coef = max(pos_coef, neg_coef, neu_coef, key=abs)
             if max_coef == pos_coef:
                 direction = "positive"
@@ -73,11 +92,17 @@ def get_word_importance_baseline(
                 direction = "negative"
             else:
                 direction = "neutral"
-
-            importance = tfidf_val * abs(max_coef)
         else:
-            importance = tfidf_val * abs(coef[0, idx])
-            direction = "positive" if coef[0, idx] > 0 else "negative"
+            direction = "neutral"
+
+        # Calculate importance score
+        if coef is not None and coef.shape[0] == 3:
+            pos_coef = coef[2, idx]
+            neg_coef = coef[0, idx]
+            neu_coef = coef[1, idx]
+            importance = tfidf_val * max(abs(pos_coef), abs(neg_coef), abs(neu_coef))
+        else:
+            importance = tfidf_val
 
         word_scores.append((word, float(importance), direction))
 
@@ -92,7 +117,7 @@ def explain_prediction_baseline(
     model_name: str = "baseline_svm"
 ) -> dict:
     """
-    Explain a baseline model prediction.
+    Explain a baseline model prediction with lexicon-enhanced word detection.
 
     Args:
         text: Input text
@@ -120,13 +145,31 @@ def explain_prediction_baseline(
     else:
         probabilities = None
 
-    # Get word importance
+    # Get word importance (now uses lexicon for direction)
     word_importance = get_word_importance_baseline(text, model_name)
+
+    # Also get lexicon-based words directly from text
+    words_in_text = [re.sub(r'[^\w]', '', w.lower()) for w in text.split()]
+    words_in_text = [w for w in words_in_text if w]
+
+    lexicon_positive = [w for w in words_in_text if w in FINANCIAL_POSITIVE]
+    lexicon_negative = [w for w in words_in_text if w in FINANCIAL_NEGATIVE]
+    lexicon_uncertainty = [w for w in words_in_text if w in FINANCIAL_UNCERTAINTY]
 
     # Separate by direction
     positive_words = [(w, s) for w, s, d in word_importance if d == "positive"]
     negative_words = [(w, s) for w, s, d in word_importance if d == "negative"]
     neutral_words = [(w, s) for w, s, d in word_importance if d == "neutral"]
+
+    # Add lexicon words that weren't captured by TF-IDF (might be out-of-vocabulary)
+    existing_pos = {w for w, s in positive_words}
+    existing_neg = {w for w, s in negative_words}
+    for w in lexicon_positive:
+        if w not in existing_pos:
+            positive_words.append((w, 0.1))  # Small score for lexicon-only words
+    for w in lexicon_negative:
+        if w not in existing_neg:
+            negative_words.append((w, 0.1))
 
     return {
         "text": text,
@@ -136,6 +179,9 @@ def explain_prediction_baseline(
         "positive_words": positive_words[:5],
         "negative_words": negative_words[:5],
         "neutral_words": neutral_words[:5],
+        "lexicon_positive": lexicon_positive,
+        "lexicon_negative": lexicon_negative,
+        "lexicon_uncertainty": lexicon_uncertainty,
     }
 
 
