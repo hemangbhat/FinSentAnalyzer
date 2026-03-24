@@ -95,6 +95,85 @@ mlProjectFinancialSent/
 └── README.md
 ```
 
+### System Architecture Pipeline
+
+```mermaid
+flowchart TD
+    %% Data Sources
+    subgraph Data [Data Layer]
+        A[(Financial PhraseBank)] --> B[src/preprocess.py]
+        B --> C[(Processed Data Split)]
+    end
+
+    %% Training Pipeline
+    subgraph Train [Training & Evaluation]
+        C --> D{Model Selection}
+        D -->|TF-IDF + ML baselines| E[src/train.py]
+        D -->|HuggingFace/PyTorch| F[src/model.py]
+        E --> G[(Saved Models .joblib)]
+        F --> G
+        G --> H[src/evaluate.py]
+    end
+
+    %% Inference Engine
+    subgraph Engine [Inference Engine]
+        I[Input Text / Batch CSV] --> J[src/predict.py]
+        G -. Load Models .-> J
+        
+        J --> K[src/explain.py]
+        J --> L[src/nlp_advanced.py]
+        J --> M[src/llm_explain.py]
+    end
+
+    %% Dashboard (Frontend)
+    subgraph App [Streamlit Dashboard UI]
+        O[app/shared.py] -. CSS & Configurations .-> P
+        P(((app/app.py)))
+        P --- Q[Pages]
+        Q --> R(Single Analysis)
+        Q --> S(Batch Processing)
+        Q --> T(Deep Analysis & Word Insights)
+        
+        J -. Predictions .-> Q
+        K -. Word Importances .-> T
+        L -. Lexicon & NER .-> T
+        M -. LLM Summaries .-> Q
+    end
+```
+
+---
+
+## Important Files Breakdown
+
+Here is a detailed explanation of the core files driving the Financial Sentiment Analyzer:
+
+### Frontend (Streamlit Dashboard)
+- `app/app.py`: The main entry point for the multipage dashboard. It renders the modern hero section, imports the global CSS, and acts as the project's visual wrapper.
+- `app/shared.py`: The global UI/UX engine. It contains the centralized dark-mode CSS payload, sidebar configuration, and the `@st.cache_resource` model loader to prevent RAM bloat across pages.
+- `app/pages/1_Single_Analysis.py`: Handles on-the-fly sentiment prediction and renders probability distribution charts.
+- `app/pages/2_Batch_Processing.py`: Manages CSV/TXT file uploads, parallelizes batch sentiment scoring using `predict.py`, and visualizes aggregate KPIs.
+- `app/pages/3_Explainability.py`: Connects to `explain.py` to highlight specific words (e.g., green chips for positive drivers) that influenced the model's decision.
+- `app/pages/4_Word_Insights.py`: Connects to `nlp_advanced.py` to list out the highest-impact financial lexicon terms categorized by sentiment.
+- `app/pages/5_Deep_Analysis.py`: Executes advanced linguistic decomposition, Chain-of-Thought reasoning, and entity-specific metrics (NER).
+- `app/pages/6_Model_Info.py`: A comprehensive Model Registry that dynamically reads available trained algorithms and displays their metadata and validation metrics.
+
+### Backend (Machine Learning & NLP)
+- `src/preprocess.py`: Handles the raw `FinancialPhraseBank` loading, regex-based text cleaning, lowercasing, and train/test/val splitting.
+- `src/train.py`: The primary machine learning pipeline. It handles feature extraction (TF-IDF) and trains the 7 highly-tuned baseline models (SVM, Random Forest, Gradient Boosting, etc.).
+- `src/predict.py`: The unified inference API. It dynamically routes text requests to the correct model (whether it belongs to standard ML baselines or Transformers) and returns formatted probability dictionaries.
+- `src/evaluate.py`: Calculates holistic performance metrics (Macro F1, Precision, Recall) and plots confusion matrices to validate model deployments.
+- `src/explain.py`: Extracts model coefficients (for linear models) or utilizes lexicons to derive sub-word feature importance, essentially extracting the algorithm's "why".
+- `src/nlp_advanced.py`: Uses `SpaCy` to perform Named Entity Recognition (NER), identifying organizations (Orgs), currency strings, and noun chunks for deep linguistic insights.
+- `src/llm_explain.py`: Integrates with LLM APIs (like Google's Gemini) to generate human-readable, executive-level natural language explanations of a localized market dynamic.
+- `src/finbert_pretrained.py`: A specialized HuggingFace wrapper exclusively for the `ProsusAI/finbert` model, handling its unique label mapping without requiring local fine-tuning.
+- `src/model.py`: A PyTorch neural network module responsible for handling fine-tuning operations on raw Transformer/BERT sequence classification models.
+
+### Infrastructure & Engineering
+- `tests/`: Contains isolated `pytest` modules (`test_predict.py`, `test_preprocess.py`, etc.) ensuring safe CI/CD operations and safeguarding against regressions.
+- `Makefile`: Enterprise standard task automation for environment setup, testing, formatting (`ruff`), and running the app.
+- `.github/workflows/`: Contains the CI/CD pipeline configuration, ensuring tests and linting check out autonomously upon every pull request.
+- `Dockerfile`: Orchestrates the containerized build sequence for scalable cloud deployments (AWS/GCP) using lightweight Python images.
+
 ---
 
 ## Installation

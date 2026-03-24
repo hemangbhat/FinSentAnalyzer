@@ -3,16 +3,16 @@ LLM-powered explanations for Financial Sentiment Analysis.
 Provides natural language explanations and market outlook summaries.
 """
 
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
 
 
 def generate_explanation_template(
     text: str,
     prediction: str,
     confidence: float,
-    positive_words: List[tuple],
-    negative_words: List[tuple],
-    neutral_words: List[tuple],
+    positive_words: List[Tuple[str, float]],
+    negative_words: List[Tuple[str, float]],
+    neutral_words: List[Tuple[str, float]],
 ) -> str:
     """
     Generate a natural language explanation for the sentiment prediction.
@@ -30,9 +30,9 @@ def generate_explanation_template(
         Natural language explanation string
     """
     # Extract word lists
-    pos_terms = [w for w, s in positive_words[:3]] if positive_words else []
-    neg_terms = [w for w, s in negative_words[:3]] if negative_words else []
-    neu_terms = [w for w, s in neutral_words[:3]] if neutral_words else []
+    pos_terms = [w for w, s in positive_words[:3]] if positive_words else []  # pyre-ignore
+    neg_terms = [w for w, s in negative_words[:3]] if negative_words else []  # pyre-ignore
+    neu_terms = [w for w, s in neutral_words[:3]] if neutral_words else []  # pyre-ignore
 
     # Build explanation based on prediction
     confidence_desc = "high" if confidence > 0.8 else "moderate" if confidence > 0.6 else "low"
@@ -190,7 +190,7 @@ def get_llm_explanation(
     text: str,
     prediction: str,
     probabilities: Dict[str, float],
-    word_importance: List[tuple],
+    word_importance: List[Tuple[str, float, str]],
     use_api: bool = False,
     api_key: Optional[str] = None,
 ) -> str:
