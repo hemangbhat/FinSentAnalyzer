@@ -151,9 +151,9 @@ def highlight_text(text: str, word_importance: List[Tuple[str, float, str]]) -> 
         HTML string with highlighted words
     """
     colors = {
-        "positive": "#d4edda",  # light green
-        "negative": "#f8d7da",  # light red
-        "neutral": "#cce5ff",   # light blue
+        "positive": "rgba(40, 167, 69, 0.2)",  # dark mode positive
+        "negative": "rgba(220, 53, 69, 0.2)",  # dark mode negative
+        "neutral": "rgba(0, 123, 255, 0.2)",   # dark mode neutral
     }
 
     # Create word to color mapping
