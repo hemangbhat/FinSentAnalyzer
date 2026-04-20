@@ -1,8 +1,10 @@
 """
 Financial Sentiment Analyzer — Explainability Page.
+Supports both TF-IDF word-importance analysis and SHAP-based explanations.
 """
 
 import sys
+import json
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
@@ -11,6 +13,13 @@ import streamlit as st  # pyre-ignore
 import plotly.graph_objects as go  # pyre-ignore
 
 from explain import explain_prediction_baseline, highlight_text  # pyre-ignore
+
+# Try importing SHAP module (optional dependency)
+try:
+    from shap_explain import get_shap_explanation  # pyre-ignore
+    SHAP_AVAILABLE = True
+except ImportError:
+    SHAP_AVAILABLE = False
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from shared import inject_css, setup_sidebar, get_sentiment_color, create_probability_chart  # pyre-ignore
@@ -178,3 +187,89 @@ if st.button("🔍 Explain Prediction", type="primary", use_container_width=True
             st.plotly_chart(fig, use_container_width=True)
     else:
         st.warning("Please enter text to explain.")
+
+# ── SHAP Global Explainability Section ──────────────────────────────────────────
+st.markdown("<hr style='border-color: rgba(255,255,255,0.05); margin: 40px 0;'>", unsafe_allow_html=True)
+st.markdown("""
+<div style='margin-bottom: 20px;'>
+    <h2 style='font-size: 1.8em; font-weight: 700; margin-bottom: 5px;'>🧠 SHAP Global Explainability</h2>
+    <p style='color: #94a3b8; font-size: 1em;'>Understand which features matter most <i>across the entire dataset</i>, not just one prediction.</p>
+</div>
+""", unsafe_allow_html=True)
+
+# Check for pre-computed SHAP results
+results_dir = Path(__file__).parent.parent.parent / "results"
+classifier_name = selected_model.replace("baseline_", "")
+shap_results_path = results_dir / f"shap_{classifier_name}.json"
+
+shap_data = None
+if shap_results_path.exists():
+    with open(shap_results_path) as f:
+        shap_data = json.load(f)
+    st.success(f"✅ Loaded pre-computed SHAP results for **{classifier_name}**")
+elif SHAP_AVAILABLE:
+    st.info(f"No pre-computed SHAP results for **{classifier_name}**. Click below to generate them (may take ~30s).")
+    if st.button("🧠 Run SHAP Analysis", type="primary", use_container_width=True):
+        with st.spinner("Computing SHAP values... this may take 30-60 seconds"):
+            try:
+                shap_data = get_shap_explanation(classifier_name, max_samples=100)
+                # Auto-save
+                results_dir.mkdir(parents=True, exist_ok=True)
+                with open(shap_results_path, "w") as f:
+                    json.dump(shap_data, f, indent=2)
+                st.success("✅ SHAP analysis complete and saved!")
+            except Exception as e:
+                st.error(f"❌ SHAP analysis failed: {e}")
+else:
+    st.warning("**SHAP** library is not installed. Install with: `pip install shap`")
+
+if shap_data:
+    top_features = shap_data.get("top_features", [])[:20]
+    if top_features:
+        features = [f["feature"] for f in top_features]
+        importances = [f["importance"] for f in top_features]
+
+        fig = go.Figure(go.Bar(
+            x=importances,
+            y=features,
+            orientation="h",
+            marker_color="#8b5cf6",
+            marker_line_color="rgba(139, 92, 246, 0.6)",
+            marker_line_width=1,
+        ))
+        fig.update_layout(
+            title={"text": f"SHAP Feature Importance — {classifier_name.replace('_', ' ').title()}", "font": {"color": "#f8fafc", "size": 16}},
+            xaxis_title="Mean |SHAP Value|",
+            height=500,
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            font={"color": "#cbd5e1", "family": "Inter, sans-serif"},
+            yaxis={"autorange": "reversed"},
+            xaxis={"showgrid": True, "gridcolor": "rgba(255,255,255,0.05)"},
+            yaxis_tickfont={"size": 12, "family": "monospace"},
+            margin=dict(l=150),
+        )
+        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+
+    # Per-class drivers
+    class_features = shap_data.get("class_features", {})
+    if class_features:
+        st.markdown("#### Per-Class Feature Drivers")
+        ccols = st.columns(3)
+        class_colors = {"negative": "#ef4444", "neutral": "#64748b", "positive": "#10b981"}
+        for i, (cls_name, cls_feats) in enumerate(class_features.items()):
+            with ccols[i]:
+                color = class_colors.get(cls_name, "#94a3b8")
+                st.markdown(f"""
+                <div class='insight-card' style='border-top: 3px solid {color};'>
+                    <h4 style='color: {color}; text-transform: capitalize; margin-top: 0;'>{cls_name}</h4>
+                """, unsafe_allow_html=True)
+                for feat in cls_feats[:7]:
+                    icon = "↑" if feat["direction"] == "positive" else "↓"
+                    st.markdown(f"""
+                    <div style='display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9em;'>
+                        <span style='font-family: monospace; color: #cbd5e1;'>{feat['feature']}</span>
+                        <span style='color: {color};'>{icon} {feat['shap_value']:.3f}</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+                st.markdown("</div>", unsafe_allow_html=True)

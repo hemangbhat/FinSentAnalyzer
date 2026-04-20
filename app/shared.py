@@ -357,12 +357,3 @@ def create_probability_chart(probabilities: dict) -> go.Figure:
         yaxis={"showgrid": True, "gridcolor": 'rgba(255,255,255,0.05)', "linecolor": 'rgba(255,255,255,0.1)'},
     )
     return fig
-
-    fig.update_layout(
-        title="Sentiment Probabilities",
-        yaxis_title="Probability (%)",
-        yaxis_range=[0, 100],
-        height=300,
-        margin=dict(l=20, r=20, t=50, b=20),
-    )
-    return fig

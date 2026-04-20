@@ -115,6 +115,34 @@ with col6:
     </div>
     """, unsafe_allow_html=True)
 
+st.markdown("")
+
+col7, col8, _ = st.columns(3)
+
+with col7:
+    st.markdown("""
+    <div class='feature-card'>
+        <div class='card-title'>
+            <span style='font-size: 1.4em;'>📈</span> Sentiment Trends
+        </div>
+        <div class='card-text'>
+            Visualize how news sentiment correlates with stock price movements for AAPL, TSLA, and AMZN. Cross-dataset validation with SHAP explainability.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col8:
+    st.markdown("""
+    <div class='feature-card'>
+        <div class='card-title'>
+            <span style='font-size: 1.4em;'>🔬</span> Error Analysis
+        </div>
+        <div class='card-text'>
+            Inspect misclassified examples to understand model weaknesses. Identify confusion patterns between neutral, positive, and negative classes.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
 st.markdown("<hr style='margin: 40px 0;'>", unsafe_allow_html=True)
 
 col_footer, _ = st.columns([1, 0.01])

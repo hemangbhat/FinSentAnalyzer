@@ -1,10 +1,13 @@
 """
 Training module for Financial Sentiment Analysis.
 Trains baseline models (TF-IDF + classifiers) and transformer models (FinBERT).
+Includes cross-validation and hyperparameter tuning.
 """
 
 import argparse
+import json
 import joblib
+import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import MultinomialNB
@@ -13,9 +16,10 @@ from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier,
 from sklearn.neural_network import MLPClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.calibration import CalibratedClassifierCV
-from sklearn.metrics import accuracy_score, f1_score, classification_report
+from sklearn.metrics import accuracy_score, f1_score, classification_report, make_scorer
+from sklearn.model_selection import StratifiedKFold, cross_validate, GridSearchCV
 
-from utils import get_project_root, get_model_dir, setup_logging, LABEL_MAP_INV
+from utils import get_project_root, get_model_dir, get_results_dir, setup_logging, LABEL_MAP_INV
 from preprocess import load_processed_data
 
 logger = setup_logging(__name__)
@@ -363,10 +367,194 @@ def train_all_models(include_transformers: bool = True, transformer_epochs: int 
     return results
 
 
+def cross_validate_baselines(k: int = 5) -> dict:
+    """
+    Run k-fold stratified cross-validation on all baseline models.
+
+    Args:
+        k: Number of folds (default: 5)
+
+    Returns:
+        Dictionary mapping model names to their CV results
+    """
+    logger.info("\n" + "=" * 70)
+    logger.info("STRATIFIED %d-FOLD CROSS-VALIDATION", k)
+    logger.info("=" * 70)
+
+    # Load full training data (train + val combined for CV)
+    train_df = load_processed_data("train")
+    val_df = load_processed_data("val")
+    import pandas as pd
+    full_df = pd.concat([train_df, val_df], ignore_index=True)
+
+    X = full_df["sentence"].values
+    y = full_df["label"].values
+
+    logger.info("Total samples for CV: %d", len(X))
+
+    cv = StratifiedKFold(n_splits=k, shuffle=True, random_state=42)
+
+    scoring = {
+        "accuracy": "accuracy",
+        "f1_macro": make_scorer(f1_score, average="macro"),
+        "f1_weighted": make_scorer(f1_score, average="weighted"),
+    }
+
+    models = ["logreg", "naive_bayes", "svm", "random_forest", "gradient_boosting", "mlp"]
+    cv_results = {}
+
+    for name in models:
+        logger.info("\nCross-validating: %s...", name.upper())
+        pipeline = create_baseline_pipeline(name)
+
+        try:
+            scores = cross_validate(pipeline, X, y, cv=cv, scoring=scoring, n_jobs=-1)
+
+            result = {
+                "model": name,
+                "accuracy_mean": float(np.mean(scores["test_accuracy"])),
+                "accuracy_std": float(np.std(scores["test_accuracy"])),
+                "f1_macro_mean": float(np.mean(scores["test_f1_macro"])),
+                "f1_macro_std": float(np.std(scores["test_f1_macro"])),
+                "f1_weighted_mean": float(np.mean(scores["test_f1_weighted"])),
+                "f1_weighted_std": float(np.std(scores["test_f1_weighted"])),
+                "fold_accuracies": [float(x) for x in scores["test_accuracy"]],
+                "fold_f1_macros": [float(x) for x in scores["test_f1_macro"]],
+            }
+            cv_results[name] = result
+
+            logger.info("  Accuracy: %.4f ± %.4f", result["accuracy_mean"], result["accuracy_std"])
+            logger.info("  F1 macro: %.4f ± %.4f", result["f1_macro_mean"], result["f1_macro_std"])
+
+        except Exception as e:
+            logger.error("  Error with %s: %s", name, e)
+
+    # Print comparison table
+    logger.info("\n" + "=" * 80)
+    logger.info("CROSS-VALIDATION RESULTS (%d-FOLD)", k)
+    logger.info("=" * 80)
+    logger.info("%-20s %-18s %-18s %-18s", "Model", "Accuracy", "F1 (macro)", "F1 (weighted)")
+    logger.info("-" * 80)
+    for name, r in cv_results.items():
+        logger.info(
+            "%-20s %.4f ± %.4f   %.4f ± %.4f   %.4f ± %.4f",
+            name,
+            r["accuracy_mean"], r["accuracy_std"],
+            r["f1_macro_mean"], r["f1_macro_std"],
+            r["f1_weighted_mean"], r["f1_weighted_std"],
+        )
+
+    # Find best model
+    best_name = max(cv_results, key=lambda n: cv_results[n]["f1_macro_mean"])
+    logger.info("\nBest model (by mean F1 macro): %s (%.4f ± %.4f)",
+                best_name, cv_results[best_name]["f1_macro_mean"], cv_results[best_name]["f1_macro_std"])
+
+    # Save results
+    results_dir = get_results_dir()
+    results_dir.mkdir(parents=True, exist_ok=True)
+    cv_path = results_dir / "cv_results.json"
+    with open(cv_path, "w") as f:
+        json.dump(cv_results, f, indent=2)
+    logger.info("CV results saved to: %s", cv_path)
+
+    return cv_results
+
+
+def tune_hyperparameters() -> dict:
+    """
+    Run GridSearchCV hyperparameter tuning for SVM and Gradient Boosting.
+
+    Returns:
+        Dictionary with best params and scores for each model
+    """
+    logger.info("\n" + "=" * 70)
+    logger.info("HYPERPARAMETER TUNING (GridSearchCV)")
+    logger.info("=" * 70)
+
+    # Load full training data
+    train_df = load_processed_data("train")
+    val_df = load_processed_data("val")
+    import pandas as pd
+    full_df = pd.concat([train_df, val_df], ignore_index=True)
+
+    X = full_df["sentence"].values
+    y = full_df["label"].values
+
+    cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+    tune_results = {}
+
+    # --- Tune SVM ---
+    logger.info("\nTuning SVM...")
+    svm_pipeline = Pipeline([
+        ("tfidf", TfidfVectorizer(max_features=10000, ngram_range=(1, 2), min_df=2, max_df=0.95)),
+        ("classifier", LinearSVC(random_state=42, class_weight="balanced")),
+    ])
+    svm_params = {
+        "classifier__C": [0.1, 0.5, 1.0, 2.0, 5.0],
+        "classifier__max_iter": [1000, 2000],
+    }
+    svm_grid = GridSearchCV(
+        svm_pipeline, svm_params, cv=cv,
+        scoring=make_scorer(f1_score, average="macro"),
+        n_jobs=-1, verbose=0, refit=True,
+    )
+    svm_grid.fit(X, y)
+    tune_results["svm"] = {
+        "best_params": svm_grid.best_params_,
+        "best_f1_macro": float(svm_grid.best_score_),
+    }
+    # Save the best tuned model
+    model_dir = get_model_dir()
+    joblib.dump(svm_grid.best_estimator_, model_dir / "baseline_svm.joblib")
+    logger.info("  Best SVM: C=%s, F1=%.4f", svm_grid.best_params_["classifier__C"], svm_grid.best_score_)
+
+    # --- Tune Gradient Boosting ---
+    logger.info("\nTuning Gradient Boosting...")
+    gb_pipeline = Pipeline([
+        ("tfidf", TfidfVectorizer(max_features=10000, ngram_range=(1, 2), min_df=2, max_df=0.95)),
+        ("classifier", GradientBoostingClassifier(random_state=42)),
+    ])
+    gb_params = {
+        "classifier__n_estimators": [100, 200],
+        "classifier__max_depth": [3, 5, 7],
+        "classifier__learning_rate": [0.05, 0.1, 0.2],
+    }
+    gb_grid = GridSearchCV(
+        gb_pipeline, gb_params, cv=cv,
+        scoring=make_scorer(f1_score, average="macro"),
+        n_jobs=-1, verbose=0, refit=True,
+    )
+    gb_grid.fit(X, y)
+    tune_results["gradient_boosting"] = {
+        "best_params": gb_grid.best_params_,
+        "best_f1_macro": float(gb_grid.best_score_),
+    }
+    joblib.dump(gb_grid.best_estimator_, model_dir / "baseline_gradient_boosting.joblib")
+    logger.info("  Best GB: %s, F1=%.4f", gb_grid.best_params_, gb_grid.best_score_)
+
+    # Save tuning results
+    results_dir = get_results_dir()
+    results_dir.mkdir(parents=True, exist_ok=True)
+    tune_path = results_dir / "tuning_results.json"
+    # Convert numpy types for JSON serialization
+    serializable = {}
+    for k, v in tune_results.items():
+        serializable[k] = {
+            "best_params": {pk: (int(pv) if isinstance(pv, (np.integer,)) else float(pv) if isinstance(pv, (np.floating,)) else pv)
+                           for pk, pv in v["best_params"].items()},
+            "best_f1_macro": v["best_f1_macro"],
+        }
+    with open(tune_path, "w") as f:
+        json.dump(serializable, f, indent=2)
+    logger.info("\nTuning results saved to: %s", tune_path)
+
+    return tune_results
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train Financial Sentiment Models")
     parser.add_argument("--model", type=str, default="all",
-                        help="Model to train: all, baselines, ensemble, finbert, distilbert, logreg, svm, naive_bayes, random_forest, gradient_boosting, mlp")
+                        help="Model to train: all, baselines, ensemble, cv, tune, finbert, distilbert, logreg, svm, naive_bayes, random_forest, gradient_boosting, mlp")
     parser.add_argument("--epochs", type=int, default=3, help="Epochs for transformer training")
     parser.add_argument("--batch-size", type=int, default=16, help="Batch size")
     parser.add_argument("--lr", type=float, default=2e-5, help="Learning rate")
@@ -380,6 +568,10 @@ if __name__ == "__main__":
         train_ensemble()  # Also train ensemble
     elif args.model == "ensemble":
         train_ensemble()
+    elif args.model == "cv":
+        cross_validate_baselines(k=5)
+    elif args.model == "tune":
+        tune_hyperparameters()
     elif args.model in ["finbert", "distilbert", "roberta", "bert"]:
         train_transformer(args.model, epochs=args.epochs, batch_size=args.batch_size, learning_rate=args.lr)
     elif args.model in ["logreg", "svm", "naive_bayes", "random_forest", "gradient_boosting", "mlp"]:

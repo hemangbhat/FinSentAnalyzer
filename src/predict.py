@@ -290,6 +290,7 @@ if __name__ == "__main__":
         for m in get_available_models():
             logger.info("  - %s", m)
     elif args.text:
+        result = predict_single(args.text, args.model)
         print(f"\nText: {args.text}")
         print(f"Sentiment: {result['label']}")
         if "confidence" in result:

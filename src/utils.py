@@ -116,14 +116,11 @@ def setup_logging(
 # MODEL METRICS HELPERS
 # =============================================================================
 
-# Static fallback metrics (used when evaluation results aren't available)
-_STATIC_MODEL_INFO = {
+# Model descriptive metadata (no hardcoded metrics — those come from evaluation results only)
+_MODEL_METADATA = {
     "baseline_logreg": {
         "name": "Logistic Regression",
         "type": "TF-IDF + Classifier",
-        "accuracy": "88.5%",
-        "f1_macro": "0.844",
-        "f1_weighted": "0.887",
         "speed": "Very Fast",
         "features": [
             "TF-IDF vectorization (unigrams + bigrams)",
@@ -135,9 +132,6 @@ _STATIC_MODEL_INFO = {
     "baseline_naive_bayes": {
         "name": "Naive Bayes",
         "type": "TF-IDF + Classifier",
-        "accuracy": "86.3%",
-        "f1_macro": "0.809",
-        "f1_weighted": "0.864",
         "speed": "Very Fast",
         "features": [
             "TF-IDF vectorization",
@@ -149,9 +143,6 @@ _STATIC_MODEL_INFO = {
     "baseline_svm": {
         "name": "Support Vector Machine (SVM)",
         "type": "TF-IDF + Classifier",
-        "accuracy": "92%",
-        "f1_macro": "0.90",
-        "f1_weighted": "0.93",
         "speed": "Fast",
         "features": [
             "TF-IDF vectorization",
@@ -164,9 +155,6 @@ _STATIC_MODEL_INFO = {
     "baseline_random_forest": {
         "name": "Random Forest",
         "type": "TF-IDF + Ensemble",
-        "accuracy": "87.6%",
-        "f1_macro": "0.827",
-        "f1_weighted": "0.871",
         "speed": "Medium",
         "features": [
             "200 decision trees",
@@ -178,23 +166,17 @@ _STATIC_MODEL_INFO = {
     "baseline_gradient_boosting": {
         "name": "Gradient Boosting",
         "type": "TF-IDF + Boosting",
-        "accuracy": "94%",
-        "f1_macro": "0.92",
-        "f1_weighted": "0.94",
         "speed": "Medium",
         "features": [
             "100 boosting iterations",
             "Sequential error correction",
             "Learning rate 0.1",
-            "Highest accuracy baseline",
+            "Strong on structured features",
         ],
     },
     "baseline_mlp": {
         "name": "Multi-Layer Perceptron (Neural Network)",
         "type": "TF-IDF + Deep Learning",
-        "accuracy": "87.6%",
-        "f1_macro": "0.827",
-        "f1_weighted": "0.876",
         "speed": "Medium",
         "features": [
             "2 hidden layers (256, 128 neurons)",
@@ -206,9 +188,6 @@ _STATIC_MODEL_INFO = {
     "baseline_ensemble": {
         "name": "Voting Ensemble",
         "type": "TF-IDF + Combined Models",
-        "accuracy": "88.5%",
-        "f1_macro": "0.843",
-        "f1_weighted": "0.885",
         "speed": "Slow",
         "features": [
             "Combines LogReg + SVM + Random Forest",
@@ -219,9 +198,6 @@ _STATIC_MODEL_INFO = {
     "finbert_pretrained": {
         "name": "FinBERT (Pre-trained)",
         "type": "Transformer",
-        "accuracy": "~90%",
-        "f1_macro": "~0.88",
-        "f1_weighted": "~0.90",
         "speed": "Slow (CPU) / Fast (GPU)",
         "features": [
             "Pre-trained on financial text",
@@ -236,7 +212,8 @@ _STATIC_MODEL_INFO = {
 
 def get_model_info(model_name: str) -> Dict[str, Any]:
     """
-    Get model information, trying dynamic results first then falling back to static.
+    Get model information — tries dynamic evaluation results first,
+    falls back to descriptive metadata only (no fake numbers).
 
     Args:
         model_name: Model identifier (e.g., 'baseline_svm')
@@ -244,6 +221,17 @@ def get_model_info(model_name: str) -> Dict[str, Any]:
     Returns:
         Dictionary with model info (name, type, accuracy, f1 scores, speed, features)
     """
+    meta = _MODEL_METADATA.get(model_name, {})
+    base_info = {
+        "name": meta.get("name", model_name),
+        "type": meta.get("type", "Unknown"),
+        "accuracy": "N/A",
+        "f1_macro": "N/A",
+        "f1_weighted": "N/A",
+        "speed": meta.get("speed", "N/A"),
+        "features": meta.get("features", []),
+    }
+
     # Try loading dynamic evaluation results
     results_path = get_results_dir() / "evaluation_results.json"
     if results_path.exists():
@@ -252,29 +240,14 @@ def get_model_info(model_name: str) -> Dict[str, Any]:
                 results = json.load(f)
             for result in results:
                 if result.get("name") == model_name:
-                    static = _STATIC_MODEL_INFO.get(model_name, {})
-                    return {
-                        "name": static.get("name", model_name),
-                        "type": static.get("type", "Unknown"),
-                        "accuracy": f"{result['accuracy']:.1%}",
-                        "f1_macro": f"{result['f1_macro']:.3f}",
-                        "f1_weighted": f"{result['f1_weighted']:.3f}",
-                        "speed": static.get("speed", "N/A"),
-                        "features": static.get("features", []),
-                    }
+                    base_info["accuracy"] = f"{result['accuracy']:.1%}"
+                    base_info["f1_macro"] = f"{result['f1_macro']:.3f}"
+                    base_info["f1_weighted"] = f"{result['f1_weighted']:.3f}"
+                    break
         except (json.JSONDecodeError, KeyError):
-            pass  # Fall through to static data
+            pass  # Keep N/A values
 
-    # Fallback to static data
-    return _STATIC_MODEL_INFO.get(model_name, {
-        "name": model_name,
-        "type": "Unknown",
-        "accuracy": "N/A",
-        "f1_macro": "N/A",
-        "f1_weighted": "N/A",
-        "speed": "N/A",
-        "features": [],
-    })
+    return base_info
 
 
 def get_all_model_info(available_models: list) -> Dict[str, Dict[str, Any]]:

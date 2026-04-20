@@ -172,8 +172,8 @@ def compare_models(model_names: list = None, split: str = "test") -> list:
         model_dir = get_model_dir()
         model_names = []
 
-        # Check for baseline models
-        for name in ["logreg", "naive_bayes", "svm"]:
+        # Check for ALL baseline models
+        for name in ["logreg", "naive_bayes", "svm", "random_forest", "gradient_boosting", "mlp", "ensemble"]:
             if (model_dir / f"baseline_{name}.joblib").exists():
                 model_names.append(f"baseline_{name}")
 
