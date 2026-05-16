@@ -232,8 +232,20 @@ def run_stock_prediction_extension(
 
     logger.info("Running stock extension pipeline: ticker=%s, start=%s, end=%s", ticker, start_date, end_date)
 
-    prices = components["download_stock_data"](ticker, start_date, end_date)
-    prices = _normalize_price_dataframe(prices)
+    # Attempt live stock download; fall back to sample data if yfinance
+    # is blocked (common on Streamlit Cloud / cloud VMs).
+    try:
+        prices = components["download_stock_data"](ticker, start_date, end_date)
+        prices = _normalize_price_dataframe(prices)
+    except Exception as exc:
+        logger.warning("yfinance download failed for %s: %s — falling back to sample stock data", ticker, exc)
+        stock_data_path = get_stock_project_root() / "data" / "stock_data.csv"
+        if not stock_data_path.exists():
+            raise FileNotFoundError(
+                f"Live stock download failed ({exc}) and no sample data at {stock_data_path}"
+            ) from exc
+        prices = pd.read_csv(stock_data_path)
+        prices = _normalize_price_dataframe(prices)
 
     headlines = pd.DataFrame(columns=["date", "headline"])
     news_source = "none"
