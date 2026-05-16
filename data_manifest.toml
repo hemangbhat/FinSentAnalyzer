@@ -1,0 +1,34 @@
+# Data Manifest — Financial Sentiment Analyzer
+# This file documents all dataset versions used in this project for reproducibility.
+# Update this file whenever datasets are modified or new ones are added.
+
+[primary_dataset]
+name = "Financial PhraseBank"
+source = "https://huggingface.co/datasets/financial_phrasebank"
+paper = "Malo et al. (2014) — Good Debt or Bad Debt: Detecting Semantic Orientations in Economic Texts"
+agreement = "AllAgree (100% annotator agreement)"
+total_samples = 2264
+classes = ["positive", "neutral", "negative"]
+class_distribution = { positive = 570, neutral = 1391, negative = 303 }
+encoding = "latin-1"
+local_path = "data/raw/FinancialPhraseBank-v1.0/Sentences_AllAgree.txt"
+splits = { train = 1807, val = 226, test = 226 }
+split_strategy = "stratified 80/10/10"
+random_seed = 42
+
+[cross_validation_dataset]
+name = "Financial News Headlines"
+source = "financial-news-stock-prediction (Kaggle)"
+local_path = "external-datasets/financial-news-stock-prediction/data/"
+files = ["sample_news.csv", "stock_data.csv", "final_dataset.csv"]
+total_headlines = 2688
+tickers = ["AAPL", "TSLA", "AMZN"]
+news_sources = ["WSJ", "Bloomberg", "Reuters", "CNBC", "Financial Times"]
+purpose = "Out-of-distribution model generalization testing + sentiment-stock correlation"
+
+[processed_data]
+train_path = "data/processed/train.csv"
+val_path = "data/processed/val.csv"
+test_path = "data/processed/test.csv"
+preprocessing = ["regex text cleaning", "lowercasing", "duplicate removal (5 removed)", "null check"]
+label_encoding = { negative = 0, neutral = 1, positive = 2 }

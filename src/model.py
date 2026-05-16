@@ -5,6 +5,7 @@ Includes FinBERT and other transformer models.
 
 import torch
 import torch.nn as nn
+from pathlib import Path
 from torch.utils.data import Dataset, DataLoader
 from transformers import (
     AutoTokenizer,

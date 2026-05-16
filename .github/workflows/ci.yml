@@ -38,7 +38,7 @@ jobs:
       - name: Type check (mypy)
         run: |
           cd src
-          python -m mypy utils.py preprocess.py --ignore-missing-imports --no-error-summary || true
+          python -m mypy utils.py preprocess.py --ignore-missing-imports --no-error-summary
 
       - name: Run tests
         run: |

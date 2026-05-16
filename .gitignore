@@ -2,6 +2,8 @@
 venv/
 .venv/
 venvMlProject/
+external-datasets/**/.venv*/
+external-datasets/**/.sixth/
 
 # Python
 __pycache__/
@@ -33,6 +35,7 @@ models/*_finetuned/
 # IDE
 .vscode/
 .idea/
+.sixth/
 *.swp
 *.swo
 
@@ -46,6 +49,10 @@ Thumbs.db
 # Cache
 .cache/
 huggingface/
+.pytest_cache/
+
+# Build artifacts
+test_output.txt
 
 # Claude
 .claude/

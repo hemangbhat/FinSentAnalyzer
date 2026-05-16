@@ -1,6 +1,6 @@
 # 📈 Financial Sentiment Analyzer
 
-> **An end-to-end ML pipeline for classifying financial text sentiment with 8 trained models, SHAP explainability, cross-dataset validation, and a professional 8-page Streamlit dashboard.**
+> **An end-to-end ML pipeline for classifying financial text sentiment with 8 trained models, SHAP explainability, cross-dataset validation, and a professional 9-page Streamlit dashboard.**
 
 [![Python 3.10](https://img.shields.io/badge/Python-3.10-blue.svg)](https://python.org)
 [![Streamlit](https://img.shields.io/badge/Streamlit-Dashboard-red.svg)](https://streamlit.io)
@@ -45,7 +45,7 @@ Financial sentiment analysis is a critical tool for quantitative finance, risk m
 | **Explainability** | SHAP feature importance + per-prediction word highlighting |
 | **Error Analysis** | Sankey misclassification diagrams + confidence calibration insights |
 | **Correlation** | Sentiment-stock price Pearson correlation for AAPL, TSLA, AMZN |
-| **Dashboard** | Professional 8-page Streamlit app with dark fintech theme |
+| **Dashboard** | Professional 9-page Streamlit app with dark fintech theme |
 | **CI/CD** | GitHub Actions (lint + format + type check + tests) |
 | **Deployment** | Docker + Streamlit Cloud + HuggingFace Spaces ready |
 
@@ -61,8 +61,9 @@ Financial sentiment analysis is a critical tool for quantitative finance, risk m
 - **SHAP Explainability** — Global feature importance with per-class drivers
 - **Cross-Dataset Validation** — Test generalization on 2,688 real news headlines from WSJ, Bloomberg, Reuters, CNBC, and Financial Times
 - **Sentiment-Stock Correlation** — Pearson correlation between news sentiment and stock price movements
+- **Stock Prediction Extension** — End-to-end stock direction flow with live news fetch, FinBERT sentiment aggregation, and LSTM next-day prediction
 - **Error Analysis** — Inspect misclassified examples with Sankey diagrams and confidence histograms
-- **Deep Linguistic Analysis** — Named Entity Recognition, Chain-of-Thought reasoning, financial lexicon matching
+- **Deep Linguistic Analysis** — Named Entity Recognition, rule-based Chain-of-Thought reasoning, Loughran-McDonald financial lexicon matching
 
 ---
 
@@ -106,7 +107,7 @@ flowchart TD
         I["Input Text / Batch CSV"] --> J["src/predict.py"]
         G -.->|"Load Models"| J
         J --> L["src/nlp_advanced.py"]
-        J --> M["src/llm_explain.py"]
+        J --> M["src/llm_explain.py (template-based)"]
     end
 
     %% Dashboard
@@ -118,6 +119,7 @@ flowchart TD
         Q --> T["Explainability + SHAP"]
         Q --> U["Sentiment Trends"]
         Q --> V["Error Analysis"]
+        Q --> W["Stock Prediction Extension"]
 
         J -.->|"Predictions"| Q
         K -.->|"Word Importances"| T
@@ -143,7 +145,8 @@ financial-sentiment-analyzer/
 │       ├── 5_Deep_Analysis.py      # NER, Chain-of-Thought, linguistic decomposition
 │       ├── 6_Model_Info.py         # Model registry with live metrics
 │       ├── 7_Sentiment_Trends.py   # Sentiment vs stock price correlation
-│       └── 8_Error_Analysis.py     # Misclassified examples & confusion patterns
+│       ├── 8_Error_Analysis.py     # Misclassified examples & confusion patterns
+│       └── 9_Stock_Prediction_Extension.py  # Full stock pipeline extension page
 │
 ├── src/                            # Core ML Pipeline
 │   ├── preprocess.py               # Data loading, cleaning, train/val/test splitting
@@ -154,16 +157,18 @@ financial-sentiment-analyzer/
 │   ├── explain.py                  # Word importance & explainability
 │   ├── shap_explain.py             # SHAP-based global feature importance
 │   ├── integrate_news.py           # Cross-dataset evaluation & sentiment-stock correlation
+│   ├── stock_extension.py          # Bridge to nested stock prediction project
 │   ├── nlp_advanced.py             # Financial NLP: NER, lexicon, text features
 │   ├── finbert_pretrained.py       # Pre-trained FinBERT wrapper (zero-shot)
-│   ├── llm_explain.py              # Natural language explanation generation
+│   ├── benchmark_finbert.py        # FinBERT test-set benchmark (appends to evaluation_results.json)
+│   ├── llm_explain.py              # Template-based explanation generation
 │   └── utils.py                    # Constants, paths, logging, dynamic model metrics
 │
 ├── data/
 │   ├── raw/                        # Financial PhraseBank (2,264 sentences)
 │   └── processed/                  # Stratified train/val/test CSV splits
 │
-├── financial-news-stock-prediction/  # Cross-validation dataset (2,688 headlines)
+├── external-datasets/              # Cross-validation dataset (2,688 headlines)
 │
 ├── models/                         # Saved trained models
 │   ├── baseline_logreg.joblib
@@ -182,7 +187,7 @@ financial-sentiment-analyzer/
 │   ├── shap_gradient_boosting.json # SHAP feature importance (GB)
 │   └── shap_svm.json              # SHAP feature importance (SVM)
 │
-├── tests/                          # Automated test suite (77 tests)
+├── tests/                          # Automated test suite (80 tests)
 │   ├── conftest.py                 # Shared fixtures
 │   ├── test_utils.py
 │   ├── test_preprocess.py
@@ -190,6 +195,7 @@ financial-sentiment-analyzer/
 │   ├── test_nlp_advanced.py
 │   ├── test_llm_enhanced.py
 │   ├── test_integrate_news.py
+│   ├── test_stock_extension.py
 │   └── test_shap_explain.py
 │
 ├── notebooks/
@@ -262,7 +268,7 @@ This creates `data/processed/train.csv`, `val.csv`, and `test.csv` with an **80/
 streamlit run app/app.py
 ```
 
-Open **http://localhost:8501** in your browser. Use the sidebar to navigate 8 pages.
+Open **http://localhost:8501** in your browser. Use the sidebar to navigate 9 pages.
 
 ### Train All Models
 
@@ -299,6 +305,12 @@ python src/shap_explain.py --model svm
 
 ```bash
 python src/integrate_news.py --action evaluate --model svm
+```
+
+### Run Full Stock Prediction Extension (CLI)
+
+```bash
+python src/stock_extension.py --ticker AAPL --days-back 120 --epochs 8 --seq-len 5
 ```
 
 ### Single Prediction (CLI)
@@ -465,13 +477,13 @@ Furthermore, the **Error Analysis** module mathematically breaks down failures m
 ## Dashboard Pages
 
 ### 🏠 Home
-Landing page with 8 feature cards linking to each module.
+Landing page with 9 feature cards linking to each module.
 
 ### 📝 1. Single Analysis
 - Enter any financial text
 - Get instant sentiment prediction with confidence score
 - View probability distribution (bar chart)
-- AI-generated natural language explanation
+- Template-based natural language explanation
 
 ### 📁 2. Batch Processing
 - Upload CSV or TXT files
@@ -513,6 +525,13 @@ Landing page with 8 feature cards linking to each module.
 - **Confidence histogram**: Correct vs error distribution
 - **Calibration insight**: Auto-generated (well-calibrated vs overconfident)
 - **Misclassified examples table**: Filterable by true label, sortable by confidence
+
+### 📉 9. Stock Prediction Extension
+- Runs the full nested `financial-news-stock-prediction` flow inside the main app
+- Downloads ticker OHLCV data with yfinance
+- Fetches live ticker news and scores sentiment with FinBERT
+- Engineers technical + sentiment features and trains an LSTM
+- Predicts next-day direction (UP/DOWN) with confidence
 
 ---
 
@@ -560,11 +579,18 @@ python src/integrate_news.py --action correlate --model svm
 python src/integrate_news.py --action predict --model gradient_boosting
 ```
 
+### Stock Prediction Extension
+
+```bash
+python src/stock_extension.py --ticker AAPL --days-back 120 --epochs 8 --seq-len 5
+python src/stock_extension.py --ticker TSLA --start 2025-01-01 --end 2025-06-30 --no-live-news
+```
+
 ---
 
 ## Testing
 
-The project has **77 automated tests** across 7 test files:
+The project has **80 automated tests** across 8 test files:
 
 ```bash
 # Run all tests
@@ -573,6 +599,7 @@ python -m pytest tests/ -v --tb=short
 # Run a specific test file
 python -m pytest tests/test_predict.py -v
 python -m pytest tests/test_integrate_news.py -v
+python -m pytest tests/test_stock_extension.py -v
 python -m pytest tests/test_shap_explain.py -v
 ```
 
@@ -586,6 +613,7 @@ python -m pytest tests/test_shap_explain.py -v
 | `test_nlp_advanced.py` | 14 | Text processing, NER, lexicon, features |
 | `test_llm_enhanced.py` | 10 | Thought steps, market outlook, confidence |
 | `test_integrate_news.py` | 7 | News loading, sentiment prediction, trends |
+| `test_stock_extension.py` | 3 | Full extension pipeline orchestration and fallback behavior |
 | `test_shap_explain.py` | 6 | SHAP analysis, per-class features, JSON save |
 
 ### CI/CD Pipeline
@@ -675,11 +703,51 @@ The Dockerfile includes a health check, uses Python 3.10-slim, and the lightweig
 
 ### Q: What's your CI/CD story?
 
-**A:** Every push triggers GitHub Actions: ruff lint/format checks, mypy static type analysis, and 77 pytest tests. The Docker image has a health check endpoint. I can deploy to Streamlit Cloud, HuggingFace Spaces, or any container platform.
+**A:** Every push triggers GitHub Actions: ruff lint/format checks, mypy static type analysis, and 80 pytest tests. The Docker image has a health check endpoint. I can deploy to Streamlit Cloud, HuggingFace Spaces, or any container platform.
 
 ### Q: What would you do with more time?
 
 **A:** (1) DistilBERT/RoBERTa fine-tuning for a transformer comparison study. (2) Production monitoring with prediction drift detection. (3) Active learning pipeline to label the most uncertain predictions. (4) Real-time news ingestion via API for live dashboard updates.
+
+---
+
+## Limitations
+
+This project is transparent about its boundaries:
+
+| Limitation | Detail | Mitigation |
+|------------|--------|------------|
+| **Dataset size** | 2,264 sentences (AllAgree subset of Financial PhraseBank) | AllAgree was chosen for label quality (100% annotator agreement) over quantity. The full PhraseBank has 4,840 samples at 50% agreement, but noisy labels would undermine evaluation reliability. |
+| **Class imbalance** | 61% neutral, 25% positive, 14% negative | Stratified splitting and `class_weight="balanced"` preserve minority-class recall. F1 macro (not accuracy) is the primary metric. |
+| **Domain coverage** | Training data is from Finnish company financial reports (formal language) | Cross-dataset validation on 2,688 real news headlines from WSJ/Bloomberg/Reuters tests generalization. Casual language (Reddit, Twitter) is out of scope. |
+| **Sentiment–stock correlation** | Pearson correlations are low (0.05 for AAPL) | Expected and scientifically honest — single-factor sentiment is not a reliable price predictor. The value is in demonstrating the end-to-end pipeline and honest reporting. |
+| **Explanation generation** | `llm_explain.py` uses template-based generation, not an external LLM API | Deliberate design choice for reproducibility, zero cost, and latency-free operation. The system works fully offline with no API dependency. |
+| **Test vs CV accuracy gap** | Gradient Boosting: 94.25% test accuracy vs 88.1% CV accuracy | The test set happens to be slightly easier than the average CV fold. The CV result (88.1% ± 0.5%) is the more reliable performance estimate. |
+
+---
+
+## Demo
+
+### Quick Start
+
+```bash
+# 1. Install dependencies
+pip install -r requirements.txt
+
+# 2. Launch the dashboard
+streamlit run app/app.py
+
+# 3. Open http://localhost:8501
+```
+
+### FinBERT Benchmark
+
+```bash
+# Run FinBERT on the test set and append metrics to evaluation_results.json
+python src/benchmark_finbert.py
+```
+
+> **Tip:** Record a short screen capture of the dashboard using [ScreenToGif](https://www.screentogif.com/) or your OS screen recorder, then embed a GIF here for instant visual impact on GitHub.
 
 ---
 

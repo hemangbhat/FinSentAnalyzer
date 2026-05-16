@@ -36,7 +36,7 @@ if predictor is None:
 st.markdown("""
 <div style='margin-bottom: 25px;'>
     <h1 style='font-size: 2.2em; font-weight: 700; margin-bottom: 5px;'>🔍 Explainability</h1>
-    <p style='color: #94a3b8; font-size: 1.1em;'>Deconstruct the AI reasoning to see exactly which words influenced the decision.</p>
+    <p style='color: #94a3b8; font-size: 1.1em;'>Deconstruct the model reasoning to see exactly which words influenced the decision.</p>
 </div>
 """, unsafe_allow_html=True)
 

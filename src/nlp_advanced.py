@@ -1,6 +1,6 @@
 """
 Advanced NLP Processing Module for Financial Sentiment Analysis.
-Elite-level text preprocessing, feature extraction, and linguistic analysis.
+Advanced text preprocessing, feature extraction, and linguistic analysis.
 """
 
 import re
@@ -109,7 +109,7 @@ class ProcessedText:
 
 class AdvancedTextProcessor:
     """
-    Elite-level text preprocessing for financial sentiment analysis.
+    Advanced text preprocessing for financial sentiment analysis.
 
     Features:
     - Financial-specific normalization (currencies, percentages, numbers)

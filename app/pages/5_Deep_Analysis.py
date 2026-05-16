@@ -1,5 +1,5 @@
 """
-Financial Sentiment Analyzer — Deep Analysis (Elite NLP) Page.
+Financial Sentiment Analyzer — Deep Analysis (Advanced NLP) Page.
 """
 
 import sys
@@ -32,7 +32,7 @@ if predictor is None:
 st.markdown("""
 <div style='margin-bottom: 25px;'>
     <h1 style='font-size: 2.2em; font-weight: 700; margin-bottom: 5px;'>🧠 Deep Analysis</h1>
-    <p style='color: #94a3b8; font-size: 1.1em;'>Elite NLP module featuring Chain-of-Thought reasoning and deep linguistic decomposition.</p>
+    <p style='color: #94a3b8; font-size: 1.1em;'>Advanced NLP module featuring rule-based Chain-of-Thought reasoning and deep linguistic decomposition.</p>
 </div>
 """, unsafe_allow_html=True)
 

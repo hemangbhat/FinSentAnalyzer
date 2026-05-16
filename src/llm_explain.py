@@ -1,6 +1,7 @@
 """
-LLM-powered explanations for Financial Sentiment Analysis.
-Provides natural language explanations and market outlook summaries.
+Template-based natural language explanations for Financial Sentiment Analysis.
+Generates human-readable explanations and market outlook summaries
+using word-importance data from trained models (no external LLM API required).
 """
 
 from typing import List, Dict, Optional, Tuple
@@ -180,7 +181,7 @@ Based on analysis of **{total_texts} financial texts**, the market sentiment app
         report += "Balanced or neutral sentiment suggests stability without strong directional bias. "
         report += "This may indicate a consolidation phase or lack of significant catalysts."
 
-    report += "\n\n*Note: This analysis is based on ML-powered sentiment classification and should be used "
+    report += "\n\n*Note: This analysis is based on model-based sentiment classification and should be used "
     report += "as one input among many in investment decision-making.*"
 
     return report
@@ -195,8 +196,8 @@ def get_llm_explanation(
     api_key: Optional[str] = None,
 ) -> str:
     """
-    Get an LLM-powered explanation for a prediction.
-    Falls back to template-based generation if API is not available.
+    Get a template-based natural language explanation for a prediction.
+    Uses word-importance scores from the model to build readable explanations.
 
     Args:
         text: Original text
@@ -229,7 +230,7 @@ def get_llm_explanation(
 
 if __name__ == "__main__":
     # Test the explanation generator
-    print("Testing LLM Explanation Generator...")
+    print("Testing Template-Based Explanation Generator...")
 
     # Test single explanation
     explanation = generate_explanation_template(

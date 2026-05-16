@@ -238,7 +238,7 @@ if uploaded_file:
 
         # ── Market Outlook Report ───────────────────────────────────────────
         with st.expander("📊 Generate Market Outlook Report", expanded=False):
-            st.markdown("*AI-generated market sentiment analysis based on your batch data*")
+            st.markdown("*Template-based market sentiment summary derived from your batch data*")
             if st.button("🔮 Generate Outlook", key="generate_outlook"):
                 with st.spinner("Generating market outlook..."):
                     assert predictor is not None, "Predictor is required"

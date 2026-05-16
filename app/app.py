@@ -46,7 +46,7 @@ with col1:
             <span style='font-size: 1.4em;'>📝</span> Single Analysis
         </div>
         <div class='card-text'>
-            Instantly evaluate market sentiment from news excerpts or reports with high-confidence predictive modelling and AI-driven explainability.
+            Instantly evaluate market sentiment from news excerpts or reports with high-confidence predictive modelling and model-driven explainability.
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -117,7 +117,7 @@ with col6:
 
 st.markdown("")
 
-col7, col8, _ = st.columns(3)
+col7, col8, col9 = st.columns(3)
 
 with col7:
     st.markdown("""
@@ -139,6 +139,18 @@ with col8:
         </div>
         <div class='card-text'>
             Inspect misclassified examples to understand model weaknesses. Identify confusion patterns between neutral, positive, and negative classes.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col9:
+    st.markdown("""
+    <div class='feature-card'>
+        <div class='card-title'>
+            <span style='font-size: 1.4em;'>📉</span> Stock Extension
+        </div>
+        <div class='card-text'>
+            Run the full financial-news-stock-prediction pipeline in-app: live news fetch, FinBERT scoring, LSTM training, and next-day direction forecast.
         </div>
     </div>
     """, unsafe_allow_html=True)

@@ -1,4 +1,4 @@
-"""Tests for src/llm_enhanced.py"""
+"""Tests for src/llm_enhanced.py (Rule-Based Reasoning Engine)"""
 
 from llm_enhanced import (
     ChainOfThoughtReasoner,
@@ -50,7 +50,7 @@ class TestChainOfThoughtReasoner:
         assert isinstance(cot.key_factors, list)
 
 
-class TestEliteExplanationGenerator:
+class TestExplanationGenerator:
     def setup_method(self):
         self.generator = EliteExplanationGenerator()
 

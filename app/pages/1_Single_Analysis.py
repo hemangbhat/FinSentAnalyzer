@@ -12,7 +12,6 @@ import plotly.graph_objects as go  # pyre-ignore
 from explain import explain_prediction_baseline  # pyre-ignore
 from llm_explain import get_llm_explanation  # pyre-ignore
 import os
-import sys
 
 # Shared helpers
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -102,9 +101,9 @@ if st.button("🔍 Analyze Sentiment", type="primary", use_container_width=True)
                 st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
                 st.markdown("</div>", unsafe_allow_html=True)
 
-        # LLM-powered Natural Language Explanation
+        # Template-based Natural Language Explanation
         if selected_model.startswith("baseline_"):
-            st.markdown("### 💬 AI Explanation")
+            st.markdown("### 💬 Model Explanation")
             try:
                 explanation_data = explain_prediction_baseline(text_input, selected_model)
                 llm_explanation = get_llm_explanation(
@@ -118,7 +117,7 @@ if st.button("🔍 Analyze Sentiment", type="primary", use_container_width=True)
                     <div class='insight-card' style='border-left: 4px solid {color}; background: rgba(26, 29, 36, 0.95);'>
                         <div style='display: flex; align-items: center; gap: 10px; margin-bottom: 15px;'>
                             <span style='font-size: 1.5em;'>🤖</span>
-                            <span style='font-weight: 600; font-size: 1.1em; color: #f8fafc;'>AI Reasoning Overview</span>
+                            <span style='font-weight: 600; font-size: 1.1em; color: #f8fafc;'>Model Reasoning</span>
                         </div>
                         <div style='line-height: 1.6; color: #cbd5e1; font-size: 1.05em;'>
                             {llm_explanation}
@@ -128,6 +127,6 @@ if st.button("🔍 Analyze Sentiment", type="primary", use_container_width=True)
                     unsafe_allow_html=True,
                 )
             except Exception:
-                st.info("Enable the Explainability page for detailed AI-powered explanations.")
+                st.info("Enable the Explainability page for detailed model-based explanations.")
     else:
         st.warning("Please enter some text to analyze.")

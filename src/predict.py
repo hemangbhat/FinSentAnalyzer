@@ -4,6 +4,8 @@ Single text and batch prediction support.
 """
 
 import json
+from pathlib import Path
+
 import joblib
 import pandas as pd
 import numpy as np

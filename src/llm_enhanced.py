@@ -1,6 +1,13 @@
 """
-Elite LLM-powered Analysis for Financial Sentiment.
-Chain-of-thought reasoning, multi-step analysis, and structured outputs.
+Rule-Based Chain-of-Thought Reasoning Engine for Financial Sentiment.
+
+Implements a structured, multi-step reasoning pipeline that mimics
+chain-of-thought analysis: comprehension → entity extraction →
+sentiment detection → context analysis → confidence calibration → synthesis.
+
+Note: This module uses deterministic rules and financial lexicons (not an
+external LLM API). It is designed for transparent, reproducible, and
+latency-free reasoning that can be audited step-by-step.
 """
 
 from typing import List, Dict, Optional, Any, Tuple
@@ -102,7 +109,7 @@ class ChainOfThought:
 
 class ChainOfThoughtReasoner:
     """
-    Elite chain-of-thought reasoning for financial sentiment analysis.
+    Structured chain-of-thought reasoning for financial sentiment analysis.
 
     Implements a multi-step reasoning process:
     1. Comprehension - Understand the text
@@ -497,7 +504,7 @@ class ChainOfThoughtReasoner:
 
 class EliteExplanationGenerator:
     """
-    Elite-level explanation generator combining ML predictions with
+    Comprehensive explanation generator combining ML predictions with
     chain-of-thought reasoning for transparent, trustworthy outputs.
     """
 
@@ -635,7 +642,7 @@ def generate_elite_market_outlook(
     include_reasoning: bool = True,
 ) -> Dict[str, Any]:
     """
-    Generate elite market outlook with chain-of-thought backing.
+    Generate comprehensive market outlook with chain-of-thought backing.
 
     Args:
         texts: List of analyzed texts
@@ -775,7 +782,7 @@ def _generate_outlook_narrative(
         narrative += "Monitor for emerging trends that could shift sentiment decisively. "
         narrative += "This may be a period of consolidation before a clearer direction emerges.\n"
 
-    narrative += "\n*Note: This analysis is AI-generated and should be used as one input among many in investment decision-making.*"
+    narrative += "\n*Note: This analysis is model-generated and should be used as one input among many in investment decision-making.*"
 
     return narrative
 
@@ -839,7 +846,7 @@ def get_llm_explanation(
 
 if __name__ == "__main__":
     print("=" * 80)
-    print("ELITE CHAIN-OF-THOUGHT FINANCIAL SENTIMENT ANALYSIS")
+    print("CHAIN-OF-THOUGHT FINANCIAL SENTIMENT REASONING ENGINE")
     print("=" * 80)
 
     test_texts = [
