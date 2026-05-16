@@ -5,6 +5,10 @@ pandas==2.2.3
 joblib==1.4.2
 scipy==1.15.2
 
+# Deep Learning (CPU-only for cloud deployment)
+torch
+transformers
+
 # Web App
 streamlit==1.42.2
 plotly==6.0.0
