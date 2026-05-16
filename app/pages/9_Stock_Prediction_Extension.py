@@ -84,7 +84,7 @@ with opt1:
 with opt2:
     use_sample_fallback = st.checkbox("Fallback to sample_news.csv", value=True)
 
-if st.button("Run Full Extension Pipeline", type="primary", width="stretch"):
+if st.button("Run Full Extension Pipeline", type="primary", use_container_width=True):
     try:
         if not ticker:
             st.error("Please enter a ticker symbol.")
@@ -227,7 +227,7 @@ if st.button("Run Full Extension Pipeline", type="primary", width="stretch"):
             yaxis2={"title": "Sentiment", "showgrid": True, "gridcolor": "rgba(255,255,255,0.05)"},
         )
 
-        st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
+        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
         st.markdown("### Latest Headlines Used")
         if result.headlines.empty:
@@ -246,10 +246,10 @@ if st.button("Run Full Extension Pipeline", type="primary", width="stretch"):
             if not columns_to_show:
                 columns_to_show = list(headlines_view.columns)
 
-            st.dataframe(headlines_view[columns_to_show].head(25), width="stretch")
+            st.dataframe(headlines_view[columns_to_show].head(25), use_container_width=True)
 
         with st.expander("Supervised dataset snapshot", expanded=False):
-            st.dataframe(result.supervised.tail(30), width="stretch")
+            st.dataframe(result.supervised.tail(30), use_container_width=True)
 
     except Exception as exc:
         st.error(f"Pipeline failed: {exc}")
