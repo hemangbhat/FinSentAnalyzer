@@ -5,8 +5,9 @@ import random
 tickers = ['AAPL', 'TSLA', 'AMZN']
 sources = ['Reuters', 'Bloomberg', 'CNBC', 'WSJ', 'Financial Times']
 
-start_date = datetime(2025, 1, 1)
-end_date = datetime(2026, 3, 24)
+from datetime import date as date_mod
+start_date = datetime(2025, 2, 24)
+end_date = datetime.today()
 dates = pd.date_range(start_date, end_date)
 
 headlines_templates = {
@@ -91,7 +92,5 @@ for date in dates:
             })
 
 df = pd.DataFrame(rows)
-df.to_csv('temp_sample_news.csv', index=False)
-print(f'Generated temp_sample_news.csv with {len(df)} rows.')
-print('First 12 rows:')
-print(df.head(12).to_csv(index=False))
+df.to_csv('data/sample_news.csv', index=False)
+print(f'Generated data/sample_news.csv with {len(df)} rows from {df["date"].min()} to {df["date"].max()}')
