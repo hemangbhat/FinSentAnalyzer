@@ -59,14 +59,34 @@ split = st.selectbox("Data Split", ["test", "val"], key="error_split")
 def get_error_analysis(model_name, data_split):
     """Load model, predict, and identify errors."""
     model = joblib.load(get_model_dir() / f"baseline_{model_name}.joblib")
-    df = load_processed_data(data_split)
 
-    X = df["sentence"].values
-    y_true = df["label"].values
-    y_pred = model.predict(X)
+    # The ensemble model is stored as a dict with separate 'tfidf' and
+    # 'ensemble' components, unlike the other baselines which are Pipelines.
+    if isinstance(model, dict):
+        tfidf = model["tfidf"]
+        clf = model["ensemble"]
+        df = load_processed_data(data_split)
+        X = df["sentence"].values
+        X_transformed = tfidf.transform(X)
+        y_true = df["label"].values
+        y_pred = clf.predict(X_transformed)
+    else:
+        df = load_processed_data(data_split)
+        X = df["sentence"].values
+        y_true = df["label"].values
+        y_pred = model.predict(X)
 
-    # Get probabilities
-    if hasattr(model, "predict_proba"):
+    # Get probabilities — handle dict (ensemble) and Pipeline models
+    if isinstance(model, dict):
+        clf = model["ensemble"]
+        if hasattr(clf, "predict_proba"):
+            probas = clf.predict_proba(X_transformed)
+        elif hasattr(clf, "decision_function"):
+            from scipy.special import softmax  # pyre-ignore
+            probas = softmax(clf.decision_function(X_transformed), axis=1)
+        else:
+            probas = np.zeros((len(X), 3))
+    elif hasattr(model, "predict_proba"):
         probas = model.predict_proba(X)
     elif hasattr(model, "decision_function"):
         decisions = model.decision_function(X)
