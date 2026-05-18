@@ -18,6 +18,7 @@ data/raw/*
 data/processed/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
+!data/processed/*.csv
 
 # Models (keep .joblib baseline models, ignore large transformers)
 models/*.pkl
