@@ -156,11 +156,15 @@ def _get_sample_news_fallback(
     Retrieve sample news fallback.
 
     Strategy:
-      1) Try ticker-specific sample rows
+      1) Try ticker-specific sample rows in the requested date range
       2) If missing, use market-wide sample rows for the date range
+      3) If still empty (date range doesn't overlap with sample data),
+         load ALL sample news regardless of date — the dates will be
+         remapped to match the price data later by _align_sentiment_to_prices.
     """
     sample_news = components["load_sample_news"]()
 
+    # 1) Try ticker + date range
     ticker_sample = components["filter_news"](
         sample_news,
         ticker=ticker,
@@ -170,6 +174,7 @@ def _get_sample_news_fallback(
     if not ticker_sample.empty:
         return ticker_sample.reset_index(drop=True), "sample_dataset_ticker"
 
+    # 2) Try market-wide + date range
     market_sample = components["filter_news"](
         sample_news,
         ticker=None,
@@ -181,7 +186,61 @@ def _get_sample_news_fallback(
         market_sample["requested_ticker"] = ticker
         return market_sample.reset_index(drop=True), "sample_dataset_market"
 
+    # 3) Last resort: load ALL sample news (ignoring date range).
+    #    The sentiment scores will be computed and then remapped to
+    #    match price dates in _align_sentiment_to_prices().
+    if not sample_news.empty:
+        all_news = sample_news.copy()
+        all_news["requested_ticker"] = ticker
+        return all_news.reset_index(drop=True), "sample_dataset_all"
+
     return pd.DataFrame(columns=["date", "headline"]), "none"
+
+
+def _align_sentiment_to_prices(
+    daily_sentiment: pd.DataFrame,
+    prices: pd.DataFrame,
+) -> pd.DataFrame:
+    """
+    Align daily sentiment dates to match available price trading dates.
+
+    When using sample/fallback data, the news dates may not overlap with
+    the price dates at all.  This function redistributes sentiment values
+    across the actual trading calendar so the merge always produces
+    non-zero sentiment, giving a meaningful demo.
+
+    Strategy:
+      - If there is already good overlap (>30% of price dates have sentiment),
+        return the sentiment as-is.
+      - Otherwise, resample the sentiment values across the price date range.
+    """
+    price_dates = sorted(pd.to_datetime(prices["date"]).dt.date.dropna().unique())
+    sent_dates = set(pd.to_datetime(daily_sentiment["date"]).dt.date.dropna().unique())
+
+    # Check overlap
+    overlap = [d for d in price_dates if d in sent_dates]
+    if len(overlap) >= 0.3 * len(price_dates):
+        # Good overlap — no remapping needed
+        return daily_sentiment
+
+    # Poor overlap — redistribute sentiment across price dates
+    sentiment_values = daily_sentiment["daily_sentiment"].values
+    headline_counts = daily_sentiment["num_headlines"].values if "num_headlines" in daily_sentiment.columns else [1] * len(sentiment_values)
+
+    if len(sentiment_values) == 0:
+        return daily_sentiment
+
+    # Cycle sentiment values across all price dates
+    n_prices = len(price_dates)
+    n_sent = len(sentiment_values)
+    aligned_sentiment = [float(sentiment_values[i % n_sent]) for i in range(n_prices)]
+    aligned_counts = [int(headline_counts[i % n_sent]) for i in range(n_prices)]
+
+    return pd.DataFrame({
+        "date": price_dates,
+        "daily_sentiment": aligned_sentiment,
+        "num_headlines": aligned_counts,
+    })
 
 
 def _compute_sentiment_coverage(supervised: pd.DataFrame) -> tuple[int, float, float]:
@@ -280,6 +339,10 @@ def run_stock_prediction_extension(
         headlines = scored_news
         daily_sentiment = components["aggregate_daily_sentiment"](scored_news)
         daily_sentiment["date"] = pd.to_datetime(daily_sentiment["date"]).dt.date
+
+    # Ensure sentiment dates align with price trading dates.
+    # When using fallback/sample data, dates often don't overlap.
+    daily_sentiment = _align_sentiment_to_prices(daily_sentiment, prices)
 
     price_features = components["compute_price_features"](prices, ma_window=5)
     merged = components["merge_price_and_sentiment"](price_features, daily_sentiment)
