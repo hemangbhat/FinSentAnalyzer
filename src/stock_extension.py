@@ -305,12 +305,15 @@ def run_stock_prediction_extension(
             ) from exc
         prices = pd.read_csv(stock_data_path)
         prices = _normalize_price_dataframe(prices)
+        # stock_data.csv contains 3 tickers interleaved (no ticker column).
+        # Keep one row per date to get a clean single-ticker price series.
+        prices = prices.drop_duplicates(subset=["date"], keep="first").reset_index(drop=True)
         # Align date range to match actual sample data so that
         # news fallback dates overlap with price dates.
         price_dates_sorted = sorted(pd.to_datetime(prices["date"]).dt.date.unique())
         start_date = str(price_dates_sorted[0])
         end_date = str(price_dates_sorted[-1])
-        logger.info("Adjusted date range to sample data: %s to %s", start_date, end_date)
+        logger.info("Adjusted date range to sample data: %s to %s (%d rows)", start_date, end_date, len(prices))
 
     headlines = pd.DataFrame(columns=["date", "headline"])
     news_source = "none"
