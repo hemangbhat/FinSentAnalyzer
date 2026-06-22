@@ -16,7 +16,7 @@ import streamlit as st  # pyre-ignore
 from plotly.subplots import make_subplots  # pyre-ignore
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from shared import inject_css, setup_sidebar  # pyre-ignore
+from shared import inject_css, page_header, setup_sidebar  # pyre-ignore
 
 from stock_extension import (  # pyre-ignore
     get_stock_project_root,
@@ -31,17 +31,11 @@ selected_model, predictor = setup_sidebar()
 if predictor is None:
     st.stop()
 
-st.markdown(
-    """
-<div style='margin-bottom: 20px;'>
-    <h1 style='font-size: 2.1em; font-weight: 700; margin-bottom: 6px;'>📉 Stock Prediction Extension</h1>
-    <p style='color: #94a3b8; font-size: 1.05em;'>
-        Full end-to-end pipeline from the nested financial-news-stock-prediction project,
-        executed inside this dashboard.
-    </p>
-</div>
-""",
-    unsafe_allow_html=True,
+page_header(
+    "Stock Prediction Extension",
+    "End-to-end pipeline executed in-app: stock download, live news, FinBERT "
+    "sentiment, feature engineering, and an LSTM next-day direction forecast.",
+    eyebrow="Experimental · LSTM",
 )
 
 try:

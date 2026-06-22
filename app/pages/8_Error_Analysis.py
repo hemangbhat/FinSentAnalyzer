@@ -18,7 +18,7 @@ from preprocess import load_processed_data  # pyre-ignore
 from utils import LABEL_MAP_INV, get_model_dir  # pyre-ignore
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from shared import inject_css, setup_sidebar  # pyre-ignore
+from shared import inject_css, page_header, setup_sidebar  # pyre-ignore
 
 # ── Page config ─────────────────────────────────────────────────────────────────
 st.set_page_config(page_title="Error Analysis", page_icon="🔬", layout="wide")
@@ -28,15 +28,10 @@ selected_model, predictor = setup_sidebar()
 if predictor is None:
     st.stop()
 
-# ── Page content ────────────────────────────────────────────────────────────────
-st.markdown(
-    """
-<div style='margin-bottom: 25px;'>
-    <h1 style='font-size: 2.2em; font-weight: 700; margin-bottom: 5px;'>🔬 Error Analysis</h1>
-    <p style='color: #94a3b8; font-size: 1.1em;'>Inspect misclassified examples and understand model weaknesses.</p>
-</div>
-""",
-    unsafe_allow_html=True,
+page_header(
+    "Error Analysis",
+    "Inspect misclassifications, confusion flows, and confidence calibration to understand where the model is weakest.",
+    eyebrow="Model diagnostics",
 )
 
 if not selected_model.startswith("baseline_"):

@@ -14,7 +14,7 @@ from predict import get_available_models  # pyre-ignore
 from utils import get_model_info  # pyre-ignore
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from shared import inject_css, setup_sidebar  # pyre-ignore
+from shared import inject_css, page_header, setup_sidebar  # pyre-ignore
 
 # ── Page config ─────────────────────────────────────────────────────────────────
 st.set_page_config(page_title="Model Info", page_icon="📊", layout="wide")
@@ -24,15 +24,10 @@ selected_model, predictor = setup_sidebar()
 if predictor is None:
     st.stop()
 
-# ── Page content ────────────────────────────────────────────────────────────────
-st.markdown(
-    """
-<div style='margin-bottom: 25px;'>
-    <h1 style='font-size: 2.2em; font-weight: 700; margin-bottom: 5px;'>📊 Model Registry</h1>
-    <p style='color: #94a3b8; font-size: 1.1em;'>Explore model architectures, evaluation metrics, and dataset properties.</p>
-</div>
-""",
-    unsafe_allow_html=True,
+page_header(
+    "Model Registry",
+    "Compare every trained model's metrics, architecture, and the dataset behind them.",
+    eyebrow="Models",
 )
 
 try:

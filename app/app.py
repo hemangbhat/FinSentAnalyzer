@@ -1,22 +1,19 @@
 """
-Financial Sentiment Analyzer — Home Page (Streamlit Multipage App Entrypoint).
+Financial Sentiment Analyzer — Home (Streamlit multipage app entrypoint).
 """
 
 import sys
 from pathlib import Path
 
-# Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+sys.path.insert(0, str(Path(__file__).parent))
 
 import streamlit as st  # pyre-ignore
+from shared import inject_css, kpi_strip, section_header, setup_sidebar  # pyre-ignore
 
-sys.path.insert(0, str(Path(__file__).parent))
-from shared import inject_css, setup_sidebar  # pyre-ignore
-
-# ── Page config ─────────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="Financial Sentiment Analyzer",
-    page_icon="📈",
+    page_title="FinSight · Sentiment Intelligence",
+    page_icon="◆",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -24,175 +21,89 @@ st.set_page_config(
 inject_css()
 selected_model, predictor = setup_sidebar()
 
-# ── Home page content ──────────────────────────────────────────────────────────
+# ── Hero ─────────────────────────────────────────────────────────────────────
 st.markdown(
     """
-<div class='hero-container'>
-    <h1 class='hero-title'>Financial Sentiment Analyzer</h1>
-    <p class='hero-subtitle'>
-        Uncover institutional grade insights with ML-powered sentiment classification,
-        transparent explainability, and deep linguistic reasoning for financial markets.
+<div class='fs-hero'>
+    <div class='fs-eyebrow'>Financial NLP · Explainable ML</div>
+    <h1>Financial Sentiment Intelligence</h1>
+    <p>
+        Classify market sentiment from financial text, see exactly which words drove each
+        decision, and validate the model against real-world news — all in one transparent dashboard.
     </p>
 </div>
 """,
     unsafe_allow_html=True,
 )
 
-# Feature cards
-col1, col2, col3 = st.columns(3)
+# ── KPI strip (honest, verifiable facts) ─────────────────────────────────────
+kpi_strip(
+    [
+        {"label": "Trained Models", "value": "8", "sub": "6 baselines + ensemble + FinBERT", "accent": "#3b82f6"},
+        {"label": "Sentiment Classes", "value": "3", "sub": "positive · neutral · negative", "accent": "#10b981"},
+        {"label": "Validation Headlines", "value": "2.7K+", "sub": "WSJ, Bloomberg, Reuters…", "accent": "#8b5cf6"},
+        {"label": "Explainability", "value": "SHAP", "sub": "+ per-token attribution", "accent": "#f59e0b"},
+    ]
+)
 
-with col1:
-    st.markdown(
-        """
-    <div class='feature-card'>
-        <div class='card-title'>
-            <span style='font-size: 1.4em;'>📝</span> Single Analysis
-        </div>
-        <div class='card-text'>
-            Instantly evaluate market sentiment from news excerpts or reports with high-confidence predictive modelling and model-driven explainability.
-        </div>
-    </div>
-    """,
-        unsafe_allow_html=True,
-    )
+# ── Capabilities ─────────────────────────────────────────────────────────────
+section_header("Capabilities", "Each page is focused on a single task")
 
-with col2:
-    st.markdown(
-        """
-    <div class='feature-card'>
-        <div class='card-title'>
-            <span style='font-size: 1.4em;'>📁</span> Batch Processing
-        </div>
-        <div class='card-text'>
-            Scale your textual analysis by uploading datasets. Automate bulk sentiment extraction, view aggregated trends, and generate comprehensive intelligence reports.
-        </div>
-    </div>
-    """,
-        unsafe_allow_html=True,
-    )
+CARDS = [
+    (
+        "📝",
+        "Single Analysis",
+        "Classify any financial excerpt and get confidence, probabilities, and a plain-language rationale in one flow.",
+    ),
+    ("📁", "Batch Processing", "Upload a CSV or TXT file, validate it, analyze at scale, and export a results report."),
+    ("🔍", "Explainability", "Per-token attribution plus SHAP global feature importance for baseline models."),
+    ("💡", "Word Insights", "Browse the highest-impact vocabulary the models learned, grouped by sentiment."),
+    ("🧠", "Deep Analysis", "Rule-based reasoning, NER, and Loughran-McDonald lexicon decomposition."),
+    ("📊", "Model Registry", "Compare every model's metrics, architecture, and training data."),
+    ("📈", "Sentiment Trends", "News sentiment vs. stock price with Pearson correlation for AAPL, TSLA, AMZN."),
+    ("🔬", "Error Analysis", "Confusion flows, confidence calibration, and inspectable misclassifications."),
+    ("📉", "Stock Extension", "End-to-end pipeline: live news → FinBERT → LSTM next-day direction forecast."),
+]
 
-with col3:
-    st.markdown(
-        """
-    <div class='feature-card'>
-        <div class='card-title'>
-            <span style='font-size: 1.4em;'>🔍</span> Explainability
-        </div>
-        <div class='card-text'>
-            Understand the 'why' behind the prediction. Visualise precise token attributions and key indicator highlights that drive the model's decisions.
-        </div>
-    </div>
-    """,
-        unsafe_allow_html=True,
-    )
+for row_start in range(0, len(CARDS), 3):
+    cols = st.columns(3)
+    for col, (icon, title, desc) in zip(cols, CARDS[row_start : row_start + 3]):
+        with col:
+            st.markdown(
+                f"""
+                <div class='feature-card' style='height:100%;'>
+                    <div class='card-title'><span style='font-size:1.3em;'>{icon}</span> {title}</div>
+                    <div class='card-text'>{desc}</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
 
-st.markdown("")
+# ── How it works ─────────────────────────────────────────────────────────────
+section_header("How it works", "From raw text to an explainable verdict")
 
-col4, col5, col6 = st.columns(3)
+steps = st.columns(4)
+STEPS = [
+    ("01", "Select a model", "Pick a baseline or the FinBERT transformer from the sidebar."),
+    ("02", "Provide text", "Type an excerpt or upload a file for batch scoring."),
+    ("03", "Get a verdict", "Sentiment, confidence, and a probability breakdown."),
+    ("04", "Understand why", "Token attribution and SHAP reveal the drivers."),
+]
+for col, (num, title, desc) in zip(steps, STEPS):
+    with col:
+        st.markdown(
+            f"""
+            <div class='app-card' style='height:100%;'>
+                <div style='font-family:JetBrains Mono,monospace;font-size:0.9rem;color:#60a5fa;font-weight:600;'>{num}</div>
+                <div style='font-weight:600;color:#f8fafc;margin:6px 0 4px 0;'>{title}</div>
+                <div class='card-text'>{desc}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
-with col4:
-    st.markdown(
-        """
-    <div class='feature-card'>
-        <div class='card-title'>
-            <span style='font-size: 1.4em;'>💡</span> Word Insights
-        </div>
-        <div class='card-text'>
-            Examine the model's vocabulary and learned correlations. Browse high-impact financial lexicon terms categorised by their sentiment influence.
-        </div>
-    </div>
-    """,
-        unsafe_allow_html=True,
-    )
-
-with col5:
-    st.markdown(
-        """
-    <div class='feature-card'>
-        <div class='card-title'>
-            <span style='font-size: 1.4em;'>🧠</span> Deep Analysis
-        </div>
-        <div class='card-text'>
-            Dive into advanced linguistic decomposition, Chain-of-Thought reasoning, and entity-specific metrics for a meticulous market perspective.
-        </div>
-    </div>
-    """,
-        unsafe_allow_html=True,
-    )
-
-with col6:
-    st.markdown(
-        """
-    <div class='feature-card'>
-        <div class='card-title'>
-            <span style='font-size: 1.4em;'>📊</span> Model Info
-        </div>
-        <div class='card-text'>
-            Review complete registries of all trained algorithms. Access granular performance KPIs, structural architectures, and training corpus details.
-        </div>
-    </div>
-    """,
-        unsafe_allow_html=True,
-    )
-
-st.markdown("")
-
-col7, col8, col9 = st.columns(3)
-
-with col7:
-    st.markdown(
-        """
-    <div class='feature-card'>
-        <div class='card-title'>
-            <span style='font-size: 1.4em;'>📈</span> Sentiment Trends
-        </div>
-        <div class='card-text'>
-            Visualize how news sentiment correlates with stock price movements for AAPL, TSLA, and AMZN. Cross-dataset validation with SHAP explainability.
-        </div>
-    </div>
-    """,
-        unsafe_allow_html=True,
-    )
-
-with col8:
-    st.markdown(
-        """
-    <div class='feature-card'>
-        <div class='card-title'>
-            <span style='font-size: 1.4em;'>🔬</span> Error Analysis
-        </div>
-        <div class='card-text'>
-            Inspect misclassified examples to understand model weaknesses. Identify confusion patterns between neutral, positive, and negative classes.
-        </div>
-    </div>
-    """,
-        unsafe_allow_html=True,
-    )
-
-with col9:
-    st.markdown(
-        """
-    <div class='feature-card'>
-        <div class='card-title'>
-            <span style='font-size: 1.4em;'>📉</span> Stock Extension
-        </div>
-        <div class='card-text'>
-            Run the full financial-news-stock-prediction pipeline in-app: live news fetch, FinBERT scoring, LSTM training, and next-day direction forecast.
-        </div>
-    </div>
-    """,
-        unsafe_allow_html=True,
-    )
-
-st.markdown("<hr style='margin: 40px 0;'>", unsafe_allow_html=True)
-
-col_footer, _ = st.columns([1, 0.01])
-with col_footer:
-    st.markdown(
-        """
-    <div style='text-align: center; opacity: 0.5; padding: 20px; font-size: 0.9em;'>
-        <p>Use the <b>sidebar</b> to select advanced models or navigate modules.</p>
-    </div>
-    """,
-        unsafe_allow_html=True,
-    )
+st.markdown(
+    "<div style='text-align:center;opacity:0.55;padding:30px 0 6px 0;font-size:0.88rem;'>"
+    "Use the <b>sidebar</b> to choose a model and navigate between modules.</div>",
+    unsafe_allow_html=True,
+)

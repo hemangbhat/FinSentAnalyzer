@@ -19,7 +19,7 @@ except ImportError:
     ADVANCED_NLP_AVAILABLE = False
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from shared import get_sentiment_color, inject_css, setup_sidebar  # pyre-ignore
+from shared import get_sentiment_color, inject_css, page_header, setup_sidebar  # pyre-ignore
 
 # ── Page config ─────────────────────────────────────────────────────────────────
 st.set_page_config(page_title="Deep Analysis", page_icon="🧠", layout="wide")
@@ -29,15 +29,10 @@ selected_model, predictor = setup_sidebar()
 if predictor is None:
     st.stop()
 
-# ── Page content ────────────────────────────────────────────────────────────────
-st.markdown(
-    """
-<div style='margin-bottom: 25px;'>
-    <h1 style='font-size: 2.2em; font-weight: 700; margin-bottom: 5px;'>🧠 Deep Analysis</h1>
-    <p style='color: #94a3b8; font-size: 1.1em;'>Advanced NLP module featuring rule-based Chain-of-Thought reasoning and deep linguistic decomposition.</p>
-</div>
-""",
-    unsafe_allow_html=True,
+page_header(
+    "Deep Analysis",
+    "Rule-based chain-of-thought reasoning, named-entity extraction, and Loughran-McDonald lexicon decomposition.",
+    eyebrow="Advanced NLP",
 )
 
 if not ADVANCED_NLP_AVAILABLE:

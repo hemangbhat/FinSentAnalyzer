@@ -23,7 +23,13 @@ except ImportError:
     SHAP_AVAILABLE = False
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from shared import create_probability_chart, get_sentiment_color, inject_css, setup_sidebar  # pyre-ignore
+from shared import (  # pyre-ignore
+    create_probability_chart,
+    get_sentiment_color,
+    inject_css,
+    page_header,
+    setup_sidebar,
+)
 
 # ── Page config ─────────────────────────────────────────────────────────────────
 st.set_page_config(page_title="Explainability", page_icon="🔍", layout="wide")
@@ -34,14 +40,10 @@ if predictor is None:
     st.stop()
 
 # ── Page content ────────────────────────────────────────────────────────────────
-st.markdown(
-    """
-<div style='margin-bottom: 25px;'>
-    <h1 style='font-size: 2.2em; font-weight: 700; margin-bottom: 5px;'>🔍 Explainability</h1>
-    <p style='color: #94a3b8; font-size: 1.1em;'>Deconstruct the model reasoning to see exactly which words influenced the decision.</p>
-</div>
-""",
-    unsafe_allow_html=True,
+page_header(
+    "Explainability",
+    "Deconstruct a prediction to see exactly which words drove it — locally per prediction and globally with SHAP.",
+    eyebrow="Interpretable ML",
 )
 
 if not selected_model.startswith("baseline_"):
