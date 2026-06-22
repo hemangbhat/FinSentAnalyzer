@@ -6,24 +6,24 @@ Includes cross-validation and hyperparameter tuning.
 
 import argparse
 import json
+
 import joblib
 import numpy as np
+from sklearn.calibration import CalibratedClassifierCV
+from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier, VotingClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report, f1_score, make_scorer
+from sklearn.model_selection import GridSearchCV, StratifiedKFold, cross_validate
 from sklearn.naive_bayes import MultinomialNB
-from sklearn.svm import LinearSVC
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, VotingClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.pipeline import Pipeline
-from sklearn.calibration import CalibratedClassifierCV
-from sklearn.metrics import accuracy_score, f1_score, classification_report, make_scorer
-from sklearn.model_selection import StratifiedKFold, cross_validate, GridSearchCV
+from sklearn.svm import LinearSVC
 
-from utils import get_project_root, get_model_dir, get_results_dir, setup_logging, LABEL_MAP_INV
 from preprocess import load_processed_data
+from utils import LABEL_MAP_INV, get_model_dir, get_results_dir, setup_logging
 
 logger = setup_logging(__name__)
-
 
 
 def create_baseline_pipeline(classifier_name: str = "logreg") -> Pipeline:
@@ -42,40 +42,33 @@ def create_baseline_pipeline(classifier_name: str = "logreg") -> Pipeline:
         "naive_bayes": MultinomialNB(alpha=0.1),
         "svm": LinearSVC(max_iter=1000, random_state=42, class_weight="balanced"),
         "random_forest": RandomForestClassifier(
-            n_estimators=200,
-            max_depth=50,
-            min_samples_split=5,
-            random_state=42,
-            class_weight="balanced",
-            n_jobs=-1
+            n_estimators=200, max_depth=50, min_samples_split=5, random_state=42, class_weight="balanced", n_jobs=-1
         ),
         "gradient_boosting": GradientBoostingClassifier(
-            n_estimators=100,
-            max_depth=5,
-            learning_rate=0.1,
-            random_state=42
+            n_estimators=100, max_depth=5, learning_rate=0.1, random_state=42
         ),
         "mlp": MLPClassifier(
-            hidden_layer_sizes=(256, 128),
-            max_iter=500,
-            early_stopping=True,
-            random_state=42,
-            verbose=False
+            hidden_layer_sizes=(256, 128), max_iter=500, early_stopping=True, random_state=42, verbose=False
         ),
     }
 
     if classifier_name not in classifiers:
         raise ValueError(f"Unknown classifier: {classifier_name}. Choose from {list(classifiers.keys())}")
 
-    pipeline = Pipeline([
-        ("tfidf", TfidfVectorizer(
-            max_features=10000,
-            ngram_range=(1, 2),
-            min_df=2,
-            max_df=0.95,
-        )),
-        ("classifier", classifiers[classifier_name]),
-    ])
+    pipeline = Pipeline(
+        [
+            (
+                "tfidf",
+                TfidfVectorizer(
+                    max_features=10000,
+                    ngram_range=(1, 2),
+                    min_df=2,
+                    max_df=0.95,
+                ),
+            ),
+            ("classifier", classifiers[classifier_name]),
+        ]
+    )
 
     return pipeline
 
@@ -166,11 +159,11 @@ def train_all_baselines() -> list:
     logger.info("%-20s %-12s %-12s %-12s", "Model", "Accuracy", "F1 (macro)", "F1 (weight)")
     logger.info("-" * 60)
     for r in results:
-        logger.info("%-20s %-12.4f %-12.4f %-12.4f", r['classifier'], r['accuracy'], r['f1_macro'], r['f1_weighted'])
+        logger.info("%-20s %-12.4f %-12.4f %-12.4f", r["classifier"], r["accuracy"], r["f1_macro"], r["f1_weighted"])
 
     # Find best model
     best = max(results, key=lambda x: x["f1_macro"])
-    logger.info("Best model: %s (F1 macro: %.4f)", best['classifier'], best['f1_macro'])
+    logger.info("Best model: %s (F1 macro: %.4f)", best["classifier"], best["f1_macro"])
 
     return results
 
@@ -211,19 +204,21 @@ def train_ensemble(save: bool = True) -> dict:
     X_val_tfidf = tfidf.transform(X_val)
 
     # Create calibrated SVM (for probability support)
-    svm_calibrated = CalibratedClassifierCV(
-        LinearSVC(max_iter=1000, random_state=42, class_weight="balanced"),
-        cv=3
-    )
+    svm_calibrated = CalibratedClassifierCV(LinearSVC(max_iter=1000, random_state=42, class_weight="balanced"), cv=3)
 
     # Create ensemble with voting
     ensemble = VotingClassifier(
         estimators=[
-            ('logreg', LogisticRegression(max_iter=1000, random_state=42, class_weight="balanced")),
-            ('svm', svm_calibrated),
-            ('rf', RandomForestClassifier(n_estimators=100, max_depth=30, random_state=42, class_weight="balanced", n_jobs=-1)),
+            ("logreg", LogisticRegression(max_iter=1000, random_state=42, class_weight="balanced")),
+            ("svm", svm_calibrated),
+            (
+                "rf",
+                RandomForestClassifier(
+                    n_estimators=100, max_depth=30, random_state=42, class_weight="balanced", n_jobs=-1
+                ),
+            ),
         ],
-        voting='soft'  # Use probabilities for voting
+        voting="soft",  # Use probabilities for voting
     )
 
     logger.info("Training ensemble (this may take a minute)...")
@@ -303,6 +298,7 @@ def train_transformer(
         Dictionary with model and metrics
     """
     from model import train_transformer as _train_transformer
+
     return _train_transformer(model_name, epochs, batch_size, learning_rate, save)
 
 
@@ -325,12 +321,14 @@ def train_all_models(include_transformers: bool = True, transformer_epochs: int 
     logger.info("=" * 70)
     for name in ["logreg", "naive_bayes", "svm"]:
         result = train_baseline(name, save=True)
-        results["baselines"].append({
-            "name": f"tfidf_{name}",
-            "accuracy": result["accuracy"],
-            "f1_macro": result["f1_macro"],
-            "f1_weighted": result["f1_weighted"],
-        })
+        results["baselines"].append(
+            {
+                "name": f"tfidf_{name}",
+                "accuracy": result["accuracy"],
+                "f1_macro": result["f1_macro"],
+                "f1_weighted": result["f1_weighted"],
+            }
+        )
 
     # Train transformers
     if include_transformers:
@@ -340,12 +338,14 @@ def train_all_models(include_transformers: bool = True, transformer_epochs: int 
         for name in ["finbert", "distilbert"]:
             try:
                 result = train_transformer(name, epochs=transformer_epochs, save=True)
-                results["transformers"].append({
-                    "name": name,
-                    "accuracy": result["metrics"]["accuracy"],
-                    "f1_macro": result["metrics"]["f1_macro"],
-                    "f1_weighted": result["metrics"]["f1_weighted"],
-                })
+                results["transformers"].append(
+                    {
+                        "name": name,
+                        "accuracy": result["metrics"]["accuracy"],
+                        "f1_macro": result["metrics"]["f1_macro"],
+                        "f1_weighted": result["metrics"]["f1_weighted"],
+                    }
+                )
             except Exception as e:
                 logger.error("Error training %s: %s", name, e)
 
@@ -358,11 +358,11 @@ def train_all_models(include_transformers: bool = True, transformer_epochs: int 
 
     all_results = results["baselines"] + results["transformers"]
     for r in all_results:
-        logger.info("%-25s %-12.4f %-12.4f %-12.4f", r['name'], r['accuracy'], r['f1_macro'], r['f1_weighted'])
+        logger.info("%-25s %-12.4f %-12.4f %-12.4f", r["name"], r["accuracy"], r["f1_macro"], r["f1_weighted"])
 
     # Find best overall
     best = max(all_results, key=lambda x: x["f1_macro"])
-    logger.info("Best overall: %s (F1 macro: %.4f)", best['name'], best['f1_macro'])
+    logger.info("Best overall: %s (F1 macro: %.4f)", best["name"], best["f1_macro"])
 
     return results
 
@@ -385,6 +385,7 @@ def cross_validate_baselines(k: int = 5) -> dict:
     train_df = load_processed_data("train")
     val_df = load_processed_data("val")
     import pandas as pd
+
     full_df = pd.concat([train_df, val_df], ignore_index=True)
 
     X = full_df["sentence"].values
@@ -439,15 +440,22 @@ def cross_validate_baselines(k: int = 5) -> dict:
         logger.info(
             "%-20s %.4f ± %.4f   %.4f ± %.4f   %.4f ± %.4f",
             name,
-            r["accuracy_mean"], r["accuracy_std"],
-            r["f1_macro_mean"], r["f1_macro_std"],
-            r["f1_weighted_mean"], r["f1_weighted_std"],
+            r["accuracy_mean"],
+            r["accuracy_std"],
+            r["f1_macro_mean"],
+            r["f1_macro_std"],
+            r["f1_weighted_mean"],
+            r["f1_weighted_std"],
         )
 
     # Find best model
     best_name = max(cv_results, key=lambda n: cv_results[n]["f1_macro_mean"])
-    logger.info("\nBest model (by mean F1 macro): %s (%.4f ± %.4f)",
-                best_name, cv_results[best_name]["f1_macro_mean"], cv_results[best_name]["f1_macro_std"])
+    logger.info(
+        "\nBest model (by mean F1 macro): %s (%.4f ± %.4f)",
+        best_name,
+        cv_results[best_name]["f1_macro_mean"],
+        cv_results[best_name]["f1_macro_std"],
+    )
 
     # Save results
     results_dir = get_results_dir()
@@ -475,6 +483,7 @@ def tune_hyperparameters() -> dict:
     train_df = load_processed_data("train")
     val_df = load_processed_data("val")
     import pandas as pd
+
     full_df = pd.concat([train_df, val_df], ignore_index=True)
 
     X = full_df["sentence"].values
@@ -485,18 +494,24 @@ def tune_hyperparameters() -> dict:
 
     # --- Tune SVM ---
     logger.info("\nTuning SVM...")
-    svm_pipeline = Pipeline([
-        ("tfidf", TfidfVectorizer(max_features=10000, ngram_range=(1, 2), min_df=2, max_df=0.95)),
-        ("classifier", LinearSVC(random_state=42, class_weight="balanced")),
-    ])
+    svm_pipeline = Pipeline(
+        [
+            ("tfidf", TfidfVectorizer(max_features=10000, ngram_range=(1, 2), min_df=2, max_df=0.95)),
+            ("classifier", LinearSVC(random_state=42, class_weight="balanced")),
+        ]
+    )
     svm_params = {
         "classifier__C": [0.1, 0.5, 1.0, 2.0, 5.0],
         "classifier__max_iter": [1000, 2000],
     }
     svm_grid = GridSearchCV(
-        svm_pipeline, svm_params, cv=cv,
+        svm_pipeline,
+        svm_params,
+        cv=cv,
         scoring=make_scorer(f1_score, average="macro"),
-        n_jobs=-1, verbose=0, refit=True,
+        n_jobs=-1,
+        verbose=0,
+        refit=True,
     )
     svm_grid.fit(X, y)
     tune_results["svm"] = {
@@ -510,19 +525,25 @@ def tune_hyperparameters() -> dict:
 
     # --- Tune Gradient Boosting ---
     logger.info("\nTuning Gradient Boosting...")
-    gb_pipeline = Pipeline([
-        ("tfidf", TfidfVectorizer(max_features=10000, ngram_range=(1, 2), min_df=2, max_df=0.95)),
-        ("classifier", GradientBoostingClassifier(random_state=42)),
-    ])
+    gb_pipeline = Pipeline(
+        [
+            ("tfidf", TfidfVectorizer(max_features=10000, ngram_range=(1, 2), min_df=2, max_df=0.95)),
+            ("classifier", GradientBoostingClassifier(random_state=42)),
+        ]
+    )
     gb_params = {
         "classifier__n_estimators": [100, 200],
         "classifier__max_depth": [3, 5, 7],
         "classifier__learning_rate": [0.05, 0.1, 0.2],
     }
     gb_grid = GridSearchCV(
-        gb_pipeline, gb_params, cv=cv,
+        gb_pipeline,
+        gb_params,
+        cv=cv,
         scoring=make_scorer(f1_score, average="macro"),
-        n_jobs=-1, verbose=0, refit=True,
+        n_jobs=-1,
+        verbose=0,
+        refit=True,
     )
     gb_grid.fit(X, y)
     tune_results["gradient_boosting"] = {
@@ -540,8 +561,10 @@ def tune_hyperparameters() -> dict:
     serializable = {}
     for k, v in tune_results.items():
         serializable[k] = {
-            "best_params": {pk: (int(pv) if isinstance(pv, (np.integer,)) else float(pv) if isinstance(pv, (np.floating,)) else pv)
-                           for pk, pv in v["best_params"].items()},
+            "best_params": {
+                pk: (int(pv) if isinstance(pv, (np.integer,)) else float(pv) if isinstance(pv, (np.floating,)) else pv)
+                for pk, pv in v["best_params"].items()
+            },
             "best_f1_macro": v["best_f1_macro"],
         }
     with open(tune_path, "w") as f:
@@ -553,8 +576,12 @@ def tune_hyperparameters() -> dict:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train Financial Sentiment Models")
-    parser.add_argument("--model", type=str, default="all",
-                        help="Model to train: all, baselines, ensemble, cv, tune, finbert, distilbert, logreg, svm, naive_bayes, random_forest, gradient_boosting, mlp")
+    parser.add_argument(
+        "--model",
+        type=str,
+        default="all",
+        help="Model to train: all, baselines, ensemble, cv, tune, finbert, distilbert, logreg, svm, naive_bayes, random_forest, gradient_boosting, mlp",
+    )
     parser.add_argument("--epochs", type=int, default=3, help="Epochs for transformer training")
     parser.add_argument("--batch-size", type=int, default=16, help="Batch size")
     parser.add_argument("--lr", type=float, default=2e-5, help="Learning rate")

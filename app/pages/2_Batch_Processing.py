@@ -7,15 +7,16 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 
-import streamlit as st  # pyre-ignore
+from io import StringIO
+
 import pandas as pd  # pyre-ignore
 import plotly.express as px  # pyre-ignore
-import os
-from io import StringIO
+import streamlit as st  # pyre-ignore
+
 from llm_explain import generate_market_outlook  # pyre-ignore
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from shared import inject_css, setup_sidebar, get_sentiment_color  # pyre-ignore
+from shared import inject_css, setup_sidebar  # pyre-ignore
 
 # ── Page config ─────────────────────────────────────────────────────────────────
 st.set_page_config(page_title="Batch Processing", page_icon="📁", layout="wide")
@@ -26,12 +27,15 @@ if predictor is None:
     st.stop()
 
 # ── Page content ────────────────────────────────────────────────────────────────
-st.markdown("""
+st.markdown(
+    """
 <div style='margin-bottom: 25px;'>
     <h1 style='font-size: 2.2em; font-weight: 700; margin-bottom: 5px;'>📁 Batch Processing</h1>
     <p style='color: #94a3b8; font-size: 1.1em;'>Analyze hundreds of transcripts or news streams rapidly at scale.</p>
 </div>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 uploaded_file = st.file_uploader(
     "Upload file",
@@ -90,7 +94,7 @@ if uploaded_file:
             texts = [line.strip() for line in content if line.strip()]
             df = pd.DataFrame({"text": texts})
             text_column = "text"
-            clean_df = df.copy() # For consistency with CSV path
+            clean_df = df.copy()  # For consistency with CSV path
 
     except Exception as e:
         st.error(f"❌ Error reading file: {e}")
@@ -132,33 +136,42 @@ if uploaded_file:
 
         with col1:
             pos_count = sentiment_counts.get("positive", 0)
-            st.markdown(f"""
+            st.markdown(
+                f"""
             <div class='metric-card' style='border-top: 4px solid #10b981;'>
                 <div style='color: #94a3b8; font-size: 0.9em; text-transform: uppercase;'>Positive Signals</div>
                 <div style='font-size: 2.2em; font-weight: 700; color: #10b981;'>{pos_count}</div>
-                <div style='color: #cbd5e1; font-size: 0.85em; opacity: 0.8;'>{pos_count/len(clean_df)*100:.1f}% of total</div>
+                <div style='color: #cbd5e1; font-size: 0.85em; opacity: 0.8;'>{pos_count / len(clean_df) * 100:.1f}% of total</div>
             </div>
-            """, unsafe_allow_html=True)
+            """,
+                unsafe_allow_html=True,
+            )
 
         with col2:
             neu_count = sentiment_counts.get("neutral", 0)
-            st.markdown(f"""
+            st.markdown(
+                f"""
             <div class='metric-card' style='border-top: 4px solid #3b82f6;'>
                 <div style='color: #94a3b8; font-size: 0.9em; text-transform: uppercase;'>Neutral Signals</div>
                 <div style='font-size: 2.2em; font-weight: 700; color: #3b82f6;'>{neu_count}</div>
-                <div style='color: #cbd5e1; font-size: 0.85em; opacity: 0.8;'>{neu_count/len(clean_df)*100:.1f}% of total</div>
+                <div style='color: #cbd5e1; font-size: 0.85em; opacity: 0.8;'>{neu_count / len(clean_df) * 100:.1f}% of total</div>
             </div>
-            """, unsafe_allow_html=True)
+            """,
+                unsafe_allow_html=True,
+            )
 
         with col3:
             neg_count = sentiment_counts.get("negative", 0)
-            st.markdown(f"""
+            st.markdown(
+                f"""
             <div class='metric-card' style='border-top: 4px solid #ef4444;'>
                 <div style='color: #94a3b8; font-size: 0.9em; text-transform: uppercase;'>Negative Signals</div>
                 <div style='font-size: 2.2em; font-weight: 700; color: #ef4444;'>{neg_count}</div>
-                <div style='color: #cbd5e1; font-size: 0.85em; opacity: 0.8;'>{neg_count/len(clean_df)*100:.1f}% of total</div>
+                <div style='color: #cbd5e1; font-size: 0.85em; opacity: 0.8;'>{neg_count / len(clean_df) * 100:.1f}% of total</div>
             </div>
-            """, unsafe_allow_html=True)
+            """,
+                unsafe_allow_html=True,
+            )
 
         st.markdown("")
 
@@ -174,14 +187,14 @@ if uploaded_file:
                 "neutral": "#3b82f6",
                 "error": "#f59e0b",
             },
-            hole=0.4 # Donut chart looks more modern
+            hole=0.4,  # Donut chart looks more modern
         )
         fig.update_layout(
-            paper_bgcolor='rgba(0,0,0,0)',
-            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
             font=dict(color="#cbd5e1", family="Inter, sans-serif"),
             margin=dict(t=40, b=10, l=10, r=10),
-            title={"font": {"color": "#f8fafc", "size": 18}}
+            title={"font": {"color": "#f8fafc", "size": 18}},
         )
         st.plotly_chart(fig, use_container_width=True)
 

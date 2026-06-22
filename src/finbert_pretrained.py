@@ -3,10 +3,11 @@ Pre-trained FinBERT model for financial sentiment analysis.
 Uses ProsusAI/finbert directly without fine-tuning.
 """
 
-import torch
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from typing import List, Union
+
 import numpy as np
+import torch
+from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 from utils import setup_logging
 
@@ -19,6 +20,9 @@ class PretrainedFinBERT:
     # FinBERT uses different label mapping
     LABEL_MAP = {0: "positive", 1: "negative", 2: "neutral"}
 
+    # Pin a specific model revision for reproducible, supply-chain-safe loads.
+    MODEL_REVISION = "main"
+
     def __init__(self, model_name: str = "ProsusAI/finbert"):
         """
         Initialize pre-trained FinBERT.
@@ -30,8 +34,8 @@ class PretrainedFinBERT:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         logger.info("Using device: %s", self.device)
 
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self.model = AutoModelForSequenceClassification.from_pretrained(model_name)
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name, revision=self.MODEL_REVISION)
+        self.model = AutoModelForSequenceClassification.from_pretrained(model_name, revision=self.MODEL_REVISION)
         self.model.to(self.device)
         self.model.eval()
 
@@ -55,16 +59,12 @@ class PretrainedFinBERT:
         # Process in batches to avoid memory issues
         batch_size = 8
         for i in range(0, len(texts), batch_size):
-            batch_texts = texts[i:i + batch_size]
+            batch_texts = texts[i : i + batch_size]
 
             # Tokenize
-            inputs = self.tokenizer(
-                batch_texts,
-                padding=True,
-                truncation=True,
-                max_length=512,
-                return_tensors="pt"
-            ).to(self.device)
+            inputs = self.tokenizer(batch_texts, padding=True, truncation=True, max_length=512, return_tensors="pt").to(
+                self.device
+            )
 
             # Predict
             with torch.no_grad():
@@ -84,17 +84,19 @@ class PretrainedFinBERT:
                 # Reorder probabilities to match our format
                 our_probs = {
                     "negative": float(prob[1]),  # FinBERT: 1=negative
-                    "neutral": float(prob[2]),   # FinBERT: 2=neutral
+                    "neutral": float(prob[2]),  # FinBERT: 2=neutral
                     "positive": float(prob[0]),  # FinBERT: 0=positive
                 }
 
-                results.append({
-                    "text": text[:100] + "..." if len(text) > 100 else text,
-                    "prediction": our_pred,
-                    "label": label,
-                    "confidence": float(max(prob)),
-                    "probabilities": our_probs,
-                })
+                results.append(
+                    {
+                        "text": text[:100] + "..." if len(text) > 100 else text,
+                        "prediction": our_pred,
+                        "label": label,
+                        "confidence": float(max(prob)),
+                        "probabilities": our_probs,
+                    }
+                )
 
         return results
 

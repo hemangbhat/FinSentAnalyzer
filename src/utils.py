@@ -3,12 +3,11 @@ Shared utilities for Financial Sentiment Analysis.
 Central module for constants, path helpers, logging, and shared functions.
 """
 
-import logging
 import json
+import logging
 import sys
 from pathlib import Path
-from typing import Dict, Any, Optional
-
+from typing import Any, Dict
 
 # =============================================================================
 # CONSTANTS
@@ -20,8 +19,13 @@ LABEL_MAP_INV = {v: k for k, v in LABEL_MAP.items()}
 
 # Supported baseline classifier names
 BASELINE_CLASSIFIERS = [
-    "logreg", "naive_bayes", "svm",
-    "random_forest", "gradient_boosting", "mlp", "ensemble",
+    "logreg",
+    "naive_bayes",
+    "svm",
+    "random_forest",
+    "gradient_boosting",
+    "mlp",
+    "ensemble",
 ]
 
 # Supported transformer model names
@@ -31,6 +35,7 @@ TRANSFORMER_MODELS = ["finbert", "distilbert", "roberta", "bert"]
 # =============================================================================
 # PATH HELPERS
 # =============================================================================
+
 
 def get_project_root() -> Path:
     """
@@ -75,6 +80,7 @@ def get_results_dir() -> Path:
 # =============================================================================
 # LOGGING
 # =============================================================================
+
 
 def setup_logging(
     name: str,

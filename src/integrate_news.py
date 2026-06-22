@@ -8,15 +8,13 @@ This module validates model generalization on out-of-distribution data
 """
 
 import json
-import logging
-from pathlib import Path
 from typing import Optional
 
-import pandas as pd
-import numpy as np
 import joblib
+import numpy as np
+import pandas as pd
 
-from utils import get_project_root, get_model_dir, get_results_dir, setup_logging, LABEL_MAP_INV
+from utils import LABEL_MAP_INV, get_model_dir, get_project_root, get_results_dir, setup_logging
 
 logger = setup_logging(__name__)
 
@@ -76,8 +74,7 @@ def predict_news_sentiment(model_name: str = "svm") -> pd.DataFrame:
     model_path = get_model_dir() / f"baseline_{model_name}.joblib"
     if not model_path.exists():
         raise FileNotFoundError(
-            f"Model not found: {model_path}. Train the model first with: "
-            f"python src/train.py --model {model_name}"
+            f"Model not found: {model_path}. Train the model first with: python src/train.py --model {model_name}"
         )
 
     model = joblib.load(model_path)
@@ -126,14 +123,18 @@ def compute_daily_sentiment(news_df: pd.DataFrame) -> pd.DataFrame:
     news_df["sentiment_score"] = news_df["sentiment"].map(sentiment_scores)
 
     # Aggregate per day per ticker
-    daily = news_df.groupby(["date", "ticker"]).agg(
-        mean_sentiment=("sentiment_score", "mean"),
-        num_headlines=("headline", "count"),
-        positive_count=("sentiment_score", lambda x: (x > 0).sum()),
-        negative_count=("sentiment_score", lambda x: (x < 0).sum()),
-        neutral_count=("sentiment_score", lambda x: (x == 0).sum()),
-        avg_confidence=("confidence", "mean"),
-    ).reset_index()
+    daily = (
+        news_df.groupby(["date", "ticker"])
+        .agg(
+            mean_sentiment=("sentiment_score", "mean"),
+            num_headlines=("headline", "count"),
+            positive_count=("sentiment_score", lambda x: (x > 0).sum()),
+            negative_count=("sentiment_score", lambda x: (x < 0).sum()),
+            neutral_count=("sentiment_score", lambda x: (x == 0).sum()),
+            avg_confidence=("confidence", "mean"),
+        )
+        .reset_index()
+    )
 
     logger.info("Computed daily sentiment for %d ticker-day pairs", len(daily))
     return daily
@@ -180,8 +181,10 @@ def compute_sentiment_stock_correlation(model_name: str = "svm") -> dict:
 
         # Merge on date
         merged = pd.merge(
-            ticker_sentiment, ticker_stock[["date", "ticker", "Close", "daily_return"]],
-            on=["date", "ticker"], how="inner"
+            ticker_sentiment,
+            ticker_stock[["date", "ticker", "Close", "daily_return"]],
+            on=["date", "ticker"],
+            how="inner",
         )
 
         if len(merged) > 5:
@@ -201,8 +204,10 @@ def compute_sentiment_stock_correlation(model_name: str = "svm") -> dict:
             }
             logger.info(
                 "  %s: same-day corr=%.4f, next-day corr=%.4f (%d points)",
-                ticker, results[ticker]["pearson_same_day"],
-                results[ticker]["pearson_next_day"], len(merged)
+                ticker,
+                results[ticker]["pearson_same_day"],
+                results[ticker]["pearson_next_day"],
+                len(merged),
             )
         else:
             results[ticker] = {
@@ -321,11 +326,10 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="Cross-Dataset Evaluation")
-    parser.add_argument("--model", type=str, default="svm",
-                        help="Model to use for predictions")
-    parser.add_argument("--action", type=str, default="evaluate",
-                        choices=["evaluate", "correlate", "predict"],
-                        help="Action to perform")
+    parser.add_argument("--model", type=str, default="svm", help="Model to use for predictions")
+    parser.add_argument(
+        "--action", type=str, default="evaluate", choices=["evaluate", "correlate", "predict"], help="Action to perform"
+    )
 
     args = parser.parse_args()
 

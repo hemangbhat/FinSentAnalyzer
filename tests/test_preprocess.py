@@ -1,7 +1,8 @@
 """Tests for src/preprocess.py"""
 
 import pandas as pd
-from preprocess import clean_text, preprocess_dataframe, create_splits, LABEL_MAP
+
+from preprocess import clean_text, create_splits, preprocess_dataframe
 
 
 class TestCleanText:
@@ -26,27 +27,33 @@ class TestCleanText:
 
 class TestPreprocessDataframe:
     def test_basic_preprocessing(self):
-        df = pd.DataFrame({
-            "sentence": ["Revenue UP!", "Loss DOWN."],
-            "label": ["positive", "negative"],
-        })
+        df = pd.DataFrame(
+            {
+                "sentence": ["Revenue UP!", "Loss DOWN."],
+                "label": ["positive", "negative"],
+            }
+        )
         result = preprocess_dataframe(df, clean=True)
         assert "label" in result.columns
         assert len(result) == 2
 
     def test_label_encoding(self):
-        df = pd.DataFrame({
-            "sentence": ["Good", "Bad", "Ok"],
-            "label": ["positive", "negative", "neutral"],
-        })
+        df = pd.DataFrame(
+            {
+                "sentence": ["Good", "Bad", "Ok"],
+                "label": ["positive", "negative", "neutral"],
+            }
+        )
         result = preprocess_dataframe(df, clean=False)
         assert set(result["label"].values) == {0, 1, 2}
 
     def test_drops_empty_sentences(self):
-        df = pd.DataFrame({
-            "sentence": ["Good", "", "Bad"],
-            "label": ["positive", "neutral", "negative"],
-        })
+        df = pd.DataFrame(
+            {
+                "sentence": ["Good", "", "Bad"],
+                "label": ["positive", "neutral", "negative"],
+            }
+        )
         result = preprocess_dataframe(df, clean=True)
         # Empty strings may remain but NaN should be dropped
         assert len(result) >= 2
@@ -54,20 +61,24 @@ class TestPreprocessDataframe:
 
 class TestCreateSplits:
     def test_split_sizes(self):
-        df = pd.DataFrame({
-            "sentence": [f"text_{i}" for i in range(100)],
-            "label": [i % 3 for i in range(100)],
-        })
+        df = pd.DataFrame(
+            {
+                "sentence": [f"text_{i}" for i in range(100)],
+                "label": [i % 3 for i in range(100)],
+            }
+        )
         train, val, test = create_splits(df)
         assert len(train) + len(val) + len(test) == 100
         assert len(train) > len(val)
         assert len(train) > len(test)
 
     def test_no_overlap(self):
-        df = pd.DataFrame({
-            "sentence": [f"text_{i}" for i in range(50)],
-            "label": [i % 3 for i in range(50)],
-        })
+        df = pd.DataFrame(
+            {
+                "sentence": [f"text_{i}" for i in range(50)],
+                "label": [i % 3 for i in range(50)],
+            }
+        )
         train, val, test = create_splits(df)
         train_sentences = set(train["sentence"])
         val_sentences = set(val["sentence"])

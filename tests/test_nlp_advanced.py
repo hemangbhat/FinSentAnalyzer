@@ -1,5 +1,6 @@
 """Tests for src/nlp_advanced.py"""
 
+from lexicons import FINANCIAL_NEGATIVE, FINANCIAL_POSITIVE, FINANCIAL_UNCERTAINTY
 from nlp_advanced import (
     AdvancedTextProcessor,
     FinancialTextAnalyzer,
@@ -8,7 +9,6 @@ from nlp_advanced import (
     extract_financial_features,
     get_lexicon_sentiment,
 )
-from lexicons import FINANCIAL_POSITIVE, FINANCIAL_NEGATIVE, FINANCIAL_UNCERTAINTY
 
 
 class TestAdvancedTextProcessor:
@@ -57,16 +57,12 @@ class TestFinancialTextAnalyzer:
         assert "features" in result
 
     def test_positive_text_detected(self):
-        result = self.analyzer.analyze(
-            "The company reported strong earnings growth, beating expectations."
-        )
+        result = self.analyzer.analyze("The company reported strong earnings growth, beating expectations.")
         # Should lean positive or at least not negative
         assert result["sentiment"]["score"] >= 0
 
     def test_negative_text_detected(self):
-        result = self.analyzer.analyze(
-            "Revenue declined sharply due to weak demand and rising losses."
-        )
+        result = self.analyzer.analyze("Revenue declined sharply due to weak demand and rising losses.")
         assert result["sentiment"]["score"] <= 0
 
     def test_batch_analyze(self):

@@ -1,9 +1,8 @@
 """Tests for src/predict.py"""
 
 import pytest
-from pathlib import Path
 
-from predict import get_available_models, SentimentPredictor
+from predict import SentimentPredictor, get_available_models
 
 
 class TestGetAvailableModels:

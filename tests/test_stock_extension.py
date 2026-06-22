@@ -84,7 +84,9 @@ def _build_stub_components(live_news_df: pd.DataFrame, sample_news_df: pd.DataFr
         out["target_up"] = (out["next_close"] > out["Close"]).astype(int)
         return out.dropna(subset=["next_close"]).reset_index(drop=True)
 
-    def train_lstm_on_dataframe(df, feature_columns, target_column="target_up", seq_len=5, epochs=8, lr=1e-3, batch_size=16):
+    def train_lstm_on_dataframe(
+        df, feature_columns, target_column="target_up", seq_len=5, epochs=8, lr=1e-3, batch_size=16
+    ):
         return {"trained": True, "rows": len(df), "seq_len": seq_len}
 
     def predict_next_movement(training_result, supervised_df):
@@ -203,3 +205,40 @@ class TestStockExtension:
 
         assert result.news_source == "sample_dataset_market"
         assert result.num_news_rows == 2
+
+    def test_get_lstm_model_path_uses_ticker(self):
+        from stock_extension import get_lstm_model_path
+
+        path = get_lstm_model_path("aapl")
+        assert path.name == "lstm_AAPL.pt"
+        assert path.parent.name == "models"
+
+    def test_save_model_is_graceful_without_real_torch_model(self, monkeypatch):
+        # The stub training result is a plain dict (no torch model), so save
+        # must degrade gracefully and leave model_path as None.
+        import stock_extension
+
+        live_news = pd.DataFrame(
+            {
+                "date": ["2024-01-10", "2024-01-11", "2024-01-12"],
+                "headline": ["A", "B", "C"],
+            }
+        )
+        sample_news = pd.DataFrame(columns=["date", "headline"])
+
+        monkeypatch.setattr(
+            stock_extension,
+            "_load_stock_components",
+            lambda: _build_stub_components(live_news, sample_news),
+        )
+
+        result = stock_extension.run_stock_prediction_extension(
+            ticker="AAPL",
+            use_live_news=True,
+            fallback_to_sample_news=True,
+            epochs=2,
+            seq_len=5,
+            save_model=True,
+        )
+
+        assert result.model_path is None  # stub model has no state_dict

@@ -3,7 +3,6 @@ Shared fixtures for Financial Sentiment Analyzer tests.
 """
 
 import sys
-import os
 from pathlib import Path
 
 import pytest
@@ -16,6 +15,7 @@ sys.path.insert(0, str(SRC_DIR))
 # =============================================================================
 # SAMPLE DATA FIXTURES
 # =============================================================================
+
 
 @pytest.fixture
 def positive_texts():

@@ -2,8 +2,8 @@
 Tests for the SHAP explainability module (shap_explain.py).
 """
 
-import sys
 import json
+import sys
 from pathlib import Path
 
 import pytest
@@ -23,6 +23,7 @@ class TestShapExplain:
         """SHAP library is installed and importable."""
         try:
             import shap  # noqa: F401
+
             assert True
         except ImportError:
             pytest.skip("SHAP not installed — skipping SHAP tests")
@@ -39,6 +40,7 @@ class TestShapExplain:
             pytest.skip("SHAP not installed")
 
         from shap_explain import get_shap_explanation
+
         result = get_shap_explanation("gradient_boosting", max_samples=20)
 
         assert isinstance(result, dict)
@@ -61,6 +63,7 @@ class TestShapExplain:
             pytest.skip("SHAP not installed")
 
         from shap_explain import get_shap_explanation
+
         result = get_shap_explanation("logreg", max_samples=20)
 
         assert isinstance(result, dict)
@@ -79,6 +82,7 @@ class TestShapExplain:
             pytest.skip("SHAP not installed")
 
         from shap_explain import get_shap_explanation
+
         result = get_shap_explanation("gradient_boosting", max_samples=20)
 
         class_features = result.get("class_features", {})
@@ -106,6 +110,7 @@ class TestShapExplain:
         from utils import get_results_dir
 
         result = save_shap_results("gradient_boosting", "test")
+        assert result is not None
 
         # Check file was saved
         output_path = get_results_dir() / "shap_gradient_boosting.json"

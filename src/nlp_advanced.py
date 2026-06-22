@@ -5,26 +5,28 @@ Advanced text preprocessing, feature extraction, and linguistic analysis.
 
 import re
 import string
-from typing import List, Dict, Tuple, Optional, Any
-from dataclasses import dataclass, field
 from collections import Counter
+from dataclasses import dataclass, field
+from typing import Any, Dict, List
+
 import numpy as np
 
 from lexicons import (
-    FINANCIAL_POSITIVE,
-    FINANCIAL_NEGATIVE,
-    FINANCIAL_UNCERTAINTY,
     FINANCIAL_LITIGIOUS,
+    FINANCIAL_NEGATIVE,
+    FINANCIAL_POSITIVE,
+    FINANCIAL_UNCERTAINTY,
 )
-
 
 # =============================================================================
 # DATA CLASSES FOR STRUCTURED OUTPUT
 # =============================================================================
 
+
 @dataclass
 class TextFeatures:
     """Structured features extracted from financial text."""
+
     # Basic stats
     word_count: int = 0
     char_count: int = 0
@@ -86,6 +88,7 @@ class TextFeatures:
 @dataclass
 class ProcessedText:
     """Result of advanced text processing."""
+
     original: str
     cleaned: str
     normalized: str
@@ -107,6 +110,7 @@ class ProcessedText:
 # ADVANCED TEXT PREPROCESSING
 # =============================================================================
 
+
 class AdvancedTextProcessor:
     """
     Advanced text preprocessing for financial sentiment analysis.
@@ -121,22 +125,67 @@ class AdvancedTextProcessor:
 
     # Negation words that flip sentiment
     NEGATION_WORDS = {
-        "not", "no", "never", "neither", "nobody", "nothing", "nowhere",
-        "none", "nor", "cannot", "can't", "won't", "wouldn't", "shouldn't",
-        "couldn't", "doesn't", "don't", "didn't", "isn't", "aren't", "wasn't",
-        "weren't", "hasn't", "haven't", "hadn't", "without", "lack", "lacking",
-        "fail", "failed", "fails", "unable", "unlikely",
+        "not",
+        "no",
+        "never",
+        "neither",
+        "nobody",
+        "nothing",
+        "nowhere",
+        "none",
+        "nor",
+        "cannot",
+        "can't",
+        "won't",
+        "wouldn't",
+        "shouldn't",
+        "couldn't",
+        "doesn't",
+        "don't",
+        "didn't",
+        "isn't",
+        "aren't",
+        "wasn't",
+        "weren't",
+        "hasn't",
+        "haven't",
+        "hadn't",
+        "without",
+        "lack",
+        "lacking",
+        "fail",
+        "failed",
+        "fails",
+        "unable",
+        "unlikely",
     }
 
     # Intensifiers that amplify sentiment
     INTENSIFIERS = {
-        "very": 1.5, "extremely": 2.0, "highly": 1.5, "significantly": 1.5,
-        "substantially": 1.5, "considerably": 1.5, "remarkably": 1.5,
-        "exceptionally": 1.8, "tremendously": 1.8, "drastically": 1.8,
-        "sharply": 1.5, "strongly": 1.5, "deeply": 1.5, "greatly": 1.5,
-        "massively": 1.8, "hugely": 1.8, "overwhelmingly": 2.0,
-        "slightly": 0.5, "somewhat": 0.7, "marginally": 0.5, "modestly": 0.7,
-        "mildly": 0.5, "fairly": 0.8, "relatively": 0.8,
+        "very": 1.5,
+        "extremely": 2.0,
+        "highly": 1.5,
+        "significantly": 1.5,
+        "substantially": 1.5,
+        "considerably": 1.5,
+        "remarkably": 1.5,
+        "exceptionally": 1.8,
+        "tremendously": 1.8,
+        "drastically": 1.8,
+        "sharply": 1.5,
+        "strongly": 1.5,
+        "deeply": 1.5,
+        "greatly": 1.5,
+        "massively": 1.8,
+        "hugely": 1.8,
+        "overwhelmingly": 2.0,
+        "slightly": 0.5,
+        "somewhat": 0.7,
+        "marginally": 0.5,
+        "modestly": 0.7,
+        "mildly": 0.5,
+        "fairly": 0.8,
+        "relatively": 0.8,
     }
 
     # Financial term patterns
@@ -149,11 +198,13 @@ class AdvancedTextProcessor:
         "date": r"(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2}(?:,?\s+\d{4})?|\d{1,2}/\d{1,2}/\d{2,4}",
     }
 
-    def __init__(self,
-                 lowercase: bool = True,
-                 remove_punctuation: bool = False,
-                 normalize_numbers: bool = True,
-                 handle_negations: bool = True):
+    def __init__(
+        self,
+        lowercase: bool = True,
+        remove_punctuation: bool = False,
+        normalize_numbers: bool = True,
+        handle_negations: bool = True,
+    ):
         """
         Initialize the processor.
 
@@ -169,10 +220,7 @@ class AdvancedTextProcessor:
         self.handle_negations = handle_negations
 
         # Compile regex patterns
-        self.compiled_patterns = {
-            name: re.compile(pattern, re.IGNORECASE)
-            for name, pattern in self.PATTERNS.items()
-        }
+        self.compiled_patterns = {name: re.compile(pattern, re.IGNORECASE) for name, pattern in self.PATTERNS.items()}
 
     def process(self, text: str) -> ProcessedText:
         """
@@ -207,19 +255,19 @@ class AdvancedTextProcessor:
     def _clean_text(self, text: str) -> str:
         """Basic text cleaning."""
         # Remove extra whitespace
-        text = re.sub(r'\s+', ' ', text)
+        text = re.sub(r"\s+", " ", text)
 
         # Fix common encoding issues
-        text = text.replace('â€™', "'")
+        text = text.replace("â€™", "'")
         text = text.replace('â€"', "-")
-        text = text.replace('â€œ', '"')
-        text = text.replace('â€', '"')
+        text = text.replace("â€œ", '"')
+        text = text.replace("â€", '"')
 
         # Remove URLs
-        text = re.sub(r'https?://\S+|www\.\S+', ' ', text)
+        text = re.sub(r"https?://\S+|www\.\S+", " ", text)
 
         # Remove email addresses
-        text = re.sub(r'\S+@\S+', ' ', text)
+        text = re.sub(r"\S+@\S+", " ", text)
 
         # Normalize quotes
         text = re.sub(r'["""]', '"', text)
@@ -234,27 +282,21 @@ class AdvancedTextProcessor:
         # Normalize percentages
         if self.normalize_numbers:
             # Replace percentage with placeholder
-            normalized = re.sub(r'[-+]?\d+(?:\.\d+)?%', ' _PERCENT_ ', normalized)
+            normalized = re.sub(r"[-+]?\d+(?:\.\d+)?%", " _PERCENT_ ", normalized)
 
             # Normalize large numbers
             normalized = re.sub(
-                r'\$?\d+(?:\.\d+)?\s*(?:billion|bn)\b',
-                ' _BILLION_DOLLARS_ ',
-                normalized, flags=re.IGNORECASE
+                r"\$?\d+(?:\.\d+)?\s*(?:billion|bn)\b", " _BILLION_DOLLARS_ ", normalized, flags=re.IGNORECASE
             )
             normalized = re.sub(
-                r'\$?\d+(?:\.\d+)?\s*(?:million|mn|m)\b',
-                ' _MILLION_DOLLARS_ ',
-                normalized, flags=re.IGNORECASE
+                r"\$?\d+(?:\.\d+)?\s*(?:million|mn|m)\b", " _MILLION_DOLLARS_ ", normalized, flags=re.IGNORECASE
             )
             normalized = re.sub(
-                r'\$?\d+(?:\.\d+)?\s*(?:trillion|tn|tr)\b',
-                ' _TRILLION_DOLLARS_ ',
-                normalized, flags=re.IGNORECASE
+                r"\$?\d+(?:\.\d+)?\s*(?:trillion|tn|tr)\b", " _TRILLION_DOLLARS_ ", normalized, flags=re.IGNORECASE
             )
 
             # Normalize currency amounts
-            normalized = re.sub(r'\$\d+(?:,\d{3})*(?:\.\d+)?', ' _CURRENCY_ ', normalized)
+            normalized = re.sub(r"\$\d+(?:,\d{3})*(?:\.\d+)?", " _CURRENCY_ ", normalized)
 
         # Apply lowercasing if enabled
         if self.lowercase:
@@ -262,10 +304,10 @@ class AdvancedTextProcessor:
 
         # Remove punctuation if enabled
         if self.remove_punctuation:
-            normalized = normalized.translate(str.maketrans('', '', string.punctuation))
+            normalized = normalized.translate(str.maketrans("", "", string.punctuation))
 
         # Clean up whitespace
-        normalized = re.sub(r'\s+', ' ', normalized).strip()
+        normalized = re.sub(r"\s+", " ", normalized).strip()
 
         return normalized
 
@@ -286,7 +328,7 @@ class AdvancedTextProcessor:
         # Basic stats
         features.word_count = len(tokens)
         features.char_count = len(cleaned)
-        features.sentence_count = max(1, len(re.findall(r'[.!?]+', cleaned)))
+        features.sentence_count = max(1, len(re.findall(r"[.!?]+", cleaned)))
 
         if features.word_count > 0:
             features.avg_word_length = sum(len(t) for t in tokens) / features.word_count
@@ -299,7 +341,7 @@ class AdvancedTextProcessor:
 
         # Lexicon-based analysis
         # Strip punctuation from tokens before matching against lexicon
-        words_lower = [re.sub(r'[^\w]', '', t.lower()) for t in tokens]
+        words_lower = [re.sub(r"[^\w]", "", t.lower()) for t in tokens]
         words_lower = [w for w in words_lower if w]  # Remove empty strings
 
         for word in words_lower:
@@ -319,9 +361,8 @@ class AdvancedTextProcessor:
         total_sentiment_words = features.positive_word_count + features.negative_word_count
         if total_sentiment_words > 0:
             features.sentiment_score = (
-                (features.positive_word_count - features.negative_word_count) /
-                total_sentiment_words
-            )
+                features.positive_word_count - features.negative_word_count
+            ) / total_sentiment_words
 
         # Calculate uncertainty score (0 to 1)
         if features.word_count > 0:
@@ -337,8 +378,8 @@ class AdvancedTextProcessor:
         features.has_negation = features.negation_count > 0
 
         # Punctuation counts
-        features.exclamation_count = original.count('!')
-        features.question_count = original.count('?')
+        features.exclamation_count = original.count("!")
+        features.question_count = original.count("?")
 
         # Adjust sentiment for negations
         if self.handle_negations and features.has_negation:
@@ -374,7 +415,7 @@ class AdvancedTextProcessor:
 
         # Uncertainty
         if features.uncertainty_score > 0.3:
-            explanations.append(f"High uncertainty language detected")
+            explanations.append("High uncertainty language detected")
             if features.uncertainty_words:
                 explanations.append(f"Uncertainty words: {', '.join(features.uncertainty_words[:3])}")
 
@@ -395,6 +436,7 @@ class AdvancedTextProcessor:
 # =============================================================================
 # FINANCIAL TEXT ANALYZER (HIGH-LEVEL API)
 # =============================================================================
+
 
 class FinancialTextAnalyzer:
     """
@@ -527,6 +569,7 @@ class FinancialTextAnalyzer:
 # CONVENIENCE FUNCTIONS
 # =============================================================================
 
+
 def analyze_financial_text(text: str) -> Dict[str, Any]:
     """
     Quick analysis of financial text.
@@ -603,12 +646,14 @@ if __name__ == "__main__":
         print(f"\nText: {text[:80]}...")
         result = analyzer.analyze(text)
 
-        print(f"  Sentiment: {result['sentiment']['category'].upper()} "
-              f"(score: {result['sentiment']['score']:.2f}, "
-              f"confidence: {result['sentiment']['confidence']:.2f})")
+        print(
+            f"  Sentiment: {result['sentiment']['category'].upper()} "
+            f"(score: {result['sentiment']['score']:.2f}, "
+            f"confidence: {result['sentiment']['confidence']:.2f})"
+        )
         print(f"  Explanation: {result['sentiment']['explanation']}")
 
-        if result['entities']['percentages']:
+        if result["entities"]["percentages"]:
             print(f"  Percentages: {result['entities']['percentages']}")
 
         print("-" * 80)

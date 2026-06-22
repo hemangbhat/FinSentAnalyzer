@@ -9,6 +9,7 @@ from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipe
 
 
 FINBERT_MODEL_NAME = "ProsusAI/finbert"
+FINBERT_MODEL_REVISION = "main"
 
 
 @dataclass
@@ -32,8 +33,10 @@ class FinBertSentimentAnalyzer:
     def __init__(self, model_name: str = FINBERT_MODEL_NAME, device: int = -1) -> None:
         # Use AutoModel/Tokenizer explicitly so the first load is predictable,
         # then wrap with transformers.pipeline for convenience.
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
-        model = AutoModelForSequenceClassification.from_pretrained(model_name)
+        tokenizer = AutoTokenizer.from_pretrained(model_name, revision=FINBERT_MODEL_REVISION)
+        model = AutoModelForSequenceClassification.from_pretrained(
+            model_name, revision=FINBERT_MODEL_REVISION
+        )
         self._pipeline = pipeline(
             "sentiment-analysis",
             model=model,

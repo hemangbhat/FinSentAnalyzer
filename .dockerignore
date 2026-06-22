@@ -14,3 +14,10 @@ README.md
 .github/
 tests/
 *.tmp
+
+# Exclude heavy virtualenvs and scratch folders from the nested project.
+external-datasets/**/.venv/
+external-datasets/**/.venv310/
+external-datasets/**/.sixth/
+external-datasets/**/__pycache__/
+**/tempCodeRunnerFile.py

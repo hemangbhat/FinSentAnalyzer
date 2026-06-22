@@ -61,7 +61,7 @@ Financial sentiment analysis is a critical tool for quantitative finance, risk m
 - **SHAP Explainability** — Global feature importance with per-class drivers
 - **Cross-Dataset Validation** — Test generalization on 2,688 real news headlines from WSJ, Bloomberg, Reuters, CNBC, and Financial Times
 - **Sentiment-Stock Correlation** — Pearson correlation between news sentiment and stock price movements
-- **Stock Prediction Extension** — End-to-end stock direction flow with live news fetch, FinBERT sentiment aggregation, and LSTM next-day prediction
+- **Stock Prediction Extension** — End-to-end stock direction flow with live news fetch, FinBERT sentiment aggregation, LSTM next-day prediction, reported test accuracy, and optional model-weight persistence
 - **Error Analysis** — Inspect misclassified examples with Sankey diagrams and confidence histograms
 - **Deep Linguistic Analysis** — Named Entity Recognition, rule-based Chain-of-Thought reasoning, Loughran-McDonald financial lexicon matching
 
@@ -187,7 +187,7 @@ financial-sentiment-analyzer/
 │   ├── shap_gradient_boosting.json # SHAP feature importance (GB)
 │   └── shap_svm.json              # SHAP feature importance (SVM)
 │
-├── tests/                          # Automated test suite (80 tests)
+├── tests/                          # Automated test suite (88 tests)
 │   ├── conftest.py                 # Shared fixtures
 │   ├── test_utils.py
 │   ├── test_preprocess.py
@@ -532,6 +532,7 @@ Landing page with 9 feature cards linking to each module.
 - Fetches live ticker news and scores sentiment with FinBERT
 - Engineers technical + sentiment features and trains an LSTM
 - Predicts next-day direction (UP/DOWN) with confidence
+- Reports LSTM test accuracy and can persist trained weights to `models/lstm_{TICKER}.pt`
 
 ---
 
@@ -584,13 +585,14 @@ python src/integrate_news.py --action predict --model gradient_boosting
 ```bash
 python src/stock_extension.py --ticker AAPL --days-back 120 --epochs 8 --seq-len 5
 python src/stock_extension.py --ticker TSLA --start 2025-01-01 --end 2025-06-30 --no-live-news
+python src/stock_extension.py --ticker AAPL --days-back 120 --save-model   # persist LSTM weights
 ```
 
 ---
 
 ## Testing
 
-The project has **80 automated tests** across 8 test files:
+The project has **88 automated tests** across 8 test files:
 
 ```bash
 # Run all tests
@@ -613,7 +615,7 @@ python -m pytest tests/test_shap_explain.py -v
 | `test_nlp_advanced.py` | 14 | Text processing, NER, lexicon, features |
 | `test_llm_enhanced.py` | 10 | Thought steps, market outlook, confidence |
 | `test_integrate_news.py` | 7 | News loading, sentiment prediction, trends |
-| `test_stock_extension.py` | 3 | Full extension pipeline orchestration and fallback behavior |
+| `test_stock_extension.py` | 6 | Pipeline orchestration, news fallbacks, model-path logic, save-model behavior |
 | `test_shap_explain.py` | 6 | SHAP analysis, per-class features, JSON save |
 
 ### CI/CD Pipeline
@@ -645,12 +647,21 @@ docker build -t financial-sentiment .
 docker run -p 8501:8501 financial-sentiment
 ```
 
-The Dockerfile includes a health check, uses Python 3.10-slim, and the lightweight `requirements-deploy.txt`.
+The Dockerfile is a **full-featured build**: Python 3.10-slim base, CPU-only PyTorch
+(installed from the PyTorch CPU index to keep the image small), and the complete
+`requirements-deploy.txt`. It copies the core app plus the nested stock-prediction
+extension (`external-datasets/.../src` and `data`), so **all 9 pages — including
+FinBERT and the LSTM Stock Prediction Extension — work in the container**. A
+Python-stdlib health check hits the Streamlit `/_stcore/health` endpoint.
+
+> First container start downloads the FinBERT weights (~500MB) from HuggingFace on
+> demand. The model revision is pinned for reproducibility. For faster cold starts,
+> bake the weights into the image or mount a `HF_HOME` cache volume.
 
 ### Option 3: HuggingFace Spaces
 
 1. Create a new Space (Streamlit SDK)
-2. Upload the `app/`, `src/`, `models/`, `data/` directories
+2. Upload the `app/`, `src/`, `models/`, `data/`, and `external-datasets/` directories
 3. Add `requirements-deploy.txt` as `requirements.txt`
 
 ---

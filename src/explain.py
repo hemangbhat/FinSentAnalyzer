@@ -4,16 +4,18 @@ Provides word importance and attention-based explanations.
 Uses financial lexicon for reliable sentiment direction detection.
 """
 
-import numpy as np
-import joblib
-from typing import List, Tuple
 import re
+from typing import List, Tuple
 
-from utils import get_project_root, get_model_dir, setup_logging, LABEL_MAP_INV
+import joblib
+import numpy as np
+
+from utils import LABEL_MAP_INV, get_model_dir, setup_logging
 
 # Import financial lexicons for reliable sentiment detection
 try:
-    from lexicons import FINANCIAL_POSITIVE, FINANCIAL_NEGATIVE, FINANCIAL_UNCERTAINTY
+    from lexicons import FINANCIAL_NEGATIVE, FINANCIAL_POSITIVE, FINANCIAL_UNCERTAINTY
+
     LEXICON_AVAILABLE = True
 except ImportError:
     LEXICON_AVAILABLE = False
@@ -24,10 +26,7 @@ except ImportError:
 logger = setup_logging(__name__)
 
 
-def get_word_importance_baseline(
-    text: str,
-    model_name: str = "baseline_svm"
-) -> List[Tuple[str, float, str]]:
+def get_word_importance_baseline(text: str, model_name: str = "baseline_svm") -> List[Tuple[str, float, str]]:
     """
     Get word importance for baseline TF-IDF models.
     Uses TF-IDF scores for importance ranking and financial lexicon for sentiment direction.
@@ -112,10 +111,7 @@ def get_word_importance_baseline(
     return word_scores[:20]  # Top 20 words
 
 
-def explain_prediction_baseline(
-    text: str,
-    model_name: str = "baseline_svm"
-) -> dict:
+def explain_prediction_baseline(text: str, model_name: str = "baseline_svm") -> dict:
     """
     Explain a baseline model prediction with lexicon-enhanced word detection.
 
@@ -149,7 +145,7 @@ def explain_prediction_baseline(
     word_importance = get_word_importance_baseline(text, model_name)
 
     # Also get lexicon-based words directly from text
-    words_in_text = [re.sub(r'[^\w]', '', w.lower()) for w in text.split()]
+    words_in_text = [re.sub(r"[^\w]", "", w.lower()) for w in text.split()]
     words_in_text = [w for w in words_in_text if w]
 
     lexicon_positive = [w for w in words_in_text if w in FINANCIAL_POSITIVE]
@@ -199,7 +195,7 @@ def highlight_text(text: str, word_importance: List[Tuple[str, float, str]]) -> 
     colors = {
         "positive": "rgba(40, 167, 69, 0.2)",  # dark mode positive
         "negative": "rgba(220, 53, 69, 0.2)",  # dark mode negative
-        "neutral": "rgba(0, 123, 255, 0.2)",   # dark mode neutral
+        "neutral": "rgba(0, 123, 255, 0.2)",  # dark mode neutral
     }
 
     # Create word to color mapping
@@ -216,7 +212,9 @@ def highlight_text(text: str, word_importance: List[Tuple[str, float, str]]) -> 
         clean_word = re.sub(r"[^\w]", "", word.lower())
         if clean_word in word_colors:
             color = word_colors[clean_word]
-            highlighted.append(f'<span style="background-color: {color}; padding: 2px 4px; border-radius: 3px;">{word}</span>')
+            highlighted.append(
+                f'<span style="background-color: {color}; padding: 2px 4px; border-radius: 3px;">{word}</span>'
+            )
         else:
             highlighted.append(word)
 

@@ -4,15 +4,13 @@ Handles data loading, cleaning, and preparation for model training.
 """
 
 import re
+
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-from utils import get_project_root, setup_logging, LABEL_MAP, LABEL_MAP_INV
+from utils import LABEL_MAP, get_project_root, setup_logging
 
 logger = setup_logging(__name__)
-
-
-
 
 
 def load_raw_data(agreement_level: str = "AllAgree") -> pd.DataFrame:
@@ -115,12 +113,7 @@ def preprocess_dataframe(df: pd.DataFrame, clean: bool = True) -> pd.DataFrame:
     return df.reset_index(drop=True)
 
 
-def create_splits(
-    df: pd.DataFrame,
-    test_size: float = 0.2,
-    val_size: float = 0.5,
-    random_state: int = 42
-) -> tuple:
+def create_splits(df: pd.DataFrame, test_size: float = 0.2, val_size: float = 0.5, random_state: int = 42) -> tuple:
     """
     Create train/val/test splits.
 

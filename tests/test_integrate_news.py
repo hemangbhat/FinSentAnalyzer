@@ -5,8 +5,8 @@ Tests for the cross-dataset integration module (integrate_news.py).
 import sys
 from pathlib import Path
 
-import pytest
 import pandas as pd
+import pytest
 
 SRC_DIR = Path(__file__).parent.parent / "src"
 sys.path.insert(0, str(SRC_DIR))
@@ -22,11 +22,13 @@ class TestIntegrateNews:
     def test_news_data_path_exists(self):
         """The NEWS_DATA_DIR constant points to a valid directory."""
         from integrate_news import NEWS_DATA_DIR
+
         assert NEWS_DATA_DIR.exists(), f"News data directory not found: {NEWS_DATA_DIR}"
 
     def test_load_news_headlines(self):
         """News headlines load correctly with expected columns."""
         from integrate_news import load_news_headlines
+
         df = load_news_headlines()
         assert isinstance(df, pd.DataFrame)
         assert len(df) > 0, "News headlines DataFrame should not be empty"
@@ -39,6 +41,7 @@ class TestIntegrateNews:
     def test_load_stock_data(self):
         """Stock data loads correctly with expected columns."""
         from integrate_news import load_stock_data
+
         df = load_stock_data()
         assert isinstance(df, pd.DataFrame)
         assert len(df) > 0
@@ -49,6 +52,7 @@ class TestIntegrateNews:
     def test_predict_news_sentiment(self):
         """Sentiment predictions run successfully on news headlines."""
         from integrate_news import predict_news_sentiment
+
         model_path = Path(__file__).parent.parent / "models" / "baseline_svm.joblib"
         if not model_path.exists():
             pytest.skip("SVM model not trained yet — skipping prediction test")
@@ -61,7 +65,8 @@ class TestIntegrateNews:
 
     def test_compute_daily_sentiment(self):
         """Daily sentiment aggregation produces expected columns."""
-        from integrate_news import predict_news_sentiment, compute_daily_sentiment
+        from integrate_news import compute_daily_sentiment, predict_news_sentiment
+
         model_path = Path(__file__).parent.parent / "models" / "baseline_svm.joblib"
         if not model_path.exists():
             pytest.skip("SVM model not trained yet")
@@ -77,6 +82,7 @@ class TestIntegrateNews:
     def test_get_sentiment_trends(self):
         """Sentiment trends returns merged sentiment + price data."""
         from integrate_news import get_sentiment_trends
+
         model_path = Path(__file__).parent.parent / "models" / "baseline_svm.joblib"
         if not model_path.exists():
             pytest.skip("SVM model not trained yet")

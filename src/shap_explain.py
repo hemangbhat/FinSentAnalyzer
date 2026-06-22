@@ -9,15 +9,12 @@ Supports:
 """
 
 import json
-import logging
-from pathlib import Path
-from typing import Optional
 
-import numpy as np
 import joblib
+import numpy as np
 
-from utils import get_model_dir, get_results_dir, setup_logging, LABEL_MAP_INV
 from preprocess import load_processed_data
+from utils import LABEL_MAP_INV, get_model_dir, get_results_dir, setup_logging
 
 logger = setup_logging(__name__)
 
@@ -41,9 +38,7 @@ def get_shap_explanation(
     try:
         import shap
     except ImportError:
-        raise ImportError(
-            "SHAP is not installed. Install with: pip install shap"
-        )
+        raise ImportError("SHAP is not installed. Install with: pip install shap")
 
     model_path = get_model_dir() / f"baseline_{model_name}.joblib"
     if not model_path.exists():
@@ -57,7 +52,6 @@ def get_shap_explanation(
         df = df.sample(n=max_samples, random_state=42)
 
     X_text = df["sentence"].values
-    y_true = df["label"].values
 
     # Extract TF-IDF transformer and classifier from pipeline
     tfidf = pipeline.named_steps["tfidf"]
@@ -95,7 +89,7 @@ def get_shap_explanation(
                 probas = classifier.predict_proba(X_dense)
                 shap_values = []
                 for class_idx in range(3):
-                    class_weight = probas[:, class_idx:class_idx + 1]
+                    class_weight = probas[:, class_idx : class_idx + 1]
                     class_shap = X_dense * fi * class_weight
                     shap_values.append(class_shap)
             else:
@@ -122,7 +116,7 @@ def get_shap_explanation(
             explainer = shap.KernelExplainer(classifier.predict_proba, background)
         else:
             explainer = shap.KernelExplainer(classifier.decision_function, background)
-        shap_values = explainer.shap_values(X_tfidf.toarray()[:min(50, len(X_text))])
+        shap_values = explainer.shap_values(X_tfidf.toarray()[: min(50, len(X_text))])
 
     # Compute feature importance (mean absolute SHAP across all classes)
     if isinstance(shap_values, list):
@@ -136,10 +130,12 @@ def get_shap_explanation(
     top_indices = np.argsort(mean_abs_shap)[::-1][:30]
     top_features = []
     for idx in top_indices:
-        top_features.append({
-            "feature": str(feature_names[idx]),
-            "importance": float(mean_abs_shap[idx]),
-        })
+        top_features.append(
+            {
+                "feature": str(feature_names[idx]),
+                "importance": float(mean_abs_shap[idx]),
+            }
+        )
 
     # Per-class top features
     class_features = {}
@@ -207,8 +203,9 @@ def generate_shap_plot(model_name: str = "gradient_boosting", split: str = "test
         save: Whether to save the plot to results/
     """
     try:
-        import shap
         import matplotlib
+        import shap
+
         matplotlib.use("Agg")
         import matplotlib.pyplot as plt
     except ImportError:
@@ -233,7 +230,8 @@ def generate_shap_plot(model_name: str = "gradient_boosting", split: str = "test
 
         fig, ax = plt.subplots(figsize=(12, 8))
         shap.summary_plot(
-            shap_values, X_tfidf.toarray(),
+            shap_values,
+            X_tfidf.toarray(),
             feature_names=feature_names,
             class_names=[LABEL_MAP_INV[i] for i in range(3)],
             plot_type="bar",
@@ -260,8 +258,12 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="SHAP Explainability")
-    parser.add_argument("--model", type=str, default="gradient_boosting",
-                        help="Model to explain: gradient_boosting, random_forest, logreg, svm")
+    parser.add_argument(
+        "--model",
+        type=str,
+        default="gradient_boosting",
+        help="Model to explain: gradient_boosting, random_forest, logreg, svm",
+    )
     parser.add_argument("--split", type=str, default="test", help="Data split")
     parser.add_argument("--plot", action="store_true", help="Generate and save SHAP plot")
 

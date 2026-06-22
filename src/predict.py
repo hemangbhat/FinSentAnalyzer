@@ -3,16 +3,14 @@ Prediction module for Financial Sentiment Analysis.
 Single text and batch prediction support.
 """
 
-import json
 from pathlib import Path
+from typing import List, Union
 
 import joblib
-import pandas as pd
 import numpy as np
-from typing import Union, List
+import pandas as pd
 
-from utils import get_project_root, get_model_dir, setup_logging, LABEL_MAP_INV
-from preprocess import clean_text
+from utils import LABEL_MAP_INV, get_model_dir, setup_logging
 
 logger = setup_logging(__name__)
 
@@ -45,22 +43,22 @@ class SentimentPredictor:
         # Handle pre-trained FinBERT (no training needed)
         if self.is_pretrained_finbert:
             from finbert_pretrained import get_finbert
+
             self.model = get_finbert()
         elif self.is_transformer:
             from model import FinancialSentimentModel
+
             model_path = model_dir / f"{self.model_type}_finetuned"
             if not model_path.exists():
                 raise FileNotFoundError(
-                    f"Model not found: {model_path}. "
-                    f"Train with: python src/train.py --model {self.model_type}"
+                    f"Model not found: {model_path}. Train with: python src/train.py --model {self.model_type}"
                 )
             self.model = FinancialSentimentModel.load(model_path)
         else:
             model_path = model_dir / f"{self.model_type}.joblib"
             if not model_path.exists():
                 raise FileNotFoundError(
-                    f"Model not found: {model_path}. "
-                    f"Train with: python src/train.py --model baselines"
+                    f"Model not found: {model_path}. Train with: python src/train.py --model baselines"
                 )
             loaded = joblib.load(model_path)
 
@@ -103,7 +101,7 @@ class SentimentPredictor:
     def _predict_baseline(self, texts: List[str]) -> List[dict]:
         """Predict using baseline model."""
         # Handle ensemble model separately
-        if hasattr(self, 'is_ensemble') and self.is_ensemble:
+        if hasattr(self, "is_ensemble") and self.is_ensemble:
             return self._predict_ensemble(texts)
 
         # Get predictions
@@ -130,9 +128,7 @@ class SentimentPredictor:
 
             if probas is not None:
                 result["confidence"] = float(probas[i][pred])
-                result["probabilities"] = {
-                    LABEL_MAP_INV[j]: float(p) for j, p in enumerate(probas[i])
-                }
+                result["probabilities"] = {LABEL_MAP_INV[j]: float(p) for j, p in enumerate(probas[i])}
 
             results.append(result)
 
@@ -157,9 +153,7 @@ class SentimentPredictor:
                 "prediction": int(pred),
                 "label": LABEL_MAP_INV[pred],
                 "confidence": float(probas[i][pred]),
-                "probabilities": {
-                    LABEL_MAP_INV[j]: float(p) for j, p in enumerate(probas[i])
-                },
+                "probabilities": {LABEL_MAP_INV[j]: float(p) for j, p in enumerate(probas[i])},
             }
             results.append(result)
 
@@ -176,9 +170,7 @@ class SentimentPredictor:
                 "prediction": int(pred),
                 "label": LABEL_MAP_INV[pred],
                 "confidence": float(probas[i][pred]),
-                "probabilities": {
-                    LABEL_MAP_INV[j]: float(p) for j, p in enumerate(probas[i])
-                },
+                "probabilities": {LABEL_MAP_INV[j]: float(p) for j, p in enumerate(probas[i])},
             }
             results.append(result)
 
@@ -274,16 +266,11 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="Predict Financial Sentiment")
-    parser.add_argument("--text", type=str, default=None,
-                        help="Text to analyze")
-    parser.add_argument("--file", type=str, default=None,
-                        help="File to analyze (CSV or TXT)")
-    parser.add_argument("--model", type=str, default="baseline_svm",
-                        help="Model to use")
-    parser.add_argument("--output", type=str, default=None,
-                        help="Output file for batch predictions")
-    parser.add_argument("--list-models", action="store_true",
-                        help="List available models")
+    parser.add_argument("--text", type=str, default=None, help="Text to analyze")
+    parser.add_argument("--file", type=str, default=None, help="File to analyze (CSV or TXT)")
+    parser.add_argument("--model", type=str, default="baseline_svm", help="Model to use")
+    parser.add_argument("--output", type=str, default=None, help="Output file for batch predictions")
+    parser.add_argument("--list-models", action="store_true", help="List available models")
 
     args = parser.parse_args()
 
@@ -305,7 +292,7 @@ if __name__ == "__main__":
         predictor = SentimentPredictor(args.model)
         df = predictor.predict_file(args.file)
 
-        print(f"\nResults:")
+        print("\nResults:")
         print(df[["text", "predicted_label", "confidence"]].head(10))
 
         if args.output:

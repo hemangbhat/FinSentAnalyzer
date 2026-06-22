@@ -4,7 +4,7 @@ Generates human-readable explanations and market outlook summaries
 using word-importance data from trained models (no external LLM API required).
 """
 
-from typing import List, Dict, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 
 def generate_explanation_template(
@@ -40,10 +40,16 @@ def generate_explanation_template(
 
     if prediction == "positive":
         if pos_terms:
-            key_phrase = f"'{pos_terms[0]}'" if len(pos_terms) == 1 else \
-                        f"'{pos_terms[0]}' and '{pos_terms[1]}'" if len(pos_terms) == 2 else \
-                        f"'{pos_terms[0]}', '{pos_terms[1]}', and '{pos_terms[2]}'"
-            explanation = f"This text expresses **positive** sentiment with {confidence_desc} confidence ({confidence:.1%}). "
+            key_phrase = (
+                f"'{pos_terms[0]}'"
+                if len(pos_terms) == 1
+                else f"'{pos_terms[0]}' and '{pos_terms[1]}'"
+                if len(pos_terms) == 2
+                else f"'{pos_terms[0]}', '{pos_terms[1]}', and '{pos_terms[2]}'"
+            )
+            explanation = (
+                f"This text expresses **positive** sentiment with {confidence_desc} confidence ({confidence:.1%}). "
+            )
             explanation += f"The model identified key positive indicators: {key_phrase}. "
             if neg_terms:
                 explanation += f"While some cautionary terms like '{neg_terms[0]}' are present, "
@@ -56,10 +62,16 @@ def generate_explanation_template(
 
     elif prediction == "negative":
         if neg_terms:
-            key_phrase = f"'{neg_terms[0]}'" if len(neg_terms) == 1 else \
-                        f"'{neg_terms[0]}' and '{neg_terms[1]}'" if len(neg_terms) == 2 else \
-                        f"'{neg_terms[0]}', '{neg_terms[1]}', and '{neg_terms[2]}'"
-            explanation = f"This text expresses **negative** sentiment with {confidence_desc} confidence ({confidence:.1%}). "
+            key_phrase = (
+                f"'{neg_terms[0]}'"
+                if len(neg_terms) == 1
+                else f"'{neg_terms[0]}' and '{neg_terms[1]}'"
+                if len(neg_terms) == 2
+                else f"'{neg_terms[0]}', '{neg_terms[1]}', and '{neg_terms[2]}'"
+            )
+            explanation = (
+                f"This text expresses **negative** sentiment with {confidence_desc} confidence ({confidence:.1%}). "
+            )
             explanation += f"Key negative indicators include: {key_phrase}. "
             if pos_terms:
                 explanation += f"Despite some positive elements like '{pos_terms[0]}', "
@@ -71,7 +83,9 @@ def generate_explanation_template(
             explanation += "The overall tone suggests unfavorable sentiment or concerns."
 
     else:  # neutral
-        explanation = f"This text expresses **neutral** sentiment with {confidence_desc} confidence ({confidence:.1%}). "
+        explanation = (
+            f"This text expresses **neutral** sentiment with {confidence_desc} confidence ({confidence:.1%}). "
+        )
         if neu_terms:
             explanation += f"The model recognized factual/neutral terms like '{neu_terms[0]}'. "
         explanation += "The language is primarily informational without strong positive or negative bias. "
@@ -160,9 +174,13 @@ Based on analysis of **{total_texts} financial texts**, the market sentiment app
     if pos_count > 0 and neg_count > 0:
         ratio = pos_count / neg_count
         if ratio > 2:
-            report += f"- Positive-to-negative ratio is **{ratio:.1f}:1**, indicating predominantly optimistic coverage.\n"
+            report += (
+                f"- Positive-to-negative ratio is **{ratio:.1f}:1**, indicating predominantly optimistic coverage.\n"
+            )
         elif ratio < 0.5:
-            report += f"- Positive-to-negative ratio is **{ratio:.1f}:1**, indicating predominantly pessimistic coverage.\n"
+            report += (
+                f"- Positive-to-negative ratio is **{ratio:.1f}:1**, indicating predominantly pessimistic coverage.\n"
+            )
         else:
             report += f"- Positive-to-negative ratio is **{ratio:.1f}:1**, showing balanced sentiment distribution.\n"
 

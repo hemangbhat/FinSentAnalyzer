@@ -4,16 +4,16 @@ import logging
 from pathlib import Path
 
 from utils import (
-    get_project_root,
-    get_model_dir,
-    get_data_dir,
-    get_results_dir,
-    setup_logging,
+    BASELINE_CLASSIFIERS,
     LABEL_MAP,
     LABEL_MAP_INV,
-    BASELINE_CLASSIFIERS,
     TRANSFORMER_MODELS,
+    get_data_dir,
+    get_model_dir,
     get_model_info,
+    get_project_root,
+    get_results_dir,
+    setup_logging,
 )
 
 

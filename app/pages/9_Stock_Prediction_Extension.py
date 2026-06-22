@@ -11,8 +11,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 
-import streamlit as st  # pyre-ignore
 import plotly.graph_objects as go  # pyre-ignore
+import streamlit as st  # pyre-ignore
 from plotly.subplots import make_subplots  # pyre-ignore
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -23,7 +23,6 @@ from stock_extension import (  # pyre-ignore
     result_to_summary_dict,
     run_stock_prediction_extension,
 )
-
 
 st.set_page_config(page_title="Stock Prediction Extension", page_icon="📉", layout="wide")
 inject_css()
@@ -66,11 +65,15 @@ with st.expander("Pipeline steps", expanded=False):
 ctrl1, ctrl2, ctrl3, ctrl4 = st.columns(4)
 
 with ctrl1:
-    ticker = st.text_input(
-        "Ticker",
-        value="AAPL",
-        help="Any Yahoo Finance symbol (e.g., MSFT, NVDA, GOOGL, RELIANCE.NS, 7203.T)",
-    ).strip().upper()
+    ticker = (
+        st.text_input(
+            "Ticker",
+            value="AAPL",
+            help="Any Yahoo Finance symbol (e.g., MSFT, NVDA, GOOGL, RELIANCE.NS, 7203.T)",
+        )
+        .strip()
+        .upper()
+    )
 with ctrl2:
     days_back = st.slider("Days Back", min_value=30, max_value=365, value=90, step=5)
 with ctrl3:
@@ -83,6 +86,14 @@ with opt1:
     use_live_news = st.checkbox("Use live news (yfinance)", value=True)
 with opt2:
     use_sample_fallback = st.checkbox("Fallback to sample_news.csv", value=True)
+
+opt3, _ = st.columns(2)
+with opt3:
+    save_model = st.checkbox(
+        "Save trained LSTM weights",
+        value=False,
+        help="Persist weights to models/lstm_{TICKER}.pt (parity with the standalone train_model.py)",
+    )
 
 if st.button("Run Full Extension Pipeline", type="primary", use_container_width=True):
     try:
@@ -98,6 +109,7 @@ if st.button("Run Full Extension Pipeline", type="primary", use_container_width=
                 seq_len=seq_len,
                 use_live_news=use_live_news,
                 fallback_to_sample_news=use_sample_fallback,
+                save_model=save_model,
             )
             summary = result_to_summary_dict(result)
 
@@ -141,6 +153,22 @@ if st.button("Run Full Extension Pipeline", type="primary", use_container_width=
         with s3:
             st.metric("Sentiment Max", f"{daily_sentiment_max:.3f}")
 
+        test_acc = summary.get("test_accuracy")
+        saved_path = summary.get("model_path")
+        if test_acc is not None or saved_path:
+            t1, t2 = st.columns(2)
+            with t1:
+                st.metric(
+                    "LSTM Test Accuracy",
+                    f"{test_acc:.2%}" if test_acc is not None else "N/A",
+                )
+            with t2:
+                if saved_path:
+                    st.metric("Model Saved", "Yes")
+                    st.caption(f"Weights: {saved_path}")
+                else:
+                    st.metric("Model Saved", "No")
+
         total_rows = max(1, int(summary["num_supervised_rows"]))
         nonzero_rows = nonzero_sentiment_rows
         zero_rows = total_rows - nonzero_rows
@@ -152,13 +180,7 @@ if st.button("Run Full Extension Pipeline", type="primary", use_container_width=
                     "The pipeline used neutral fallback values."
                 )
             elif "sentiment_label" in result.headlines.columns and not result.headlines.empty:
-                all_neutral = (
-                    result.headlines["sentiment_label"]
-                    .astype(str)
-                    .str.upper()
-                    .str.contains("NEUTRAL")
-                    .all()
-                )
+                all_neutral = result.headlines["sentiment_label"].astype(str).str.upper().str.contains("NEUTRAL").all()
                 if all_neutral:
                     st.info("daily_sentiment is 0 because matched headlines were classified as NEUTRAL by FinBERT.")
                 else:
@@ -199,8 +221,7 @@ if st.button("Run Full Extension Pipeline", type="primary", use_container_width=
         )
 
         sentiment_colors = [
-            "#10b981" if value > 0 else "#ef4444" if value < 0 else "#64748b"
-            for value in trend_data["daily_sentiment"]
+            "#10b981" if value > 0 else "#ef4444" if value < 0 else "#64748b" for value in trend_data["daily_sentiment"]
         ]
 
         fig.add_trace(

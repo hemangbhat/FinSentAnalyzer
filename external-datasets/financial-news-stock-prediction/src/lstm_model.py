@@ -72,6 +72,7 @@ class LSTMTrainingResult:
     scaler: StandardScaler
     feature_columns: Sequence[str]
     seq_len: int
+    test_accuracy: float | None = None
 
 
 # =========================
@@ -154,19 +155,21 @@ def train_lstm_on_dataframe(
     # =========================
     # EVALUATION
     # =========================
+    test_accuracy: float | None = None
     if x_test_seq is not None:
         model.eval()
         with torch.no_grad():
             logits = model(x_test_seq.to(DEVICE))
             preds = logits.argmax(dim=1).cpu()
-            test_acc = (preds == y_test_seq).float().mean().item()
-            print(f"Test Accuracy: {test_acc:.4f}")
+            test_accuracy = (preds == y_test_seq).float().mean().item()
+            print(f"Test Accuracy: {test_accuracy:.4f}")
 
     return LSTMTrainingResult(
         model=model,
         scaler=scaler,
         feature_columns=list(feature_columns),
         seq_len=seq_len,
+        test_accuracy=test_accuracy,
     )
 
 

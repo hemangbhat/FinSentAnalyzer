@@ -16,7 +16,6 @@ from pathlib import Path
 # Ensure src is importable
 sys.path.insert(0, str(Path(__file__).parent))
 
-import numpy as np
 import pandas as pd
 from sklearn.metrics import (
     accuracy_score,
@@ -25,7 +24,7 @@ from sklearn.metrics import (
     recall_score,
 )
 
-from utils import get_project_root, get_results_dir, LABEL_MAP, setup_logging
+from utils import get_project_root, get_results_dir, setup_logging
 
 logger = setup_logging(__name__)
 

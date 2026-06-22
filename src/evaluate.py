@@ -4,21 +4,22 @@ Comprehensive model evaluation with metrics, confusion matrix, and comparison.
 """
 
 import json
+
 import joblib
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 from sklearn.metrics import (
+    ConfusionMatrixDisplay,
     accuracy_score,
+    classification_report,
+    confusion_matrix,
     f1_score,
     precision_score,
     recall_score,
-    classification_report,
-    confusion_matrix,
-    ConfusionMatrixDisplay,
 )
 
-from utils import get_project_root, get_model_dir, get_results_dir, setup_logging, LABEL_MAP_INV
 from preprocess import load_processed_data
+from utils import LABEL_MAP_INV, get_model_dir, get_results_dir, setup_logging
 
 logger = setup_logging(__name__)
 
@@ -114,11 +115,11 @@ def compute_metrics(y_true: np.ndarray, y_pred: np.ndarray, model_name: str = ""
 
 def print_evaluation_report(metrics: dict):
     """Print a formatted evaluation report."""
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"EVALUATION REPORT: {metrics.get('name', 'Unknown Model')}")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
-    print(f"\nOverall Metrics:")
+    print("\nOverall Metrics:")
     print(f"  Accuracy:           {metrics['accuracy']:.4f}")
     print(f"  F1 Score (macro):   {metrics['f1_macro']:.4f}")
     print(f"  F1 Score (weight):  {metrics['f1_weighted']:.4f}")
@@ -126,7 +127,7 @@ def print_evaluation_report(metrics: dict):
     print(f"  Recall (macro):     {metrics['recall_macro']:.4f}")
 
     target_names = [LABEL_MAP_INV[i] for i in sorted(LABEL_MAP_INV.keys())]
-    print(f"\nPer-Class Report:")
+    print("\nPer-Class Report:")
     print(classification_report(metrics["y_true"], metrics["y_pred"], target_names=target_names))
 
 
@@ -206,8 +207,10 @@ def compare_models(model_names: list = None, split: str = "test") -> list:
         print("-" * 80)
 
         for r in sorted(results, key=lambda x: x["f1_macro"], reverse=True):
-            print(f"{r['name']:<25} {r['accuracy']:<10.4f} {r['f1_macro']:<12.4f} "
-                  f"{r['precision_macro']:<12.4f} {r['recall_macro']:<10.4f}")
+            print(
+                f"{r['name']:<25} {r['accuracy']:<10.4f} {r['f1_macro']:<12.4f} "
+                f"{r['precision_macro']:<12.4f} {r['recall_macro']:<10.4f}"
+            )
 
         best = max(results, key=lambda x: x["f1_macro"])
         print(f"\nBest model: {best['name']} (F1 macro: {best['f1_macro']:.4f})")
@@ -247,11 +250,11 @@ def error_analysis(model_name: str = "baseline_svm", split: str = "test", num_sa
     misclassified_idx = np.where(y_true != y_pred)[0]
     total_errors = len(misclassified_idx)
 
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"ERROR ANALYSIS: {model_name}")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
     print(f"Total samples: {len(y_true)}")
-    print(f"Misclassified: {total_errors} ({total_errors/len(y_true)*100:.1f}%)")
+    print(f"Misclassified: {total_errors} ({total_errors / len(y_true) * 100:.1f}%)")
 
     # Analyze error patterns by class
     error_matrix = {}
@@ -264,7 +267,7 @@ def error_analysis(model_name: str = "baseline_svm", split: str = "test", num_sa
                 if count > 0:
                     error_matrix[key] = count
 
-    print(f"\nError patterns:")
+    print("\nError patterns:")
     for pattern, count in sorted(error_matrix.items(), key=lambda x: x[1], reverse=True):
         print(f"  {pattern}: {count}")
 
@@ -278,17 +281,19 @@ def error_analysis(model_name: str = "baseline_svm", split: str = "test", num_sa
         pred_label = LABEL_MAP_INV[y_pred[idx]]
         text = texts[idx][:80] + "..." if len(texts[idx]) > 80 else texts[idx]
 
-        print(f"{i+1}. True: {true_label:<10} Pred: {pred_label:<10}")
+        print(f"{i + 1}. True: {true_label:<10} Pred: {pred_label:<10}")
         print(f"   Text: {text}")
 
-        samples.append({
-            "text": texts[idx],
-            "true_label": true_label,
-            "pred_label": pred_label,
-        })
+        samples.append(
+            {
+                "text": texts[idx],
+                "true_label": true_label,
+                "pred_label": pred_label,
+            }
+        )
 
     # Identify common patterns
-    print(f"\nKey insights:")
+    print("\nKey insights:")
     if "neutral_as_positive" in error_matrix or "neutral_as_negative" in error_matrix:
         print("  - Neutral class is often confused with positive/negative")
     if "positive_as_neutral" in error_matrix:
@@ -329,16 +334,11 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="Evaluate Financial Sentiment Models")
-    parser.add_argument("--model", type=str, default=None,
-                        help="Model to evaluate (None = all available)")
-    parser.add_argument("--split", type=str, default="test",
-                        help="Data split: val or test")
-    parser.add_argument("--save", action="store_true",
-                        help="Save results to JSON")
-    parser.add_argument("--plot", action="store_true",
-                        help="Plot confusion matrices")
-    parser.add_argument("--errors", action="store_true",
-                        help="Run error analysis")
+    parser.add_argument("--model", type=str, default=None, help="Model to evaluate (None = all available)")
+    parser.add_argument("--split", type=str, default="test", help="Data split: val or test")
+    parser.add_argument("--save", action="store_true", help="Save results to JSON")
+    parser.add_argument("--plot", action="store_true", help="Plot confusion matrices")
+    parser.add_argument("--errors", action="store_true", help="Run error analysis")
 
     args = parser.parse_args()
 

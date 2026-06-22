@@ -1,11 +1,11 @@
 """Tests for src/llm_enhanced.py (Rule-Based Reasoning Engine)"""
 
 from llm_enhanced import (
+    ChainOfThought,
     ChainOfThoughtReasoner,
     EliteExplanationGenerator,
-    ChainOfThought,
-    ThoughtStep,
     ReasoningStep,
+    ThoughtStep,
     generate_elite_market_outlook,
 )
 

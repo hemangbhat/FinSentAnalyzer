@@ -15,7 +15,7 @@ from typing import Any, Dict, Optional
 
 import pandas as pd
 
-from utils import get_project_root, setup_logging
+from utils import get_model_dir, get_project_root, setup_logging
 
 logger = setup_logging(__name__)
 
@@ -43,6 +43,8 @@ class StockPredictionExtensionResult:
     num_nonzero_sentiment_rows: int = 0
     daily_sentiment_min: float = 0.0
     daily_sentiment_max: float = 0.0
+    model_path: Optional[str] = None
+    test_accuracy: Optional[float] = None
 
 
 def get_stock_project_root() -> Path:
@@ -54,6 +56,43 @@ def get_stock_project_root() -> Path:
             "Expected folder: external-datasets/financial-news-stock-prediction"
         )
     return stock_root
+
+
+def get_lstm_model_path(ticker: str) -> Path:
+    """
+    Return the on-disk path where the trained LSTM weights for a ticker live.
+
+    Mirrors the naming convention used by the nested project's
+    models/train_model.py (lstm_{TICKER}.pt) but stores inside the main
+    project's models/ directory so the artifact is versioned with the app.
+    """
+    ticker = ticker.upper().strip()
+    return get_model_dir() / f"lstm_{ticker}.pt"
+
+
+def _save_trained_model(training_result: Any, ticker: str) -> Optional[str]:
+    """
+    Persist trained LSTM weights to disk (parity with train_model.py).
+
+    Returns the saved path as a string, or None when the training result does
+    not expose a real torch model (e.g. when running with stubbed components
+    in tests). Never raises — persistence is best-effort.
+    """
+    model = getattr(training_result, "model", None)
+    if model is None or not hasattr(model, "state_dict"):
+        logger.info("Skipping model save: training result has no persistable torch model.")
+        return None
+
+    try:
+        import torch  # local import keeps torch optional for stubbed/test runs
+
+        model_path = get_lstm_model_path(ticker)
+        torch.save(model.state_dict(), model_path)
+        logger.info("Saved trained LSTM weights to %s", model_path)
+        return str(model_path)
+    except Exception as exc:  # pragma: no cover - depends on torch runtime
+        logger.warning("Failed to save trained model for %s: %s", ticker, exc)
+        return None
 
 
 def _ensure_stock_project_import_path() -> Path:
@@ -225,7 +264,11 @@ def _align_sentiment_to_prices(
 
     # Poor overlap — redistribute sentiment across price dates
     sentiment_values = daily_sentiment["daily_sentiment"].values
-    headline_counts = daily_sentiment["num_headlines"].values if "num_headlines" in daily_sentiment.columns else [1] * len(sentiment_values)
+    headline_counts = (
+        daily_sentiment["num_headlines"].values
+        if "num_headlines" in daily_sentiment.columns
+        else [1] * len(sentiment_values)
+    )
 
     if len(sentiment_values) == 0:
         return daily_sentiment
@@ -236,11 +279,13 @@ def _align_sentiment_to_prices(
     aligned_sentiment = [float(sentiment_values[i % n_sent]) for i in range(n_prices)]
     aligned_counts = [int(headline_counts[i % n_sent]) for i in range(n_prices)]
 
-    return pd.DataFrame({
-        "date": price_dates,
-        "daily_sentiment": aligned_sentiment,
-        "num_headlines": aligned_counts,
-    })
+    return pd.DataFrame(
+        {
+            "date": price_dates,
+            "daily_sentiment": aligned_sentiment,
+            "num_headlines": aligned_counts,
+        }
+    )
 
 
 def _compute_sentiment_coverage(supervised: pd.DataFrame) -> tuple[int, float, float]:
@@ -262,6 +307,7 @@ def run_stock_prediction_extension(
     seq_len: int = 5,
     use_live_news: bool = True,
     fallback_to_sample_news: bool = True,
+    save_model: bool = False,
 ) -> StockPredictionExtensionResult:
     """
     Run the full stock prediction extension pipeline end-to-end.
@@ -381,6 +427,11 @@ def run_stock_prediction_extension(
     direction = "UP" if pred_label == 1 else "DOWN"
     nonzero_rows, sentiment_min, sentiment_max = _compute_sentiment_coverage(supervised)
 
+    saved_model_path = _save_trained_model(training_result, ticker) if save_model else None
+    test_accuracy = getattr(training_result, "test_accuracy", None)
+    if test_accuracy is not None:
+        test_accuracy = float(test_accuracy)
+
     return StockPredictionExtensionResult(
         ticker=ticker,
         start_date=str(start_date),
@@ -399,6 +450,8 @@ def run_stock_prediction_extension(
         num_nonzero_sentiment_rows=nonzero_rows,
         daily_sentiment_min=sentiment_min,
         daily_sentiment_max=sentiment_max,
+        model_path=saved_model_path,
+        test_accuracy=test_accuracy,
     )
 
 
@@ -418,6 +471,8 @@ def result_to_summary_dict(result: StockPredictionExtensionResult) -> Dict[str, 
         "num_nonzero_sentiment_rows": result.num_nonzero_sentiment_rows,
         "daily_sentiment_min": result.daily_sentiment_min,
         "daily_sentiment_max": result.daily_sentiment_max,
+        "model_path": result.model_path,
+        "test_accuracy": result.test_accuracy,
     }
 
 
@@ -431,6 +486,9 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--seq-len", type=int, default=5, help="LSTM sequence length")
     parser.add_argument("--no-live-news", action="store_true", help="Disable live yfinance news fetch")
     parser.add_argument("--no-sample-fallback", action="store_true", help="Disable sample news fallback")
+    parser.add_argument(
+        "--save-model", action="store_true", help="Persist trained LSTM weights to models/lstm_{TICKER}.pt"
+    )
     return parser
 
 
@@ -446,6 +504,7 @@ if __name__ == "__main__":
         seq_len=args.seq_len,
         use_live_news=not args.no_live_news,
         fallback_to_sample_news=not args.no_sample_fallback,
+        save_model=args.save_model,
     )
 
     summary = result_to_summary_dict(output)

@@ -3,20 +3,20 @@ Model definitions for Financial Sentiment Analysis.
 Includes FinBERT and other transformer models.
 """
 
-import torch
-import torch.nn as nn
 from pathlib import Path
-from torch.utils.data import Dataset, DataLoader
+
+import numpy as np
+import torch
+from sklearn.metrics import accuracy_score, classification_report, f1_score
+from torch.utils.data import DataLoader, Dataset
+from tqdm import tqdm
 from transformers import (
-    AutoTokenizer,
     AutoModelForSequenceClassification,
+    AutoTokenizer,
     get_linear_schedule_with_warmup,
 )
-from sklearn.metrics import accuracy_score, f1_score, classification_report
-import numpy as np
-from tqdm import tqdm
 
-from utils import get_project_root, setup_logging, LABEL_MAP_INV
+from utils import LABEL_MAP_INV, get_project_root, setup_logging
 
 logger = setup_logging(__name__)
 
@@ -27,7 +27,6 @@ MODELS = {
     "roberta": "roberta-base",
     "bert": "bert-base-uncased",
 }
-
 
 
 class SentimentDataset(Dataset):
@@ -136,7 +135,7 @@ class FinancialSentimentModel:
             self.model.train()
             train_loss = 0
 
-            progress = tqdm(train_loader, desc=f"Epoch {epoch+1}/{epochs}")
+            progress = tqdm(train_loader, desc=f"Epoch {epoch + 1}/{epochs}")
             for batch in progress:
                 optimizer.zero_grad()
 
@@ -167,8 +166,11 @@ class FinancialSentimentModel:
 
             logger.info(
                 "Epoch %d: Train Loss=%.4f, Val Loss=%.4f, Val Acc=%.4f, Val F1=%.4f",
-                epoch + 1, avg_train_loss, val_metrics['loss'],
-                val_metrics['accuracy'], val_metrics['f1_macro'],
+                epoch + 1,
+                avg_train_loss,
+                val_metrics["loss"],
+                val_metrics["accuracy"],
+                val_metrics["f1_macro"],
             )
 
         return history
@@ -325,16 +327,15 @@ def train_transformer(
     # Create and train model
     model = FinancialSentimentModel(model_name)
     history = model.train(
-        X_train, y_train, X_val, y_val,
-        epochs=epochs, batch_size=batch_size, learning_rate=learning_rate
+        X_train, y_train, X_val, y_val, epochs=epochs, batch_size=batch_size, learning_rate=learning_rate
     )
 
     # Final evaluation
     logger.info("\nFinal Validation Results:")
     metrics = model.evaluate(X_val, y_val)
-    logger.info("  Accuracy:    %.4f", metrics['accuracy'])
-    logger.info("  F1 (macro):  %.4f", metrics['f1_macro'])
-    logger.info("  F1 (weight): %.4f", metrics['f1_weighted'])
+    logger.info("  Accuracy:    %.4f", metrics["accuracy"])
+    logger.info("  F1 (macro):  %.4f", metrics["f1_macro"])
+    logger.info("  F1 (weight): %.4f", metrics["f1_weighted"])
 
     target_names = [LABEL_MAP_INV[i] for i in sorted(LABEL_MAP_INV.keys())]
     logger.info("\nClassification Report:")

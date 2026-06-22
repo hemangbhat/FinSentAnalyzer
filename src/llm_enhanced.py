@@ -10,18 +10,17 @@ external LLM API). It is designed for transparent, reproducible, and
 latency-free reasoning that can be audited step-by-step.
 """
 
-from typing import List, Dict, Optional, Any, Tuple
+import re
 from dataclasses import dataclass, field
 from enum import Enum
-import re
-import json
+from typing import Any, Dict, List, Optional, Tuple
 
 # Import advanced NLP module
 try:
     from nlp_advanced import (
         FinancialTextAnalyzer,
-        TextFeatures,
     )
+
     NLP_AVAILABLE = True
 except ImportError:
     NLP_AVAILABLE = False
@@ -29,10 +28,11 @@ except ImportError:
 # Import lexicons directly
 try:
     from lexicons import (
-        FINANCIAL_POSITIVE,
         FINANCIAL_NEGATIVE,
+        FINANCIAL_POSITIVE,
         FINANCIAL_UNCERTAINTY,
     )
+
     LEXICON_AVAILABLE = True
 except ImportError:
     LEXICON_AVAILABLE = False
@@ -42,8 +42,10 @@ except ImportError:
 # DATA STRUCTURES
 # =============================================================================
 
+
 class ReasoningStep(Enum):
     """Steps in chain-of-thought reasoning."""
+
     COMPREHENSION = "comprehension"
     ENTITY_EXTRACTION = "entity_extraction"
     SENTIMENT_DETECTION = "sentiment_detection"
@@ -55,6 +57,7 @@ class ReasoningStep(Enum):
 @dataclass
 class ThoughtStep:
     """A single step in the reasoning chain."""
+
     step: ReasoningStep
     observation: str
     reasoning: str
@@ -74,6 +77,7 @@ class ThoughtStep:
 @dataclass
 class ChainOfThought:
     """Complete chain-of-thought analysis."""
+
     text: str
     steps: List[ThoughtStep] = field(default_factory=list)
     final_sentiment: str = "neutral"
@@ -107,6 +111,7 @@ class ChainOfThought:
 # CHAIN-OF-THOUGHT REASONING ENGINE
 # =============================================================================
 
+
 class ChainOfThoughtReasoner:
     """
     Structured chain-of-thought reasoning for financial sentiment analysis.
@@ -127,8 +132,9 @@ class ChainOfThoughtReasoner:
         else:
             self.nlp_analyzer = None
 
-    def analyze(self, text: str, model_prediction: Optional[str] = None,
-                model_confidence: Optional[float] = None) -> ChainOfThought:
+    def analyze(
+        self, text: str, model_prediction: Optional[str] = None, model_confidence: Optional[float] = None
+    ) -> ChainOfThought:
         """
         Perform chain-of-thought analysis on financial text.
 
@@ -188,7 +194,7 @@ class ChainOfThoughtReasoner:
             text_type = "general financial news"
 
         # Count sentences
-        sentence_count = len(re.findall(r'[.!?]+', text)) or 1
+        sentence_count = len(re.findall(r"[.!?]+", text)) or 1
         word_count = len(text.split())
 
         observation = f"Text is {word_count} words, {sentence_count} sentence(s), discussing {text_type}"
@@ -206,19 +212,19 @@ class ChainOfThoughtReasoner:
     def _step_entity_extraction(self, text: str) -> ThoughtStep:
         """Step 2: Extract key financial entities."""
         entities = {
-            "percentages": re.findall(r'[-+]?\d+(?:\.\d+)?%', text),
-            "currency": re.findall(r'\$\d+(?:\.\d+)?(?:\s*(?:million|billion|trillion|[MBT]))?\b', text, re.I),
-            "companies": re.findall(r'\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\s+(?:Inc|Corp|Ltd|LLC|Co)\.?\b', text),
+            "percentages": re.findall(r"[-+]?\d+(?:\.\d+)?%", text),
+            "currency": re.findall(r"\$\d+(?:\.\d+)?(?:\s*(?:million|billion|trillion|[MBT]))?\b", text, re.I),
+            "companies": re.findall(r"\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\s+(?:Inc|Corp|Ltd|LLC|Co)\.?\b", text),
         }
 
         total_entities = sum(len(v) for v in entities.values())
 
         observation = f"Found {total_entities} financial entities: {len(entities['percentages'])} percentages, {len(entities['currency'])} currency amounts"
 
-        if entities['percentages']:
+        if entities["percentages"]:
             # Analyze percentage direction
-            positive_pcts = [p for p in entities['percentages'] if not p.startswith('-')]
-            negative_pcts = [p for p in entities['percentages'] if p.startswith('-')]
+            positive_pcts = [p for p in entities["percentages"] if not p.startswith("-")]
+            negative_pcts = [p for p in entities["percentages"] if p.startswith("-")]
             reasoning = f"Percentages: {entities['percentages']}. "
             if negative_pcts:
                 reasoning += f"Negative percentages ({negative_pcts}) suggest decline. "
@@ -240,7 +246,7 @@ class ChainOfThoughtReasoner:
     def _step_sentiment_detection(self, text: str) -> ThoughtStep:
         """Step 3: Detect sentiment signals."""
         # Strip punctuation from words before matching against lexicon
-        words = [re.sub(r'[^\w]', '', w.lower()) for w in text.split()]
+        words = [re.sub(r"[^\w]", "", w.lower()) for w in text.split()]
         words = [w for w in words if w]  # Remove empty strings
 
         # Count sentiment words
@@ -250,8 +256,34 @@ class ChainOfThoughtReasoner:
 
         # Fallback if NLP not available
         if not LEXICON_AVAILABLE:
-            positive_words = {"growth", "strong", "profit", "gain", "increase", "beat", "success", "improve", "positive", "rise", "record", "exceed"}
-            negative_words = {"loss", "decline", "fall", "weak", "miss", "fail", "drop", "negative", "concern", "down", "risk", "cut"}
+            positive_words = {
+                "growth",
+                "strong",
+                "profit",
+                "gain",
+                "increase",
+                "beat",
+                "success",
+                "improve",
+                "positive",
+                "rise",
+                "record",
+                "exceed",
+            }
+            negative_words = {
+                "loss",
+                "decline",
+                "fall",
+                "weak",
+                "miss",
+                "fail",
+                "drop",
+                "negative",
+                "concern",
+                "down",
+                "risk",
+                "cut",
+            }
             uncertainty_words = {"may", "might", "could", "expect", "forecast", "uncertain", "potential", "possible"}
             positive_found = [w for w in words if w in positive_words]
             negative_found = [w for w in words if w in negative_words]
@@ -281,7 +313,9 @@ class ChainOfThoughtReasoner:
             reasoning = "No strong sentiment direction; balanced or factual language"
 
         if unc_count > 2:
-            reasoning += f". High uncertainty ({uncertainty_found[:2]}) suggests forward-looking or speculative content."
+            reasoning += (
+                f". High uncertainty ({uncertainty_found[:2]}) suggests forward-looking or speculative content."
+            )
 
         conclusion = f"Dominant signal: {dominant}"
 
@@ -315,11 +349,15 @@ class ChainOfThoughtReasoner:
         if negation_found:
             reasoning_parts.append(f"Negations ({negation_found[:2]}) may invert sentiment of adjacent words")
         if comparison_found:
-            reasoning_parts.append(f"Comparative language suggests relative performance assessment")
+            reasoning_parts.append("Comparative language suggests relative performance assessment")
         if future_focused:
             reasoning_parts.append("Forward-looking language indicates predictions/expectations")
 
-        reasoning = ". ".join(reasoning_parts) if reasoning_parts else "Standard declarative context without significant modifiers"
+        reasoning = (
+            ". ".join(reasoning_parts)
+            if reasoning_parts
+            else "Standard declarative context without significant modifiers"
+        )
 
         impact = "high" if negation_found else "medium" if comparison_found or future_focused else "low"
         conclusion = f"Context impact: {impact}"
@@ -332,8 +370,9 @@ class ChainOfThoughtReasoner:
             confidence=0.75,
         )
 
-    def _step_confidence_calibration(self, text: str, steps: List[ThoughtStep],
-                                     model_confidence: Optional[float] = None) -> ThoughtStep:
+    def _step_confidence_calibration(
+        self, text: str, steps: List[ThoughtStep], model_confidence: Optional[float] = None
+    ) -> ThoughtStep:
         """Step 5: Calibrate confidence based on all factors."""
         # Calculate base confidence from step confidences
         avg_step_confidence = sum(s.confidence for s in steps) / len(steps) if steps else 0.5
@@ -381,8 +420,7 @@ class ChainOfThoughtReasoner:
             confidence=final_confidence,
         )
 
-    def _step_final_synthesis(self, steps: List[ThoughtStep],
-                             model_prediction: Optional[str] = None) -> ThoughtStep:
+    def _step_final_synthesis(self, steps: List[ThoughtStep], model_prediction: Optional[str] = None) -> ThoughtStep:
         """Step 6: Synthesize all analysis into final verdict."""
         # Get key conclusions from each step
         sentiment_step = next((s for s in steps if s.step == ReasoningStep.SENTIMENT_DETECTION), None)
@@ -428,7 +466,9 @@ class ChainOfThoughtReasoner:
         if context_step:
             reasoning_parts.append(f"Context analysis: {context_step.conclusion}")
         if model_prediction:
-            reasoning_parts.append(f"Model prediction: {model_prediction} ({'agrees' if model_prediction.lower() == dominant else 'disagrees'})")
+            reasoning_parts.append(
+                f"Model prediction: {model_prediction} ({'agrees' if model_prediction.lower() == dominant else 'disagrees'})"
+            )
         reasoning = "; ".join(reasoning_parts)
 
         conclusion = f"{dominant.upper()}: Final sentiment with {final_confidence:.1%} confidence"
@@ -444,7 +484,6 @@ class ChainOfThoughtReasoner:
     def _generate_explanation(self, cot: ChainOfThought) -> str:
         """Generate human-readable explanation from chain of thought."""
         # Get key information
-        final_step = cot.steps[-1] if cot.steps else None
         sentiment_step = next((s for s in cot.steps if s.step == ReasoningStep.SENTIMENT_DETECTION), None)
 
         sentiment = cot.final_sentiment.upper()
@@ -471,11 +510,11 @@ class ChainOfThoughtReasoner:
             if step.step == ReasoningStep.SENTIMENT_DETECTION:
                 # Extract sentiment words mentioned
                 if "positive words" in step.reasoning.lower():
-                    match = re.search(r'\[([^\]]+)\]', step.reasoning)
+                    match = re.search(r"\[([^\]]+)\]", step.reasoning)
                     if match:
                         factors.append(f"Positive indicators: {match.group(1)}")
                 if "negative words" in step.reasoning.lower():
-                    match = re.search(r'\[([^\]]+)\]', step.reasoning)
+                    match = re.search(r"\[([^\]]+)\]", step.reasoning)
                     if match:
                         factors.append(f"Negative indicators: {match.group(1)}")
 
@@ -501,6 +540,7 @@ class ChainOfThoughtReasoner:
 # =============================================================================
 # ENHANCED EXPLANATION GENERATOR
 # =============================================================================
+
 
 class EliteExplanationGenerator:
     """
@@ -635,6 +675,7 @@ class EliteExplanationGenerator:
 # MARKET OUTLOOK GENERATOR (ENHANCED)
 # =============================================================================
 
+
 def generate_elite_market_outlook(
     texts: List[str],
     predictions: List[str],
@@ -706,9 +747,7 @@ def generate_elite_market_outlook(
             "neutral_percentage": neu_count / total * 100 if total else 0,
             "average_confidence": avg_confidence,
         },
-        "narrative": _generate_outlook_narrative(
-            trend_desc, pos_count, neg_count, neu_count, total, avg_confidence
-        ),
+        "narrative": _generate_outlook_narrative(trend_desc, pos_count, neg_count, neu_count, total, avg_confidence),
     }
 
     # Add sample reasoning if requested
@@ -719,11 +758,13 @@ def generate_elite_market_outlook(
         sample_analyses = []
         for i in range(sample_size):
             cot = reasoner.analyze(texts[i], predictions[i], confidences[i])
-            sample_analyses.append({
-                "text": texts[i][:100] + "..." if len(texts[i]) > 100 else texts[i],
-                "prediction": predictions[i],
-                "key_factors": cot.key_factors[:3],
-            })
+            sample_analyses.append(
+                {
+                    "text": texts[i][:100] + "..." if len(texts[i]) > 100 else texts[i],
+                    "prediction": predictions[i],
+                    "key_factors": cot.key_factors[:3],
+                }
+            )
         report["sample_analyses"] = sample_analyses
 
     return report
@@ -756,7 +797,9 @@ def _generate_outlook_narrative(
     elif neg_pct > pos_pct + 10:
         narrative += f"- Negative sentiment ({neg_pct:.1f}%) outweighs positive ({pos_pct:.1f}%)\n"
     else:
-        narrative += f"- Sentiment is relatively balanced between positive ({pos_pct:.1f}%) and negative ({neg_pct:.1f}%)\n"
+        narrative += (
+            f"- Sentiment is relatively balanced between positive ({pos_pct:.1f}%) and negative ({neg_pct:.1f}%)\n"
+        )
 
     if confidence > 0.8:
         narrative += f"- **High confidence** ({confidence:.1%}) in classifications suggests clear sentiment signals\n"
@@ -790,6 +833,7 @@ def _generate_outlook_narrative(
 # =============================================================================
 # BACKWARD COMPATIBILITY
 # =============================================================================
+
 
 def generate_explanation_template(
     text: str,
@@ -858,7 +902,7 @@ if __name__ == "__main__":
     reasoner = ChainOfThoughtReasoner()
 
     for text in test_texts:
-        print(f"\n{'='*80}")
+        print(f"\n{'=' * 80}")
         print(f"TEXT: {text[:70]}...")
         print("=" * 80)
 
