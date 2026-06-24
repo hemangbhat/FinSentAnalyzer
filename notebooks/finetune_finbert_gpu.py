@@ -152,13 +152,24 @@ else:
 os.chdir(REPO_DIR)
 sys.path.insert(0, os.path.join(REPO_DIR, "src"))
 
-# Sanity-check: confirm we have the fixed notebook.
+# Print the exact commit so it's visible in the output.
+commit = subprocess.run(
+    ["git", "-C", REPO_DIR, "log", "-1", "--oneline"], capture_output=True, text=True
+).stdout.strip()
+print("[ok] Repo commit:", commit)
+
+# Sanity-check: confirm we have the fixed files.
 nb = Path("notebooks/finetune_finbert_gpu.py").read_text()
+model_py_text = Path("src/model.py").read_text()
 assert "capture_output=True" in nb, (
-    "Old notebook detected — clone/reset failed. Try deleting the repo folder and re-running."
+    f"Old notebook in repo! Current commit: {commit}. Delete the repo folder and re-run."
 )
-assert "protobuf" in nb, "Old notebook detected — missing protobuf dep."
-print("[ok] Notebook version verified (capture_output + protobuf present)")
+assert "protobuf" in nb, f"Old notebook — missing protobuf dep. Commit: {commit}"
+assert "deberta_family" in model_py_text, (
+    f"Old model.py — DeBERTa AMP fix missing! Commit: {commit}. "
+    "Expected commit c67cd4c5 or later. Delete /kaggle/working/FinSentAnalyzer and re-run from scratch."
+)
+print("[ok] Notebook v4 + model.py AMP fix verified")
 print("[ok] Working dir:", os.getcwd())
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -195,6 +206,18 @@ def finetune(model_name: str, epochs: int = 4, batch_size: int = 32) -> None:
     print(f"\n{'=' * 60}")
     print(f"FINE-TUNING: {model_name.upper()}  epochs={epochs}  batch={batch_size}")
     print("=" * 60)
+
+    # Belt-and-suspenders: patch model.py directly if the stale version
+    # is detected (use_amp still set to True unconditionally).
+    model_py = Path("src/model.py").read_text(encoding="utf-8")
+    if "deberta_family" not in model_py:
+        print("[warn] Stale model.py detected — patching AMP line in-process.")
+        model_py = model_py.replace(
+            'use_amp = self.device == "cuda"',
+            'deberta_family = {"deberta", "deberta-v3", "microsoft/deberta-v3-base"}\n        use_amp = self.device == "cuda" and self.model_name not in deberta_family',
+        )
+        Path("src/model.py").write_text(model_py, encoding="utf-8")
+        print("[ok] Patched AMP disable for DeBERTa family")
 
     result = subprocess.run(
         [
@@ -241,7 +264,7 @@ def finetune(model_name: str, epochs: int = 4, batch_size: int = 32) -> None:
 # NOTE: If FinBERT already ran and DeBERTa failed, set SKIP_FINBERT = True
 #       to skip the (already-done) FinBERT re-run and go straight to DeBERTa.
 # ─────────────────────────────────────────────────────────────────────────────
-SKIP_FINBERT = False  # <-- set True if FinBERT already ran this session
+SKIP_FINBERT = True  # <-- set True if FinBERT already ran this session
 
 if not SKIP_FINBERT:
     finetune("finbert", epochs=4, batch_size=32)
