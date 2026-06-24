@@ -1,5 +1,5 @@
 # ruff: noqa: E402
-# NOTEBOOK VERSION: v3  (capture_output + protobuf + batch=16 + hard-reset)
+# NOTEBOOK VERSION: v4  (DeBERTa AMP disabled — FP16/bf16 incompatibility fix)
 """
 FinBERT / DeBERTa GPU fine-tuning script — v2 (stronger recipe).
 
@@ -238,14 +238,31 @@ def finetune(model_name: str, epochs: int = 4, batch_size: int = 32) -> None:
 
 # ─────────────────────────────────────────────────────────────────────────────
 # CELL 7  Run both models
+# NOTE: If FinBERT already ran and DeBERTa failed, set SKIP_FINBERT = True
+#       to skip the (already-done) FinBERT re-run and go straight to DeBERTa.
 # ─────────────────────────────────────────────────────────────────────────────
-finetune("finbert", epochs=4, batch_size=32)
+SKIP_FINBERT = False  # <-- set True if FinBERT already ran this session
+
+if not SKIP_FINBERT:
+    finetune("finbert", epochs=4, batch_size=32)
+else:
+    # Recover FinBERT result from the previous run in this session.
+    fb_path = Path("results/finetune_results_finbert.json")
+    if fb_path.exists():
+        RESULTS["finbert"] = json.loads(fb_path.read_text())
+        print(
+            f"[ok] Recovered existing FinBERT result: acc={RESULTS['finbert']['accuracy']:.3f}  macro-F1={RESULTS['finbert']['f1_macro']:.3f}"
+        )
+    else:
+        print("[warn] No saved FinBERT result found — re-running FinBERT.")
+        finetune("finbert", epochs=4, batch_size=32)
 
 # Clear GPU memory before the second (larger) model.
 torch.cuda.empty_cache()
 print("[ok] GPU cache cleared before DeBERTa run")
 
-# DeBERTa-v3 uses a smaller batch to stay within T4 memory limits.
+# DeBERTa-v3 uses smaller batch (heavier model) and does NOT use AMP
+# (its bf16 internal embeddings are incompatible with FP16 GradScaler).
 finetune("deberta", epochs=4, batch_size=16)
 
 # ─────────────────────────────────────────────────────────────────────────────

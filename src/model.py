@@ -140,8 +140,11 @@ class FinancialSentimentModel:
         criterion = nn.CrossEntropyLoss(weight=weight_tensor)
 
         # Mixed precision on GPU — faster + lower memory. No-op on CPU.
-        use_amp = self.device == "cuda"
-        scaler = torch.cuda.amp.GradScaler(enabled=use_amp)
+        # DeBERTa-v3 uses bfloat16 embeddings internally and is incompatible
+        # with FP16 GradScaler; disable AMP for it explicitly.
+        deberta_family = {"deberta", "deberta-v3", "microsoft/deberta-v3-base"}
+        use_amp = self.device == "cuda" and self.model_name not in deberta_family
+        scaler = torch.amp.GradScaler("cuda", enabled=use_amp)
 
         best_f1 = -1.0
         best_state = None
