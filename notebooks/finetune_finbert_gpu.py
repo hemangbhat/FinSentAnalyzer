@@ -1,4 +1,5 @@
 # ruff: noqa: E402
+# NOTEBOOK VERSION: v3  (capture_output + protobuf + batch=16 + hard-reset)
 """
 FinBERT / DeBERTa GPU fine-tuning script — v2 (stronger recipe).
 
@@ -125,7 +126,7 @@ else:
     print("[ok] All dependencies present")
 
 # ─────────────────────────────────────────────────────────────────────────────
-# CELL 3  Clone / update repo
+# CELL 3  Clone / update repo  (always hard-reset to latest main)
 # ─────────────────────────────────────────────────────────────────────────────
 import os
 from pathlib import Path
@@ -143,11 +144,21 @@ if not Path(REPO_DIR).exists():
     subprocess.run(["git", "clone", "--depth=1", REPO_URL, REPO_DIR], check=True)
     print(f"[ok] Cloned to {REPO_DIR}")
 else:
-    subprocess.run(["git", "-C", REPO_DIR, "pull", "--ff-only"], check=True)
-    print(f"[ok] Repo updated at {REPO_DIR}")
+    # Hard-reset to latest main so stale notebook code can never be used.
+    subprocess.run(["git", "-C", REPO_DIR, "fetch", "--depth=1", "origin", "main"], check=True)
+    subprocess.run(["git", "-C", REPO_DIR, "reset", "--hard", "origin/main"], check=True)
+    print(f"[ok] Hard-reset to origin/main at {REPO_DIR}")
 
 os.chdir(REPO_DIR)
 sys.path.insert(0, os.path.join(REPO_DIR, "src"))
+
+# Sanity-check: confirm we have the fixed notebook.
+nb = Path("notebooks/finetune_finbert_gpu.py").read_text()
+assert "capture_output=True" in nb, (
+    "Old notebook detected — clone/reset failed. Try deleting the repo folder and re-running."
+)
+assert "protobuf" in nb, "Old notebook detected — missing protobuf dep."
+print("[ok] Notebook version verified (capture_output + protobuf present)")
 print("[ok] Working dir:", os.getcwd())
 
 # ─────────────────────────────────────────────────────────────────────────────
