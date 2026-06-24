@@ -59,7 +59,7 @@ Financial sentiment analysis is a critical tool for quantitative finance, risk m
 | **ML Rigor** | 5-fold stratified cross-validation + GridSearchCV hyperparameter tuning |
 | **Explainability** | SHAP feature importance + per-prediction word highlighting |
 | **Error Analysis** | Sankey misclassification diagrams + confidence calibration insights |
-| **Generalization** | Honest OOD test on a real, MIT-licensed news dataset: TF-IDF 0.46 macro-F1 → DistilBERT fine-tuned 0.73 |
+| **Generalization** | Honest OOD test on a real, MIT-licensed news dataset: TF-IDF 0.46 macro-F1 → FinBERT fine-tuned **0.84** |
 | **Dashboard** | Professional 9-page Streamlit app with dark fintech theme |
 | **CI/CD** | GitHub Actions (lint + format + type check + tests) |
 | **Deployment** | Docker + Streamlit Cloud + HuggingFace Spaces ready |
@@ -401,8 +401,8 @@ column is the more reliable signal.
 
 | Model | Type | Notes |
 |-------|------|-------|
-| **FinBERT** | ProsusAI/finbert (110M) | Used **pre-trained / zero-shot** for the dashboard. |
-| **DistilBERT (fine-tuned)** | distilbert-base-uncased (66M) | **Fine-tuned by this project** on in-domain financial news (`scripts/finetune_finbert_news.py`). Achieves **0.81 acc / 0.73 macro-F1** on the real news test set vs 0.67 / 0.46 for the TF-IDF baseline. Auto-detected by the dashboard/API once `models/distilbert_finetuned/` exists. |
+| **FinBERT** | ProsusAI/finbert (110M) | Used **pre-trained / zero-shot** for the dashboard, **and fine-tuned by this project** on in-domain news (3 epochs, GPU): **0.88 acc / 0.84 macro-F1** on the real news test set. Auto-detected once `models/finbert_finetuned/` exists. |
+| **DistilBERT (fine-tuned)** | distilbert-base-uncased (66M) | **Fine-tuned by this project** on in-domain financial news (`scripts/finetune_finbert_news.py`). Achieves **0.81 acc / 0.73 macro-F1** (1 epoch, CPU). |
 
 ---
 
@@ -456,35 +456,32 @@ human-labeled, out-of-distribution** dataset:
 | In-domain (5-fold CV) | — | 0.84 ± 0.02 |
 | **PhraseBank model → real news (OOD, n=2,388)** | **0.67** | **0.46** |
 | Majority-class baseline (OOD) | 0.66 | — |
-| **DistilBERT fine-tuned on in-domain news → same test** | **0.81** | **0.73** |
+| DistilBERT fine-tuned on in-domain news (1 epoch, CPU) | 0.81 | 0.73 |
+| **FinBERT fine-tuned on in-domain news (3 epochs, GPU)** | **0.88** | **0.84** |
 
 **Honest takeaway:** the PhraseBank-trained model **generalizes poorly** to a
 different domain — on real financial-news headlines its accuracy barely exceeds
 the majority-class baseline (0.67 vs 0.66) and macro-F1 nearly halves. **The gap
-is domain mismatch, not a broken pipeline:** fine-tuning DistilBERT on in-domain
-news (1 epoch, 6k examples) lifts macro-F1 from 0.46 → **0.73** and accuracy to
-**0.81** on the same held-out set. Reproduce with:
+is domain mismatch, not a broken pipeline:** fine-tuning on in-domain news closes
+it — DistilBERT (1 epoch, CPU) reaches macro-F1 0.73, and FinBERT (3 epochs, GPU)
+reaches **0.84 macro-F1 / 0.88 accuracy** on the same held-out set. Reproduce:
 
 ```bash
 python scripts/fetch_real_news_dataset.py
-python scripts/finetune_finbert_news.py --model distilbert --epochs 1 --max-train 6000
+python scripts/finetune_finbert_news.py --model distilbert --epochs 1 --max-train 6000  # CPU
 python src/integrate_news.py --action generalization --model svm   # baseline number
 ```
 
 > **Achieved here:** the 0.73 macro-F1 above is from a **DistilBERT, 1-epoch,
 > 6k-example, CPU** run — deliberately bounded for reproducibility on a laptop.
 >
-> **GPU upgrade (Kaggle / Colab free tier):**
-> Open `notebooks/finetune_finbert_gpu.py`, set runtime to GPU T4, and click
-> Run All (~15 min). It fine-tunes FinBERT for 3 epochs, evaluates, packages
-> the weights + result JSON for download, and tells you exactly where to copy
-> them. Mixed precision (AMP) is enabled automatically on CUDA.
-> Expected: acc ≈ 0.85–0.88, macro-F1 ≈ 0.79–0.83.
->
-> After running, copy the weights into `models/finbert_finetuned/`, copy
-> `finetune_results.json` into `results/`, run
-> `python src/integrate_news.py --action generalization --model finbert`,
-> update this table with the real numbers, and push.
+> **GPU upgrade (Kaggle / Colab free tier) — done:**
+> `notebooks/finetune_finbert_gpu.py` fine-tuned **FinBERT for 3 epochs** on a
+> T4 and **achieved accuracy 0.88 / macro-F1 0.84** on the real news test set
+> (vs 0.67 / 0.46 for the TF-IDF baseline). Mixed precision (AMP) is enabled
+> automatically on CUDA. `results/finetune_results.json` holds the metrics; the
+> weights live in `models/finbert_finetuned/` (gitignored — regenerate with the
+> notebook).
 
 ## Pipeline Demo on Synthetic Headlines
 
@@ -870,7 +867,7 @@ the single-process bottleneck of a standalone Streamlit app.
 
 ### Q: How do you know the model generalizes beyond the training data?
 
-**A:** I measured it honestly — and then fixed it. Trained on Financial PhraseBank, the TF-IDF model scores macro-F1 0.84 in-domain but only **0.46** on a real, MIT-licensed out-of-distribution set (`zeroshot/twitter-financial-news-sentiment`, n=2,388), barely beating the majority-class baseline. That exposed the gap as domain mismatch. So I fine-tuned DistilBERT on in-domain news (1 epoch, 6k examples), which lifts macro-F1 to **0.73** and accuracy to **0.81** on the same held-out set. I report both numbers — the weak baseline and the fix — rather than hiding the gap.
+**A:** I measured it honestly — and then fixed it. Trained on Financial PhraseBank, the TF-IDF model scores macro-F1 0.84 in-domain but only **0.46** on a real, MIT-licensed out-of-distribution set (`zeroshot/twitter-financial-news-sentiment`, n=2,388), barely beating the majority-class baseline. That exposed the gap as domain mismatch. So I fine-tuned on in-domain news: DistilBERT (1 epoch, CPU) reaches macro-F1 0.73, and **FinBERT (3 epochs, GPU) reaches 0.84 macro-F1 / 0.88 accuracy** on the same held-out set. I report the whole progression — weak baseline and the fix — rather than hiding the gap.
 
 ### Q: Did you use cross-validation?
 

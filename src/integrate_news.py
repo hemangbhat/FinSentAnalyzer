@@ -348,17 +348,25 @@ def evaluate_generalization(model_name: str = "svm") -> dict:
             f"Real dataset not found at {REAL_NEWS_PATH}. Run: python scripts/fetch_real_news_dataset.py"
         )
 
-    model_path = get_model_dir() / f"baseline_{model_name}.joblib"
-    if not model_path.exists():
-        raise FileNotFoundError(f"Model not found: {model_path}. Train it first.")
-
     df = pd.read_csv(REAL_NEWS_PATH)
     df = df.dropna(subset=["headline", "label"])
     texts = df["headline"].astype(str).apply(clean_text).values
     y_true = df["label"].astype(int).values
 
-    model = joblib.load(model_path)
-    y_pred = model.predict(texts)
+    # Support both baseline (.joblib) and fine-tuned transformer models.
+    finetuned_dir = get_model_dir() / f"{model_name}_finetuned"
+    baseline_path = get_model_dir() / f"baseline_{model_name}.joblib"
+
+    if finetuned_dir.exists():
+        from model import FinancialSentimentModel
+
+        transformer = FinancialSentimentModel.load(finetuned_dir)
+        y_pred, _ = transformer.predict(list(texts))
+    elif baseline_path.exists():
+        model = joblib.load(baseline_path)
+        y_pred = model.predict(texts)
+    else:
+        raise FileNotFoundError(f"No model found for '{model_name}'. Expected {baseline_path} or {finetuned_dir}/.")
 
     acc = float(accuracy_score(y_true, y_pred))
     f1_macro = float(f1_score(y_true, y_pred, average="macro"))

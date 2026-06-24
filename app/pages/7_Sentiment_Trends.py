@@ -66,8 +66,8 @@ if _gen_path.exists():
     )
     status_banner(
         "Honest result: the TF-IDF baseline generalizes poorly across this domain shift "
-        "(macro-F1 0.84 in-domain → ~0.46 on real news). Fine-tuning DistilBERT on "
-        "in-domain news recovers it to ~0.73 — see the README.",
+        "(macro-F1 0.84 in-domain → 0.46 on real news). Fine-tuning on in-domain news "
+        "closes the gap — FinBERT (3 epochs, GPU) reaches macro-F1 0.84 / accuracy 0.88. See the README.",
         kind="warning",
     )
 
