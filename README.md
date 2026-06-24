@@ -475,7 +475,7 @@ python src/integrate_news.py --action generalization --model svm   # baseline nu
 > 6k-example, CPU** run — deliberately bounded for reproducibility on a laptop.
 >
 > **GPU upgrade (Kaggle / Colab free tier):**
-> Open `notebooks/finetune_finbert_gpu.ipynb`, set runtime to GPU T4, and click
+> Open `notebooks/finetune_finbert_gpu.py`, set runtime to GPU T4, and click
 > Run All (~15 min). It fine-tunes FinBERT for 3 epochs, evaluates, packages
 > the weights + result JSON for download, and tells you exactly where to copy
 > them. Mixed precision (AMP) is enabled automatically on CUDA.

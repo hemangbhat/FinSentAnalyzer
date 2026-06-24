@@ -30,7 +30,7 @@ retrains, evaluates, runs the test suite, and uploads the regenerated
 4. [ ] **Tune (optional)** — `python src/train.py --model tune` for SVM + Gradient Boosting.
 5. [ ] **Evaluate** — `python src/evaluate.py --save` and compare metrics against the previous `results/evaluation_results.json`.
 6. [ ] **Generalization** — `python scripts/fetch_real_news_dataset.py` then `python src/integrate_news.py --action generalization --model svm`; confirm OOD macro-F1 hasn't regressed.
-7. [ ] **GPU fine-tune (optional upgrade)** — run `notebooks/finetune_finbert_gpu.ipynb` on Kaggle/Colab T4; download `finbert_finetuned/` + `finetune_results.json`; copy into `models/` + `results/`; re-run generalization eval; update README table.
+7. [ ] **GPU fine-tune (optional upgrade)** — run `notebooks/finetune_finbert_gpu.py` on Kaggle/Colab T4; download `finbert_finetuned/` + `finetune_results.json`; copy into `models/` + `results/`; re-run generalization eval; update README table.
 6. [ ] **Guardrail** — reject the new model if macro-F1 drops more than 2 points versus the current registry entry.
 7. [ ] **Explainability** — regenerate SHAP: `python src/shap_explain.py --model gradient_boosting`.
 8. [ ] **Registry** — `python src/registry.py --update` to record new hashes + metrics.
