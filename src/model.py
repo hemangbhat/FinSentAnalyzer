@@ -26,6 +26,7 @@ MODELS = {
     "distilbert": "distilbert-base-uncased",
     "roberta": "roberta-base",
     "bert": "bert-base-uncased",
+    "deberta": "microsoft/deberta-v3-base",  # often best; needs `sentencepiece`
 }
 
 
@@ -106,6 +107,9 @@ class FinancialSentimentModel:
         batch_size: int = 16,
         learning_rate: float = 2e-5,
         warmup_ratio: float = 0.1,
+        class_weights=None,
+        early_stopping: bool = False,
+        patience: int = 2,
     ) -> dict:
         """
         Train the model.
@@ -127,17 +131,31 @@ class FinancialSentimentModel:
 
         history = {"train_loss": [], "val_loss": [], "val_accuracy": [], "val_f1": []}
 
+        # Optional class weighting (helps macro-F1 on imbalanced label sets).
+        import torch.nn as nn
+
+        weight_tensor = (
+            torch.tensor(class_weights, dtype=torch.float, device=self.device) if class_weights is not None else None
+        )
+        criterion = nn.CrossEntropyLoss(weight=weight_tensor)
+
         # Mixed precision on GPU — faster + lower memory. No-op on CPU.
         use_amp = self.device == "cuda"
         scaler = torch.cuda.amp.GradScaler(enabled=use_amp)
 
+        best_f1 = -1.0
+        best_state = None
+        epochs_without_improvement = 0
+
         logger.info("Training %s for %d epochs...", self.model_name, epochs)
         logger.info(
-            "Train batches: %d, Val batches: %d (device=%s, amp=%s)",
+            "Train batches: %d, Val batches: %d (device=%s, amp=%s, class_weights=%s, early_stopping=%s)",
             len(train_loader),
             len(val_loader),
             self.device,
             use_amp,
+            class_weights is not None,
+            early_stopping,
         )
 
         for epoch in range(epochs):
@@ -154,8 +172,8 @@ class FinancialSentimentModel:
                 labels = batch["label"].to(self.device)
 
                 with torch.autocast(device_type="cuda" if use_amp else "cpu", enabled=use_amp):
-                    outputs = self.model(input_ids, attention_mask=attention_mask, labels=labels)
-                    loss = outputs.loss
+                    outputs = self.model(input_ids, attention_mask=attention_mask)
+                    loss = criterion(outputs.logits, labels)
                 train_loss += loss.item()
 
                 scaler.scale(loss).backward()
@@ -185,6 +203,22 @@ class FinancialSentimentModel:
                 val_metrics["accuracy"],
                 val_metrics["f1_macro"],
             )
+
+            # Track best checkpoint by val macro-F1 for optional early stopping.
+            if val_metrics["f1_macro"] > best_f1:
+                best_f1 = val_metrics["f1_macro"]
+                best_state = {k: v.detach().cpu().clone() for k, v in self.model.state_dict().items()}
+                epochs_without_improvement = 0
+            else:
+                epochs_without_improvement += 1
+                if early_stopping and epochs_without_improvement >= patience:
+                    logger.info("Early stopping at epoch %d (no val F1 improvement for %d epochs)", epoch + 1, patience)
+                    break
+
+        # Restore the best checkpoint (so the saved model is the best, not the last).
+        if best_state is not None:
+            self.model.load_state_dict(best_state)
+            logger.info("Restored best checkpoint (val macro-F1=%.4f)", best_f1)
 
         return history
 

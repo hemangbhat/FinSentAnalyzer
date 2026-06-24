@@ -339,7 +339,7 @@ def evaluate_generalization(model_name: str = "svm") -> dict:
 
     Run `python scripts/fetch_real_news_dataset.py` first to create the file.
     """
-    from sklearn.metrics import accuracy_score, classification_report, f1_score
+    from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, f1_score
 
     from preprocess import clean_text
 
@@ -350,7 +350,7 @@ def evaluate_generalization(model_name: str = "svm") -> dict:
 
     df = pd.read_csv(REAL_NEWS_PATH)
     df = df.dropna(subset=["headline", "label"])
-    texts = df["headline"].astype(str).apply(clean_text).values
+    raw_texts = df["headline"].astype(str).tolist()
     y_true = df["label"].astype(int).values
 
     # Support both baseline (.joblib) and fine-tuned transformer models.
@@ -360,20 +360,24 @@ def evaluate_generalization(model_name: str = "svm") -> dict:
     if finetuned_dir.exists():
         from model import FinancialSentimentModel
 
+        # Transformers were fine-tuned on RAW text ($TICKER, casing, #) — do NOT
+        # apply the TF-IDF clean_text() here, or the input distribution shifts.
         transformer = FinancialSentimentModel.load(finetuned_dir)
-        y_pred, _ = transformer.predict(list(texts))
+        y_pred, _ = transformer.predict(raw_texts)
     elif baseline_path.exists():
+        # Baselines were trained on clean_text()-normalized text.
         model = joblib.load(baseline_path)
-        y_pred = model.predict(texts)
+        y_pred = model.predict([clean_text(t) for t in raw_texts])
     else:
         raise FileNotFoundError(f"No model found for '{model_name}'. Expected {baseline_path} or {finetuned_dir}/.")
 
     acc = float(accuracy_score(y_true, y_pred))
     f1_macro = float(f1_score(y_true, y_pred, average="macro"))
     f1_weighted = float(f1_score(y_true, y_pred, average="weighted"))
-    report = classification_report(
-        y_true, y_pred, target_names=[LABEL_MAP_INV[i] for i in sorted(LABEL_MAP_INV)], output_dict=True
-    )
+    labels_order = [0, 1, 2]
+    label_names = [LABEL_MAP_INV[i] for i in labels_order]
+    report = classification_report(y_true, y_pred, target_names=label_names, output_dict=True, zero_division=0)
+    cm = confusion_matrix(y_true, y_pred, labels=labels_order).tolist()
 
     # Majority-class baseline for honest context.
     majority = int(pd.Series(y_true).mode().iloc[0])
@@ -387,13 +391,16 @@ def evaluate_generalization(model_name: str = "svm") -> dict:
         "f1_macro": f1_macro,
         "f1_weighted": f1_weighted,
         "majority_class_accuracy": majority_acc,
-        "per_class": {k: report[k] for k in ["negative", "neutral", "positive"] if k in report},
+        "labels": label_names,
+        "confusion_matrix": cm,
+        "per_class": {k: report[k] for k in label_names if k in report},
     }
 
     results_dir = get_results_dir()
     results_dir.mkdir(parents=True, exist_ok=True)
-    with open(results_dir / "generalization_results.json", "w") as f:
-        json.dump(results, f, indent=2)
+    # Per-model file (kept for comparison) + a "latest" file for the dashboard.
+    (results_dir / f"generalization_{model_name}.json").write_text(json.dumps(results, indent=2), encoding="utf-8")
+    (results_dir / "generalization_results.json").write_text(json.dumps(results, indent=2), encoding="utf-8")
 
     logger.info(
         "Generalization (%s) on %d real headlines: acc=%.3f, macro-F1=%.3f (majority baseline acc=%.3f)",

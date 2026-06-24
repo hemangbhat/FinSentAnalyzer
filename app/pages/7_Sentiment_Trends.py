@@ -67,9 +67,64 @@ if _gen_path.exists():
     status_banner(
         "Honest result: the TF-IDF baseline generalizes poorly across this domain shift "
         "(macro-F1 0.84 in-domain → 0.46 on real news). Fine-tuning on in-domain news "
-        "closes the gap — FinBERT (3 epochs, GPU) reaches macro-F1 0.84 / accuracy 0.88. See the README.",
+        "closes the gap — FinBERT (3 epochs, GPU) reaches ~0.87 accuracy / ~0.83 macro-F1. See the README.",
         kind="warning",
     )
+
+# ── Model comparison on the real OOD benchmark ──────────────────────────────
+_cmp_path = Path(__file__).parent.parent.parent / "results" / "model_comparison_ood.json"
+if _cmp_path.exists():
+    cmp = json.loads(_cmp_path.read_text())
+    section_header("Model comparison on real news (OOD)", cmp.get("dataset", ""))
+    names = [m["model"] for m in cmp["models"]]
+    fig_cmp = go.Figure()
+    fig_cmp.add_trace(
+        go.Bar(name="Accuracy", x=names, y=[m["accuracy"] for m in cmp["models"]], marker_color="#3b82f6")
+    )
+    fig_cmp.add_trace(
+        go.Bar(name="Macro-F1", x=names, y=[m["f1_macro"] for m in cmp["models"]], marker_color="#8b5cf6")
+    )
+    maj = cmp.get("majority_class_accuracy")
+    if maj:
+        fig_cmp.add_hline(y=maj, line_dash="dash", line_color="#ef4444", annotation_text=f"majority acc {maj:.2f}")
+    fig_cmp.update_layout(
+        barmode="group",
+        height=380,
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font={"color": "#cbd5e1", "family": "Inter, sans-serif"},
+        yaxis={"range": [0, 1], "gridcolor": "rgba(255,255,255,0.05)", "title": "Score"},
+        legend={"orientation": "h", "yanchor": "bottom", "y": 1.02, "xanchor": "right", "x": 1},
+    )
+    st.plotly_chart(fig_cmp, use_container_width=True, config={"displayModeBar": False})
+
+# ── Fine-tuned FinBERT confusion matrix on real OOD data ────────────────────
+_finbert_gen = Path(__file__).parent.parent.parent / "results" / "generalization_finbert.json"
+if _finbert_gen.exists():
+    fb = json.loads(_finbert_gen.read_text())
+    cm = fb.get("confusion_matrix")
+    cm_labels = fb.get("labels", ["negative", "neutral", "positive"])
+    if cm:
+        section_header("Fine-tuned FinBERT — confusion matrix (real OOD)", f"n={fb.get('n_samples')}")
+        fig_cm = go.Figure(
+            data=go.Heatmap(
+                z=cm,
+                x=[f"pred {lab}" for lab in cm_labels],
+                y=[f"true {lab}" for lab in cm_labels],
+                colorscale="Blues",
+                text=cm,
+                texttemplate="%{text}",
+                showscale=False,
+            )
+        )
+        fig_cm.update_layout(
+            height=360,
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            font={"color": "#cbd5e1", "family": "Inter, sans-serif"},
+            yaxis={"autorange": "reversed"},
+        )
+        st.plotly_chart(fig_cm, use_container_width=True, config={"displayModeBar": False})
 
 # Check if the news dataset integration module is available
 try:

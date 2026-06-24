@@ -50,12 +50,19 @@ def _load_news_split(split: str, max_n: int | None = None):
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Fine-tune a transformer on in-domain financial news.")
-    parser.add_argument("--model", default="distilbert", choices=["distilbert", "finbert", "bert", "roberta"])
+    parser.add_argument(
+        "--model", default="distilbert", choices=["distilbert", "finbert", "bert", "roberta", "deberta"]
+    )
     parser.add_argument("--epochs", type=int, default=2)
     parser.add_argument("--batch-size", type=int, default=16)
     parser.add_argument("--lr", type=float, default=2e-5)
     parser.add_argument("--max-train", type=int, default=None, help="Cap training rows (for CPU runs)")
     parser.add_argument("--val-monitor", type=int, default=500, help="Val subset size used during training")
+    parser.add_argument(
+        "--class-weights", action="store_true", help="Use inverse-frequency class weights (helps macro-F1)"
+    )
+    parser.add_argument("--early-stopping", action="store_true", help="Stop when val macro-F1 stops improving")
+    parser.add_argument("--patience", type=int, default=2, help="Early-stopping patience (epochs)")
     args = parser.parse_args()
 
     import torch
@@ -78,6 +85,17 @@ def main() -> None:
 
     print(f"Train: {len(train_texts)} | Val: {len(val_texts)} | model: {args.model}")
     fsm = FinancialSentimentModel(model_name=args.model, num_labels=3)
+
+    # Optional inverse-frequency class weights (mitigates neutral-class dominance).
+    class_weights = None
+    if args.class_weights:
+        import numpy as np
+
+        counts = np.bincount(train_labels, minlength=3).astype(float)
+        counts[counts == 0] = 1.0
+        class_weights = (counts.sum() / (3 * counts)).tolist()
+        print(f"Class weights (neg, neu, pos): {[round(w, 3) for w in class_weights]}")
+
     fsm.train(
         train_texts,
         train_labels,
@@ -86,6 +104,9 @@ def main() -> None:
         epochs=args.epochs,
         batch_size=args.batch_size,
         learning_rate=args.lr,
+        class_weights=class_weights,
+        early_stopping=args.early_stopping,
+        patience=args.patience,
     )
 
     print("Final evaluation on full validation split …")

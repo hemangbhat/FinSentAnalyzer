@@ -83,7 +83,7 @@ print("Internet connectivity: OK")
 # CELL 2  Install dependencies (skip if already present)
 # ─────────────────────────────────────────────────────────────────────────────
 
-PACKAGES = ["transformers>=4.40.0", "datasets", "accelerate", "scikit-learn", "tqdm"]
+PACKAGES = ["transformers>=4.40.0", "datasets", "accelerate", "scikit-learn", "tqdm", "sentencepiece"]
 
 
 def _pkg_installed(pkg: str) -> bool:
@@ -159,8 +159,10 @@ print("Mixed precision (AMP) will be enabled automatically.")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # CELL 6  Fine-tune
-#   Change --model distilbert for a faster run (~5 min/epoch on T4).
-#   finbert (ProsusAI/finbert) is the most domain-appropriate choice.
+#   Stronger recipe: 4 epochs + class weights (helps macro-F1 on the
+#   neutral-heavy data) + early stopping (keeps the best val checkpoint).
+#   Swap --model finbert for 'deberta' (microsoft/deberta-v3-base) to try a
+#   stronger base, or 'distilbert' for a faster run (~5 min/epoch on T4).
 # ─────────────────────────────────────────────────────────────────────────────
 subprocess.run(
     [
@@ -169,11 +171,15 @@ subprocess.run(
         "--model",
         "finbert",
         "--epochs",
-        "3",
+        "4",
         "--batch-size",
         "32",
         "--lr",
         "2e-5",
+        "--class-weights",
+        "--early-stopping",
+        "--patience",
+        "2",
     ],
     check=True,
 )
