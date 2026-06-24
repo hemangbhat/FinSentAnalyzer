@@ -1,0 +1,94 @@
+{
+  "generated_at": "2026-06-22T12:20:56.265084+00:00",
+  "model_count": 8,
+  "models": [
+    {
+      "model": "baseline_ensemble",
+      "artifact": "baseline_ensemble.joblib",
+      "sha256": "0d4a08ac2fe1",
+      "size_bytes": 4962309,
+      "modified": "2026-03-21T15:14:02.824173+00:00",
+      "metrics": {}
+    },
+    {
+      "model": "baseline_gradient_boosting",
+      "artifact": "baseline_gradient_boosting.joblib",
+      "sha256": "c89517ed409e",
+      "size_bytes": 977944,
+      "modified": "2026-03-21T15:13:50.961391+00:00",
+      "metrics": {
+        "accuracy": 0.9424778761061947,
+        "f1_macro": 0.9203466908896109,
+        "f1_weighted": 0.9414648981155387
+      }
+    },
+    {
+      "model": "baseline_logreg",
+      "artifact": "baseline_logreg.joblib",
+      "sha256": "87736961c0b4",
+      "size_bytes": 372068,
+      "modified": "2026-03-21T15:13:33.583109+00:00",
+      "metrics": {
+        "accuracy": 0.9070796460176991,
+        "f1_macro": 0.8837349653618939,
+        "f1_weighted": 0.9073244954353072
+      }
+    },
+    {
+      "model": "baseline_mlp",
+      "artifact": "baseline_mlp.joblib",
+      "sha256": "0298cb916013",
+      "size_bytes": 37188596,
+      "modified": "2026-03-21T15:14:01.936867+00:00",
+      "metrics": {
+        "accuracy": 0.8805309734513275,
+        "f1_macro": 0.8412816390093943,
+        "f1_weighted": 0.8799762485103304
+      }
+    },
+    {
+      "model": "baseline_naive_bayes",
+      "artifact": "baseline_naive_bayes.joblib",
+      "sha256": "76879504f2de",
+      "size_bytes": 513161,
+      "modified": "2026-03-21T15:13:33.974973+00:00",
+      "metrics": {
+        "accuracy": 0.8805309734513275,
+        "f1_macro": 0.8479807328338742,
+        "f1_weighted": 0.8810169929872457
+      }
+    },
+    {
+      "model": "baseline_random_forest",
+      "artifact": "baseline_random_forest.joblib",
+      "sha256": "4035bbffd7fa",
+      "size_bytes": 10055149,
+      "modified": "2026-03-21T15:13:36.146697+00:00",
+      "metrics": {
+        "accuracy": 0.8849557522123894,
+        "f1_macro": 0.8383458509219158,
+        "f1_weighted": 0.8802539709646281
+      }
+    },
+    {
+      "model": "baseline_svm",
+      "artifact": "baseline_svm.joblib",
+      "sha256": "5fc74e99b0f8",
+      "size_bytes": 371936,
+      "modified": "2026-03-21T15:13:34.439088+00:00",
+      "metrics": {
+        "accuracy": 0.9247787610619469,
+        "f1_macro": 0.9019209039548022,
+        "f1_weighted": 0.9251027448627569
+      }
+    },
+    {
+      "model": "lstm_AAPL",
+      "artifact": "lstm_AAPL.pt",
+      "sha256": "032b7c3ec6e5",
+      "size_bytes": 22765,
+      "modified": "2026-04-20T05:42:20.181304+00:00",
+      "metrics": {}
+    }
+  ]
+}

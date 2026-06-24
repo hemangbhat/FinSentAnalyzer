@@ -29,7 +29,7 @@ st.markdown(
     <h1>Financial Sentiment Intelligence</h1>
     <p>
         Classify market sentiment from financial text, see exactly which words drove each
-        decision, and validate the model against real-world news — all in one transparent dashboard.
+        decision, and inspect the model with explainability and error analysis — in one transparent dashboard.
     </p>
 </div>
 """,
@@ -39,9 +39,9 @@ st.markdown(
 # ── KPI strip (honest, verifiable facts) ─────────────────────────────────────
 kpi_strip(
     [
-        {"label": "Trained Models", "value": "8", "sub": "6 baselines + ensemble + FinBERT", "accent": "#3b82f6"},
+        {"label": "Trained Models", "value": "7 + 1", "sub": "7 baselines + pre-trained FinBERT", "accent": "#3b82f6"},
         {"label": "Sentiment Classes", "value": "3", "sub": "positive · neutral · negative", "accent": "#10b981"},
-        {"label": "Validation Headlines", "value": "2.7K+", "sub": "WSJ, Bloomberg, Reuters…", "accent": "#8b5cf6"},
+        {"label": "Best Macro-F1", "value": "0.90", "sub": "SVM on test (n=226)", "accent": "#8b5cf6"},
         {"label": "Explainability", "value": "SHAP", "sub": "+ per-token attribution", "accent": "#f59e0b"},
     ]
 )
@@ -60,9 +60,17 @@ CARDS = [
     ("💡", "Word Insights", "Browse the highest-impact vocabulary the models learned, grouped by sentiment."),
     ("🧠", "Deep Analysis", "Rule-based reasoning, NER, and Loughran-McDonald lexicon decomposition."),
     ("📊", "Model Registry", "Compare every model's metrics, architecture, and training data."),
-    ("📈", "Sentiment Trends", "News sentiment vs. stock price with Pearson correlation for AAPL, TSLA, AMZN."),
+    (
+        "📈",
+        "Sentiment Trends",
+        "Pipeline demo: model sentiment vs. price on synthetic headlines (template-generated, not real news).",
+    ),
     ("🔬", "Error Analysis", "Confusion flows, confidence calibration, and inspectable misclassifications."),
-    ("📉", "Stock Extension", "End-to-end pipeline: live news → FinBERT → LSTM next-day direction forecast."),
+    (
+        "📉",
+        "Stock Extension",
+        "Experimental end-to-end LSTM demo (chance-level on this data) — engineering showcase, not a real forecast.",
+    ),
 ]
 
 for row_start in range(0, len(CARDS), 3):

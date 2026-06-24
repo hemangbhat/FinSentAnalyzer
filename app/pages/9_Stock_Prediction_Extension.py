@@ -11,6 +11,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 
+import os
+
 import plotly.graph_objects as go  # pyre-ignore
 import streamlit as st  # pyre-ignore
 from plotly.subplots import make_subplots  # pyre-ignore
@@ -37,6 +39,20 @@ page_header(
     "sentiment, feature engineering, and an LSTM next-day direction forecast.",
     eyebrow="Experimental · LSTM",
 )
+
+st.warning(
+    "**Experimental engineering demo — not a trading signal.** On this small/synthetic data "
+    "the LSTM performs at roughly chance level. It exists to show the full pipeline "
+    "(download → sentiment → features → train → predict), not to forecast prices."
+)
+
+HEAVY_DISABLED = os.getenv("FINSIGHT_DISABLE_HEAVY", "false").lower() in {"1", "true", "yes"}
+if HEAVY_DISABLED:
+    st.info(
+        "Live training is disabled on this hosted instance to protect shared resources "
+        "(`FINSIGHT_DISABLE_HEAVY` is set). Clone the repo and run locally to use this page."
+    )
+    st.stop()
 
 try:
     stock_project = get_stock_project_root()

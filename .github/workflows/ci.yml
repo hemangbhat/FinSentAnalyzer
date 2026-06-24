@@ -26,14 +26,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install pytest mypy ruff
           pip install scikit-learn pandas numpy joblib datasets tqdm PyYAML
+          pip install fastapi "uvicorn[standard]" slowapi httpx
 
       - name: Ruff lint
         run: |
-          ruff check src/ app/ tests/
+          ruff check src/ app/ api/ tests/
 
       - name: Ruff format check
         run: |
-          ruff format --check src/ app/ tests/
+          ruff format --check src/ app/ api/ tests/
 
       - name: Type check (mypy)
         run: |

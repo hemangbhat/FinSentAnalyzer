@@ -15,6 +15,7 @@ so every screen shares one consistent design language.
 
 from __future__ import annotations
 
+import os
 import sys
 from contextlib import contextmanager
 from pathlib import Path
@@ -528,9 +529,32 @@ def create_gauge_chart(probabilities: dict, prediction: str) -> go.Figure:
 
 
 @st.cache_resource(show_spinner=False)
-def load_predictor(model_type: str) -> SentimentPredictor:
-    """Load and cache the sentiment predictor."""
+def load_predictor(model_type: str):
+    """
+    Load the predictor for a model.
+
+    If FINSIGHT_API_URL is set, returns a RemotePredictor that calls the
+    FastAPI inference service (UI/serving split). Otherwise loads the model
+    in-process. Both expose the same ``.predict()`` interface.
+    """
+    api_url = os.getenv("FINSIGHT_API_URL")
+    if api_url:
+        from api_client import RemotePredictor  # local import; only needed in split mode
+
+        return RemotePredictor(model_type, base_url=api_url, api_key=os.getenv("FINSIGHT_API_KEY"))
     return SentimentPredictor(model_type)
+
+
+def _list_models() -> list[str]:
+    """Model list — from the API in split mode (with local fallback), else local."""
+    api_url = os.getenv("FINSIGHT_API_URL")
+    if api_url:
+        from api_client import remote_available_models
+
+        remote = remote_available_models(api_url, api_key=os.getenv("FINSIGHT_API_KEY"))
+        if remote:
+            return remote
+    return get_available_models()
 
 
 def setup_sidebar():
@@ -551,7 +575,7 @@ def setup_sidebar():
         unsafe_allow_html=True,
     )
 
-    available_models = get_available_models()
+    available_models = _list_models()
     if not available_models:
         st.sidebar.error("No trained models found. Run `python src/train.py --model baselines`.")
         return None, None

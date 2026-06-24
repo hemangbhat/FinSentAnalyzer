@@ -1,10 +1,12 @@
 """
 Cross-Dataset Integration Module.
 Loads the financial-news-stock-prediction dataset, runs sentiment predictions,
-and analyzes sentiment ↔ stock price correlations.
+and analyzes sentiment ↔ stock price relationships.
 
-This module validates model generalization on out-of-distribution data
-(real news headlines) separate from the Financial PhraseBank training data.
+NOTE: the bundled headlines (sample_news.csv) are SYNTHETIC, template-generated
+text — not real articles — so this module demonstrates the end-to-end pipeline
+(scoring, aggregation, correlation), NOT real out-of-distribution generalization.
+Swap in a real, licensed news dataset to make the generalization claim valid.
 """
 
 import json
@@ -18,8 +20,11 @@ from utils import LABEL_MAP_INV, get_model_dir, get_project_root, get_results_di
 
 logger = setup_logging(__name__)
 
-# Path to the financial news dataset
+# Path to the synthetic demo dataset
 NEWS_DATA_DIR = get_project_root() / "external-datasets" / "financial-news-stock-prediction" / "data"
+# Path to the REAL, licensed out-of-distribution dataset (created by
+# scripts/fetch_real_news_dataset.py). Used for the valid generalization metric.
+REAL_NEWS_PATH = get_project_root() / "data" / "external" / "real_financial_news.csv"
 
 
 def load_news_headlines() -> pd.DataFrame:
@@ -322,18 +327,103 @@ def get_sentiment_trends(model_name: str = "svm", ticker: Optional[str] = None) 
     return merged
 
 
+def evaluate_generalization(model_name: str = "svm") -> dict:
+    """
+    Measure TRUE out-of-distribution generalization on a real, labeled dataset.
+
+    Trains on Financial PhraseBank, evaluates on the real, human-labeled
+    `data/external/real_financial_news.csv` (Hugging Face
+    `zeroshot/twitter-financial-news-sentiment`, MIT). Because this set has
+    ground-truth labels, the resulting accuracy / macro-F1 is a valid
+    generalization metric — unlike the synthetic demo headlines.
+
+    Run `python scripts/fetch_real_news_dataset.py` first to create the file.
+    """
+    from sklearn.metrics import accuracy_score, classification_report, f1_score
+
+    from preprocess import clean_text
+
+    if not REAL_NEWS_PATH.exists():
+        raise FileNotFoundError(
+            f"Real dataset not found at {REAL_NEWS_PATH}. Run: python scripts/fetch_real_news_dataset.py"
+        )
+
+    model_path = get_model_dir() / f"baseline_{model_name}.joblib"
+    if not model_path.exists():
+        raise FileNotFoundError(f"Model not found: {model_path}. Train it first.")
+
+    df = pd.read_csv(REAL_NEWS_PATH)
+    df = df.dropna(subset=["headline", "label"])
+    texts = df["headline"].astype(str).apply(clean_text).values
+    y_true = df["label"].astype(int).values
+
+    model = joblib.load(model_path)
+    y_pred = model.predict(texts)
+
+    acc = float(accuracy_score(y_true, y_pred))
+    f1_macro = float(f1_score(y_true, y_pred, average="macro"))
+    f1_weighted = float(f1_score(y_true, y_pred, average="weighted"))
+    report = classification_report(
+        y_true, y_pred, target_names=[LABEL_MAP_INV[i] for i in sorted(LABEL_MAP_INV)], output_dict=True
+    )
+
+    # Majority-class baseline for honest context.
+    majority = int(pd.Series(y_true).mode().iloc[0])
+    majority_acc = float((y_true == majority).mean())
+
+    results = {
+        "model": model_name,
+        "dataset": "zeroshot/twitter-financial-news-sentiment (validation, MIT)",
+        "n_samples": int(len(df)),
+        "accuracy": acc,
+        "f1_macro": f1_macro,
+        "f1_weighted": f1_weighted,
+        "majority_class_accuracy": majority_acc,
+        "per_class": {k: report[k] for k in ["negative", "neutral", "positive"] if k in report},
+    }
+
+    results_dir = get_results_dir()
+    results_dir.mkdir(parents=True, exist_ok=True)
+    with open(results_dir / "generalization_results.json", "w") as f:
+        json.dump(results, f, indent=2)
+
+    logger.info(
+        "Generalization (%s) on %d real headlines: acc=%.3f, macro-F1=%.3f (majority baseline acc=%.3f)",
+        model_name,
+        len(df),
+        acc,
+        f1_macro,
+        majority_acc,
+    )
+    return results
+
+
 if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="Cross-Dataset Evaluation")
     parser.add_argument("--model", type=str, default="svm", help="Model to use for predictions")
     parser.add_argument(
-        "--action", type=str, default="evaluate", choices=["evaluate", "correlate", "predict"], help="Action to perform"
+        "--action",
+        type=str,
+        default="evaluate",
+        choices=["evaluate", "correlate", "predict", "generalization"],
+        help="Action to perform",
     )
 
     args = parser.parse_args()
 
-    if args.action == "evaluate":
+    if args.action == "generalization":
+        results = evaluate_generalization(args.model)
+        print(f"\n{'=' * 50}")
+        print("Generalization on REAL labeled headlines")
+        print(f"{'=' * 50}")
+        print(f"Model:    {results['model']}")
+        print(f"Dataset:  {results['dataset']}")
+        print(f"Samples:  {results['n_samples']}")
+        print(f"Accuracy: {results['accuracy']:.3f}  (majority baseline {results['majority_class_accuracy']:.3f})")
+        print(f"Macro-F1: {results['f1_macro']:.3f}")
+    elif args.action == "evaluate":
         results = run_cross_dataset_evaluation(args.model)
         print(f"\n{'=' * 50}")
         print("Cross-Dataset Evaluation Summary")

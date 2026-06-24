@@ -1,0 +1,39 @@
+name: Scheduled Retraining
+
+on:
+  schedule:
+    # 05:00 UTC on the 1st of every month
+    - cron: "0 5 1 * *"
+  workflow_dispatch: {}
+
+jobs:
+  retrain:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install scikit-learn pandas numpy joblib datasets tqdm PyYAML pytest
+
+      - name: Retrain (baselines + CV + evaluate + registry)
+        run: python scripts/retrain.py
+
+      - name: Run test suite
+        run: python -m pytest tests/ -q
+
+      - name: Upload regenerated artifacts for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: retrained-artifacts
+          path: |
+            results/
+            models/registry.json
+            models/*.joblib
+          retention-days: 14

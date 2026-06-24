@@ -127,8 +127,18 @@ class FinancialSentimentModel:
 
         history = {"train_loss": [], "val_loss": [], "val_accuracy": [], "val_f1": []}
 
+        # Mixed precision on GPU — faster + lower memory. No-op on CPU.
+        use_amp = self.device == "cuda"
+        scaler = torch.cuda.amp.GradScaler(enabled=use_amp)
+
         logger.info("Training %s for %d epochs...", self.model_name, epochs)
-        logger.info("Train batches: %d, Val batches: %d", len(train_loader), len(val_loader))
+        logger.info(
+            "Train batches: %d, Val batches: %d (device=%s, amp=%s)",
+            len(train_loader),
+            len(val_loader),
+            self.device,
+            use_amp,
+        )
 
         for epoch in range(epochs):
             # Training
@@ -143,13 +153,16 @@ class FinancialSentimentModel:
                 attention_mask = batch["attention_mask"].to(self.device)
                 labels = batch["label"].to(self.device)
 
-                outputs = self.model(input_ids, attention_mask=attention_mask, labels=labels)
-                loss = outputs.loss
+                with torch.autocast(device_type="cuda" if use_amp else "cpu", enabled=use_amp):
+                    outputs = self.model(input_ids, attention_mask=attention_mask, labels=labels)
+                    loss = outputs.loss
                 train_loss += loss.item()
 
-                loss.backward()
+                scaler.scale(loss).backward()
+                scaler.unscale_(optimizer)
                 torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
-                optimizer.step()
+                scaler.step(optimizer)
+                scaler.update()
                 scheduler.step()
 
                 progress.set_postfix({"loss": f"{loss.item():.4f}"})

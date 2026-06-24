@@ -50,10 +50,18 @@ Thumbs.db
 # Cache
 .cache/
 huggingface/
+.hf_cache/
 .pytest_cache/
 
 # Build artifacts
 test_output.txt
+
+# Logs & experiment tracking
+logs/
+mlruns/
+
+# VS Code Code Runner scratch files
+**/tempCodeRunnerFile.py
 
 # Claude
 .claude/

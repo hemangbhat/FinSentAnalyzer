@@ -17,14 +17,31 @@ split_strategy = "stratified 80/10/10"
 random_seed = 42
 
 [cross_validation_dataset]
-name = "Financial News Headlines"
-source = "financial-news-stock-prediction (Kaggle)"
+name = "Synthetic Financial News Headlines"
+source = "Generated locally by external-datasets/financial-news-stock-prediction/generate_dummy_news.py"
+synthetic = true
 local_path = "external-datasets/financial-news-stock-prediction/data/"
 files = ["sample_news.csv", "stock_data.csv", "final_dataset.csv"]
 total_headlines = 2688
 tickers = ["AAPL", "TSLA", "AMZN"]
-news_sources = ["WSJ", "Bloomberg", "Reuters", "CNBC", "Financial Times"]
-purpose = "Out-of-distribution model generalization testing + sentiment-stock correlation"
+# NOTE: headlines are template-generated, not real articles. The `source`
+# column (Reuters/Bloomberg/etc.) is a randomly assigned synthetic label, NOT
+# the true publisher. This data exists only to exercise the end-to-end pipeline
+# (sentiment scoring, aggregation, charting) — it is NOT a real out-of-domain
+# generalization benchmark and must not be presented as such.
+purpose = "Pipeline demonstration only (synthetic data — not a generalization benchmark)"
+
+[generalization_dataset]
+name = "Twitter Financial News Sentiment"
+source = "https://huggingface.co/datasets/zeroshot/twitter-financial-news-sentiment"
+license = "MIT"
+split = "validation"
+total_samples = 2388
+classes = ["negative", "neutral", "positive"]
+local_path = "data/external/real_financial_news.csv"
+fetch_command = "python scripts/fetch_real_news_dataset.py"
+purpose = "Real, human-labeled out-of-distribution generalization test (valid benchmark)"
+label_mapping = "Bearish->negative, Bullish->positive, Neutral->neutral"
 
 [processed_data]
 train_path = "data/processed/train.csv"

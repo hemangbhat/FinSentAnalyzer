@@ -3,6 +3,7 @@ Financial Sentiment Analyzer — Batch Processing.
 Enterprise flow: upload → validate → preview → analyze → summarize → export.
 """
 
+import os
 import sys
 from pathlib import Path
 
@@ -109,6 +110,17 @@ except Exception as exc:  # noqa: BLE001
     status_banner(f"Error reading file: {exc}", kind="error")
     st.stop()
 
+# Cap rows to protect the shared instance from OOM / timeouts.
+MAX_ROWS = int(os.getenv("FINSIGHT_MAX_BATCH_ROWS", "2000"))
+if len(texts) > MAX_ROWS:
+    status_banner(
+        f"Large file detected — analyzing the first {MAX_ROWS:,} of {len(texts):,} rows "
+        "to keep the shared demo responsive. Run locally to process the full file.",
+        kind="warning",
+    )
+    texts = texts[:MAX_ROWS]
+    clean_df = clean_df.iloc[:MAX_ROWS].copy()
+
 # Validation KPIs + preview
 kpi_strip(
     [
@@ -126,16 +138,22 @@ run = st.button("Analyze All", type="primary", use_container_width=True)
 if not run:
     st.stop()
 
-# ── Analyze ──────────────────────────────────────────────────────────────────
+# ── Analyze (chunked batch inference) ────────────────────────────────────────
 progress_bar = st.progress(0.0, text="Scoring texts…")
-results = []
+results: list[dict] = []
 assert predictor is not None
-for i, text in enumerate(texts):
+CHUNK = 64
+for start in range(0, len(texts), CHUNK):
+    chunk = texts[start : start + CHUNK]
     try:
-        results.append(predictor.predict(text))
+        chunk_results = predictor.predict(chunk)
+        if isinstance(chunk_results, dict):  # single-item safety
+            chunk_results = [chunk_results]
     except Exception:  # noqa: BLE001
-        results.append({"label": "error", "confidence": 0.0})
-    progress_bar.progress((i + 1) / len(texts), text=f"Scoring texts… {i + 1}/{len(texts)}")
+        chunk_results = [{"label": "error", "confidence": 0.0} for _ in chunk]
+    results.extend(chunk_results)
+    done = min(len(texts), start + CHUNK)
+    progress_bar.progress(done / len(texts), text=f"Scoring texts… {done}/{len(texts)}")
 progress_bar.empty()
 
 clean_df["Sentiment"] = [r["label"] for r in results]

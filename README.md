@@ -1,11 +1,23 @@
 # 📈 Financial Sentiment Analyzer
 
-> **An end-to-end ML pipeline for classifying financial text sentiment with 8 trained models, SHAP explainability, cross-dataset validation, and a professional 9-page Streamlit dashboard.**
+> **An end-to-end ML pipeline for classifying financial text sentiment with 7 trained baseline models + pre-trained FinBERT, SHAP explainability, rigorous cross-validation, a FastAPI inference service, and a professional 9-page Streamlit dashboard.**
 
 [![Python 3.10](https://img.shields.io/badge/Python-3.10-blue.svg)](https://python.org)
 [![Streamlit](https://img.shields.io/badge/Streamlit-Dashboard-red.svg)](https://streamlit.io)
 [![scikit-learn](https://img.shields.io/badge/scikit--learn-ML-orange.svg)](https://scikit-learn.org)
 [![HuggingFace](https://img.shields.io/badge/HuggingFace-FinBERT-yellow.svg)](https://huggingface.co/ProsusAI/finbert)
+
+---
+
+## 🔗 Live Demo
+
+> **Deployed app:** `https://<your-app>.streamlit.app`  ← _replace with your public URL after deploying (see [Deployment](#deployment))._
+
+![FinSight demo](docs/demo.gif)
+
+> _Demo GIF placeholder._ Record a ~15s screen capture of the Single Analysis and
+> Batch flows and save it as `docs/demo.gif` (e.g. with [ScreenToGif](https://www.screentogif.com/)
+> or `ffmpeg`). It will render here automatically.
 
 ---
 
@@ -20,11 +32,15 @@
 - [Dataset](#dataset)
 - [Models](#models)
 - [ML Rigor: Cross-Validation & Hyperparameter Tuning](#ml-rigor-cross-validation--hyperparameter-tuning)
-- [Cross-Dataset Generalization](#cross-dataset-generalization)
+- [Generalization (Real Data)](#generalization-real-licensed-data)
+- [Pipeline Demo (Synthetic)](#pipeline-demo-on-synthetic-headlines)
 - [Explainability](#explainability)
 - [Dashboard Pages](#dashboard-pages)
 - [CLI Reference](#cli-reference)
 - [Testing](#testing)
+- [Inference API](#inference-api)
+- [Monitoring & Model Registry](#monitoring--model-registry)
+- [Retraining](#retraining)
 - [Deployment](#deployment)
 - [Technologies Used](#technologies-used)
 - [Interview Q&A](#interview-qa)
@@ -39,12 +55,11 @@ Financial sentiment analysis is a critical tool for quantitative finance, risk m
 
 | Dimension | What We Do |
 |-----------|------------|
-| **8 Models** | 6 TF-IDF baselines + Voting Ensemble + FinBERT transformer |
+| **8 Models** | 7 trained baselines (incl. Voting Ensemble) + pre-trained FinBERT (zero-shot) |
 | **ML Rigor** | 5-fold stratified cross-validation + GridSearchCV hyperparameter tuning |
-| **Generalization** | Cross-dataset validation on 2,688 real-world news headlines |
 | **Explainability** | SHAP feature importance + per-prediction word highlighting |
 | **Error Analysis** | Sankey misclassification diagrams + confidence calibration insights |
-| **Correlation** | Sentiment-stock price Pearson correlation for AAPL, TSLA, AMZN |
+| **Generalization** | Honest OOD test on a real, MIT-licensed news dataset: TF-IDF 0.46 macro-F1 → DistilBERT fine-tuned 0.73 |
 | **Dashboard** | Professional 9-page Streamlit app with dark fintech theme |
 | **CI/CD** | GitHub Actions (lint + format + type check + tests) |
 | **Deployment** | Docker + Streamlit Cloud + HuggingFace Spaces ready |
@@ -55,13 +70,13 @@ Financial sentiment analysis is a critical tool for quantitative finance, risk m
 
 - **Real-Time Prediction** — Enter any financial text and get instant sentiment with confidence scores
 - **Batch Processing** — Upload CSV/TXT files for bulk sentiment analysis with aggregate KPIs
-- **8 Trained Models** — Compare Logistic Regression, Naive Bayes, SVM, Random Forest, Gradient Boosting, MLP, Voting Ensemble, and FinBERT
+- **8 Trained Models** — Compare Logistic Regression, Naive Bayes, SVM, Random Forest, Gradient Boosting, MLP, and a Voting Ensemble (7 trained baselines), plus a pre-trained FinBERT (zero-shot, not fine-tuned by this project)
 - **5-Fold Cross-Validation** — Stratified CV with mean ± std for all metrics
 - **GridSearchCV Tuning** — Automated hyperparameter optimization for SVM and Gradient Boosting
 - **SHAP Explainability** — Global feature importance with per-class drivers
-- **Cross-Dataset Validation** — Test generalization on 2,688 real news headlines from WSJ, Bloomberg, Reuters, CNBC, and Financial Times
-- **Sentiment-Stock Correlation** — Pearson correlation between news sentiment and stock price movements
-- **Stock Prediction Extension** — End-to-end stock direction flow with live news fetch, FinBERT sentiment aggregation, LSTM next-day prediction, reported test accuracy, and optional model-weight persistence
+- **Pipeline demo (synthetic data)** — Runs the model over ~2,700 *template-generated* headlines to demonstrate the scoring/aggregation/correlation pipeline. This is **not** real news and **not** a generalization benchmark (see [Limitations](#limitations)).
+- **Real generalization test** — Honest out-of-distribution evaluation on a real, MIT-licensed dataset (`zeroshot/twitter-financial-news-sentiment`, n=2,388): the TF-IDF baseline drops to macro-F1 **0.46** OOD, and fine-tuning DistilBERT on in-domain news recovers it to **0.73** — both reported transparently.
+- **Stock Prediction Extension** — Experimental end-to-end flow (yfinance → FinBERT → LSTM). The LSTM is **chance-level** on this small/synthetic data — it's an engineering showcase, not a real forecast.
 - **Error Analysis** — Inspect misclassified examples with Sankey diagrams and confidence histograms
 - **Deep Linguistic Analysis** — Named Entity Recognition, rule-based Chain-of-Thought reasoning, Loughran-McDonald financial lexicon matching
 
@@ -168,7 +183,7 @@ financial-sentiment-analyzer/
 │   ├── raw/                        # Financial PhraseBank (2,264 sentences)
 │   └── processed/                  # Stratified train/val/test CSV splits
 │
-├── external-datasets/              # Cross-validation dataset (2,688 headlines)
+├── external-datasets/              # Synthetic headline set (pipeline demo only)
 │
 ├── models/                         # Saved trained models
 │   ├── baseline_logreg.joblib
@@ -285,6 +300,10 @@ python src/train.py --model tune
 # Train a specific model
 python src/train.py --model svm
 python src/train.py --model gradient_boosting
+
+# Fine-tune a transformer on in-domain real news (closes the OOD gap)
+python scripts/fetch_real_news_dataset.py
+python scripts/finetune_finbert_news.py --model distilbert --epochs 1 --max-train 6000
 ```
 
 ### Evaluate Models
@@ -301,7 +320,7 @@ python src/shap_explain.py --model gradient_boosting
 python src/shap_explain.py --model svm
 ```
 
-### Run Cross-Dataset Validation
+### Run Pipeline Demo (synthetic news)
 
 ```bash
 python src/integrate_news.py --action evaluate --model svm
@@ -335,16 +354,20 @@ python src/predict.py --text "Revenue increased 25% driven by strong demand" --m
 | **Split** | 80% train (1,807) / 10% val (226) / 10% test (226) |
 | **Strategy** | Stratified random split (seed=42) |
 
-### Cross-Validation Dataset: Financial News Headlines
+### Pipeline-Demo Dataset: Synthetic Headlines
+
+> ⚠️ **Synthetic, not real.** These headlines are template-generated by
+> `external-datasets/.../generate_dummy_news.py`; the `source` column is a
+> randomly assigned label, not the true publisher. They exist only to exercise
+> the pipeline. See [`.../data/README.md`](external-datasets/financial-news-stock-prediction/data/README.md).
 
 | Property | Value |
 |----------|-------|
-| **Total Headlines** | 2,688 |
-| **Sources** | WSJ, Bloomberg, Reuters, CNBC, Financial Times |
+| **Total Headlines** | 2,688 (synthetic) |
+| **Origin** | Locally generated templates (not collected from any outlet) |
 | **Tickers** | AAPL, TSLA, AMZN |
-| **Date Range** | Jan 2025 – Mar 2026 |
-| **Purpose** | Out-of-distribution generalization testing |
-| **Stock Data** | OHLCV for sentiment-stock correlation analysis |
+| **Purpose** | Pipeline demonstration only — **not** a generalization benchmark |
+| **Stock Data** | Synthetic OHLCV series |
 
 All dataset metadata is documented in `data_manifest.toml` for reproducibility.
 
@@ -355,22 +378,31 @@ All dataset metadata is documented in `data_manifest.toml` for reproducibility.
 ### Baseline Models (TF-IDF + Classifiers)
 
 All baselines use TF-IDF vectorization with unigrams + bigrams (max 10,000 features).
+Test metrics are on the held-out test split (**n = 226**, ~61% neutral, so a
+majority-class baseline scores ~62% accuracy). Because the test set is small,
+treat single-run test numbers as indicative (±~3–4%); the **5-fold CV F1 (macro)**
+column is the more reliable signal.
 
-| Model | Test Accuracy | Test F1 (macro) | CV F1 (5-fold) | Speed |
+| Model | Test Acc (n=226) | Test F1 (macro) | CV F1 macro (5-fold) | Speed |
 |-------|:------------:|:--------------:|:--------------:|:-----:|
-| **Gradient Boosting** | **94.25%** | **0.920** | 0.835 ± 0.008 | Medium |
-| SVM (Linear) | 92.48% | 0.902 | 0.838 ± 0.016 | Fast |
+| Gradient Boosting | 94.25% | 0.920 | 0.835 ± 0.008 | Medium |
+| **SVM (Linear)** | 92.48% | 0.902 | **0.838 ± 0.016** | Fast |
 | Logistic Regression | 90.71% | 0.884 | 0.821 ± 0.021 | Very Fast |
 | Random Forest | 88.50% | 0.838 | 0.755 ± 0.028 | Medium |
 | Naive Bayes | 88.05% | 0.848 | 0.784 ± 0.016 | Very Fast |
 | MLP Neural Network | 88.05% | 0.841 | 0.801 ± 0.012 | Medium |
-| Voting Ensemble | — | — | — | Slow |
+| Voting Ensemble | (probability-calibrated; see error analysis) | | | Slow |
 
-### Transformer Model
+> On the test split Gradient Boosting scores highest, but under 5-fold CV SVM and
+> Gradient Boosting are statistically tied (0.838 vs 0.835, overlapping std). SVM
+> is the default for its speed and stability.
 
-| Model | Type | Parameters | Notes |
-|-------|------|-----------|-------|
-| **FinBERT** | ProsusAI/finbert | 110M | Pre-trained on financial text, also supports fine-tuning |
+### Transformer Models
+
+| Model | Type | Notes |
+|-------|------|-------|
+| **FinBERT** | ProsusAI/finbert (110M) | Used **pre-trained / zero-shot** for the dashboard. |
+| **DistilBERT (fine-tuned)** | distilbert-base-uncased (66M) | **Fine-tuned by this project** on in-domain financial news (`scripts/finetune_finbert_news.py`). Achieves **0.81 acc / 0.73 macro-F1** on the real news test set vs 0.67 / 0.46 for the TF-IDF baseline. Auto-detected by the dashboard/API once `models/distilbert_finetuned/` exists. |
 
 ---
 
@@ -409,21 +441,70 @@ Best models are automatically saved to `models/` after tuning.
 
 ---
 
-## Cross-Dataset Generalization
+## Generalization (real, licensed data)
 
-The model trained on Financial PhraseBank is tested on 2,688 **completely different** real-world news headlines to measure out-of-distribution performance.
+The model is trained on Financial PhraseBank and evaluated on a **real,
+human-labeled, out-of-distribution** dataset:
+[`zeroshot/twitter-financial-news-sentiment`](https://huggingface.co/datasets/zeroshot/twitter-financial-news-sentiment)
+(MIT license, validation split, n = 2,388). Fetch it with
+`python scripts/fetch_real_news_dataset.py`, then evaluate with
+`python src/integrate_news.py --action generalization --model svm`.
 
-### Sentiment-Stock Correlation
+| Setting | Accuracy | Macro-F1 |
+|---------|:--------:|:--------:|
+| In-domain (PhraseBank test, n=226) | 0.92 | 0.90 |
+| In-domain (5-fold CV) | — | 0.84 ± 0.02 |
+| **PhraseBank model → real news (OOD, n=2,388)** | **0.67** | **0.46** |
+| Majority-class baseline (OOD) | 0.66 | — |
+| **DistilBERT fine-tuned on in-domain news → same test** | **0.81** | **0.73** |
 
-The project computes **Pearson correlation** between daily aggregated sentiment and stock price returns:
+**Honest takeaway:** the PhraseBank-trained model **generalizes poorly** to a
+different domain — on real financial-news headlines its accuracy barely exceeds
+the majority-class baseline (0.67 vs 0.66) and macro-F1 nearly halves. **The gap
+is domain mismatch, not a broken pipeline:** fine-tuning DistilBERT on in-domain
+news (1 epoch, 6k examples) lifts macro-F1 from 0.46 → **0.73** and accuracy to
+**0.81** on the same held-out set. Reproduce with:
 
-| Ticker | Same-Day Correlation | Next-Day Correlation | Data Points |
+```bash
+python scripts/fetch_real_news_dataset.py
+python scripts/finetune_finbert_news.py --model distilbert --epochs 1 --max-train 6000
+python src/integrate_news.py --action generalization --model svm   # baseline number
+```
+
+> **Achieved here:** the 0.73 macro-F1 above is from a **DistilBERT, 1-epoch,
+> 6k-example, CPU** run — deliberately bounded for reproducibility on a laptop.
+>
+> **GPU upgrade (Kaggle / Colab free tier):**
+> Open `notebooks/finetune_finbert_gpu.ipynb`, set runtime to GPU T4, and click
+> Run All (~15 min). It fine-tunes FinBERT for 3 epochs, evaluates, packages
+> the weights + result JSON for download, and tells you exactly where to copy
+> them. Mixed precision (AMP) is enabled automatically on CUDA.
+> Expected: acc ≈ 0.85–0.88, macro-F1 ≈ 0.79–0.83.
+>
+> After running, copy the weights into `models/finbert_finetuned/`, copy
+> `finetune_results.json` into `results/`, run
+> `python src/integrate_news.py --action generalization --model finbert`,
+> update this table with the real numbers, and push.
+
+## Pipeline Demo on Synthetic Headlines
+
+> ⚠️ **Separate from the above.** The bundled `sample_news.csv` (~2,688 rows) is
+> *template-generated* and used only to exercise the sentiment→aggregation→chart
+> →LSTM plumbing. Its sentiment-vs-price "correlations" are meaningless by
+> construction and must not be read as market evidence.
+
+The project computes **Pearson correlation** between daily aggregated sentiment
+and (synthetic) stock returns purely to exercise the analysis code:
+
+| Ticker | Same-Day | Next-Day | Data Points |
 |--------|:-------------------:|:-------------------:|:-----------:|
 | AAPL | 0.056 | -0.085 | 448 |
 | TSLA | -0.026 | 0.016 | 448 |
 | AMZN | 0.028 | -0.035 | 448 |
 
-These low correlations are **expected and scientifically honest** — if sentiment cleanly predicted stock prices, every hedge fund would use it. The value is in showing you understand the relationship.
+On synthetic data these correlations are meaningless by construction — they are
+shown only to demonstrate the end-to-end flow. Do not interpret them as evidence
+about real markets.
 
 ---
 
@@ -572,7 +653,7 @@ python src/shap_explain.py --model svm
 python src/shap_explain.py --model logreg --plot   # Save SHAP summary plot
 ```
 
-### Cross-Dataset Validation
+### Pipeline Demo (synthetic news)
 
 ```bash
 python src/integrate_news.py --action evaluate --model svm
@@ -631,6 +712,74 @@ GitHub Actions runs on every push/PR:
 
 ---
 
+## Inference API
+
+Beyond the dashboard, the same models are exposed as a small, reusable FastAPI
+service (`api/main.py`) so other apps can consume predictions programmatically.
+
+```bash
+uvicorn api.main:app --reload --port 8000
+# Interactive docs at http://localhost:8000/docs
+```
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET`  | `/health` | Liveness + loaded models |
+| `GET`  | `/models` | List available trained models |
+| `POST` | `/predict` | Classify a single text |
+| `POST` | `/predict/batch` | Classify a list of texts |
+| `GET`  | `/metrics` | Counters + latency percentiles |
+
+```bash
+curl -X POST http://localhost:8000/predict \
+  -H "Content-Type: application/json" \
+  -d '{"text": "The company reported record quarterly profit.", "model": "baseline_svm"}'
+# → {"label":"positive","confidence":0.95,"probabilities":{...},"model":"baseline_svm"}
+```
+
+**Hardening for public use** (all configurable via environment variables):
+- **Authentication** — set `FINSIGHT_API_KEY` to require an `X-API-Key` header on `/predict`, `/predict/batch`, and `/metrics` (returns 401 otherwise). If unset, the API runs open for local dev and logs a warning.
+- **Input validation** — non-empty text, `FINSIGHT_MAX_TEXT_CHARS` (default 5000), `FINSIGHT_MAX_BATCH_SIZE` (default 256), enforced by Pydantic.
+- **Rate limiting** — IP-based via `slowapi`: `FINSIGHT_RATE_LIMIT` (default `60/minute`), `FINSIGHT_BATCH_RATE_LIMIT` (default `10/minute`); returns HTTP 429 when exceeded. Set `FINSIGHT_REDIS_URL` to share limits across workers/replicas (in-memory otherwise), and `FINSIGHT_TRUST_PROXY=true` only behind a trusted proxy so `X-Forwarded-For` is honored correctly.
+- **Monitoring** — per-request latency header (`X-Process-Time-ms`), in-process metrics at `/metrics`, and a structured JSONL audit trail at `logs/predictions.jsonl`.
+
+The Streamlit batch page also caps rows (`FINSIGHT_MAX_BATCH_ROWS`, default 2000) and uses chunked batch inference; the Stock Extension page can be disabled on shared hosts with `FINSIGHT_DISABLE_HEAVY=true`.
+
+## Monitoring & Model Registry
+
+- **Monitoring** (`src/monitoring.py`) — dependency-free structured logging + an
+  in-process metrics registry (request/error counts, p50/p95/p99 latency).
+  Prediction events are appended to `logs/predictions.jsonl` for an audit trail.
+- **Model registry** (`src/registry.py`) — records a versioned snapshot of every
+  model artifact (SHA-256 hash, size, timestamp) joined with its evaluation
+  metrics to `models/registry.json` — reproducible lineage with zero infra.
+
+```bash
+python src/registry.py --update      # refresh models/registry.json
+python src/registry.py --update --mlflow   # also log to MLflow (if installed)
+python src/registry.py --show
+```
+
+MLflow is supported as an optional integration: with `mlflow` installed,
+`--mlflow` logs params + metrics to a local `mlruns/` store. The registry works
+fully without it.
+
+## Retraining
+
+The dataset is static, so retraining is occasional. A single command runs the
+full reproducible pipeline and refreshes the registry:
+
+```bash
+python scripts/retrain.py            # train baselines + CV + evaluate + registry
+python scripts/retrain.py --skip-cv  # faster
+```
+
+A scheduled GitHub Actions workflow (`.github/workflows/retrain.yml`) runs
+monthly (and on manual dispatch), retrains, runs the test suite, and uploads
+regenerated artifacts for review. Promotion of new weights is a manual, reviewed
+step. See [docs/RETRAINING.md](docs/RETRAINING.md) for the full checklist and
+promotion criteria.
+
 ## Deployment
 
 ### Option 1: Streamlit Cloud (Easiest)
@@ -664,6 +813,37 @@ Python-stdlib health check hits the Streamlit `/_stcore/health` endpoint.
 2. Upload the `app/`, `src/`, `models/`, `data/`, and `external-datasets/` directories
 3. Add `requirements-deploy.txt` as `requirements.txt`
 
+### Option 4: Scaled split architecture (UI + API + load balancer)
+
+For a production-shaped deployment, the UI and the model service run as
+**separate tiers**. `docker-compose.yml` wires them together:
+
+```
+Browser ─► Streamlit UI ─► nginx (load balancer) ─► FastAPI replicas ─► models
+                                                          │
+                                                        Redis (shared rate limit)
+```
+
+```bash
+# 3 API replicas behind the nginx load balancer
+FINSIGHT_API_KEY=your-secret docker compose up --build --scale api=3
+# UI:        http://localhost:8501
+# API (LB):  http://localhost:8080/health
+```
+
+How it works:
+- The UI sets `FINSIGHT_API_URL=http://lb:80`, so it becomes a **stateless
+  presentation layer** — `ui.load_predictor` returns a `RemotePredictor` that
+  calls the API instead of loading models in-process.
+- `nginx` (`deploy/nginx.conf`) load-balances across the scaled `api` replicas
+  and forwards the real client IP via `X-Forwarded-For`.
+- The API runs with `FINSIGHT_TRUST_PROXY=true` (so rate limits key on the real
+  caller) and `FINSIGHT_REDIS_URL` (so limits are **shared across all replicas**).
+- Set `FINSIGHT_API_KEY` to require an `X-API-Key` header end-to-end.
+
+This separation lets the model tier scale independently of the UI and removes
+the single-process bottleneck of a standalone Streamlit app.
+
 ---
 
 ## Technologies Used
@@ -690,7 +870,7 @@ Python-stdlib health check hits the Streamlit `/_stcore/health` endpoint.
 
 ### Q: How do you know the model generalizes beyond the training data?
 
-**A:** I validated on 2,688 completely separate real-world news headlines from WSJ, Bloomberg, Reuters, CNBC, and Financial Times. The model produces a realistic sentiment distribution (75% neutral, 14% positive, 10% negative) and I measured Pearson correlation between predicted sentiment and actual stock price movements for AAPL, TSLA, and AMZN.
+**A:** I measured it honestly — and then fixed it. Trained on Financial PhraseBank, the TF-IDF model scores macro-F1 0.84 in-domain but only **0.46** on a real, MIT-licensed out-of-distribution set (`zeroshot/twitter-financial-news-sentiment`, n=2,388), barely beating the majority-class baseline. That exposed the gap as domain mismatch. So I fine-tuned DistilBERT on in-domain news (1 epoch, 6k examples), which lifts macro-F1 to **0.73** and accuracy to **0.81** on the same held-out set. I report both numbers — the weak baseline and the fix — rather than hiding the gap.
 
 ### Q: Did you use cross-validation?
 
@@ -730,7 +910,7 @@ This project is transparent about its boundaries:
 |------------|--------|------------|
 | **Dataset size** | 2,264 sentences (AllAgree subset of Financial PhraseBank) | AllAgree was chosen for label quality (100% annotator agreement) over quantity. The full PhraseBank has 4,840 samples at 50% agreement, but noisy labels would undermine evaluation reliability. |
 | **Class imbalance** | 61% neutral, 25% positive, 14% negative | Stratified splitting and `class_weight="balanced"` preserve minority-class recall. F1 macro (not accuracy) is the primary metric. |
-| **Domain coverage** | Training data is from Finnish company financial reports (formal language) | Cross-dataset validation on 2,688 real news headlines from WSJ/Bloomberg/Reuters tests generalization. Casual language (Reddit, Twitter) is out of scope. |
+| **Domain coverage** | Training data is from Finnish company financial reports (formal language) | In-distribution performance is validated with 5-fold CV + a held-out test set. True out-of-domain generalization is **not yet measured** — the bundled headline set is synthetic and used only for pipeline demonstration. Casual language (Reddit, Twitter) is out of scope. |
 | **Sentiment–stock correlation** | Pearson correlations are low (0.05 for AAPL) | Expected and scientifically honest — single-factor sentiment is not a reliable price predictor. The value is in demonstrating the end-to-end pipeline and honest reporting. |
 | **Explanation generation** | `llm_explain.py` uses template-based generation, not an external LLM API | Deliberate design choice for reproducibility, zero cost, and latency-free operation. The system works fully offline with no API dependency. |
 | **Test vs CV accuracy gap** | Gradient Boosting: 94.25% test accuracy vs 88.1% CV accuracy | The test set happens to be slightly easier than the average CV fold. The CV result (88.1% ± 0.5%) is the more reliable performance estimate. |

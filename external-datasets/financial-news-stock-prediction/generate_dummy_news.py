@@ -1,6 +1,17 @@
-import pandas as pd
-from datetime import datetime
+"""
+Generate SYNTHETIC financial news headlines for pipeline demonstration.
+
+⚠️  These headlines are NOT real. They are produced by filling fixed templates
+with random word choices, and the `source` column (Reuters/Bloomberg/etc.) is a
+RANDOMLY ASSIGNED label, not the true publisher. The output (data/sample_news.csv)
+is used only to exercise the end-to-end sentiment pipeline and charts. Do not
+present it as a real dataset or as an out-of-distribution generalization benchmark.
+"""
+
 import random
+from datetime import datetime
+
+import pandas as pd
 
 tickers = ['AAPL', 'TSLA', 'AMZN']
 sources = ['Reuters', 'Bloomberg', 'CNBC', 'WSJ', 'Financial Times']

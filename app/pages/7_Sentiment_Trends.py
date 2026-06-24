@@ -15,7 +15,14 @@ import streamlit as st  # pyre-ignore
 from plotly.subplots import make_subplots  # pyre-ignore
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from shared import inject_css, page_header, setup_sidebar  # pyre-ignore
+from shared import (  # pyre-ignore
+    inject_css,
+    kpi_strip,
+    page_header,
+    section_header,
+    setup_sidebar,
+    status_banner,
+)
 
 # ── Page config ─────────────────────────────────────────────────────────────────
 st.set_page_config(page_title="Sentiment Trends", page_icon="📈", layout="wide")
@@ -27,9 +34,42 @@ if predictor is None:
 
 page_header(
     "Sentiment Trends",
-    "Cross-dataset validation: news sentiment against stock price, with Pearson correlation for AAPL, TSLA, and AMZN.",
-    eyebrow="Market validation",
+    "Real out-of-distribution generalization plus a synthetic sentiment↔price pipeline demo.",
+    eyebrow="Model validation",
 )
+
+# ── Real generalization (if evaluated) ───────────────────────────────────────
+_gen_path = Path(__file__).parent.parent.parent / "results" / "generalization_results.json"
+if _gen_path.exists():
+    import json as _json
+
+    with open(_gen_path) as _f:
+        _gen = _json.load(_f)
+    section_header("Generalization on real, labeled data", _gen.get("dataset", ""))
+    kpi_strip(
+        [
+            {
+                "label": "OOD Accuracy",
+                "value": f"{_gen['accuracy']:.2f}",
+                "sub": f"majority {_gen['majority_class_accuracy']:.2f}",
+                "accent": "#3b82f6",
+            },
+            {"label": "OOD Macro-F1", "value": f"{_gen['f1_macro']:.2f}", "sub": "in-domain 0.84", "accent": "#ef4444"},
+            {
+                "label": "Samples",
+                "value": f"{_gen['n_samples']:,}",
+                "sub": "real labeled headlines",
+                "accent": "#8b5cf6",
+            },
+            {"label": "Model", "value": _gen["model"].upper(), "accent": "#10b981"},
+        ]
+    )
+    status_banner(
+        "Honest result: the TF-IDF baseline generalizes poorly across this domain shift "
+        "(macro-F1 0.84 in-domain → ~0.46 on real news). Fine-tuning DistilBERT on "
+        "in-domain news recovers it to ~0.73 — see the README.",
+        kind="warning",
+    )
 
 # Check if the news dataset integration module is available
 try:
@@ -77,7 +117,9 @@ if cross_results_path.exists():
     st.markdown(
         """
     <p style='color: #94a3b8;'>Model trained on <b>Financial PhraseBank</b> (expert-annotated),
-    evaluated on <b>2,700+ real news headlines</b> from WSJ, Bloomberg, Reuters, CNBC, and Financial Times.</p>
+    then run over <b>~2,700 synthetic headlines</b> bundled for pipeline demonstration.
+    <br><span style='color:#f59e0b;'>Note:</span> these headlines are template-generated (not real news),
+    so this section demonstrates the pipeline — it is not a real generalization benchmark.</p>
     """,
         unsafe_allow_html=True,
     )
