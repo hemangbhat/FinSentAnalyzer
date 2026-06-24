@@ -1,6 +1,6 @@
 # ruff: noqa: E402
 """
-FinBERT / DistilBERT GPU fine-tuning script.
+FinBERT / DeBERTa GPU fine-tuning script — v2 (stronger recipe).
 
 Run on Kaggle (free T4/P100) or Google Colab.
 
@@ -13,9 +13,8 @@ KAGGLE SETUP  (recommended, free T4)
   3. Settings sidebar -> Accelerator -> GPU T4 x2
   4. *** Settings sidebar -> Internet -> ON ***
      Internet is OFF by default on Kaggle.
-     Without this, pip install will fail with
-     "Temporary failure in name resolution".
-  5. Run All  (~15-20 min for FinBERT 3 epochs)
+     Without this, pip install will fail.
+  5. Run All  (~25-35 min for both models)
 
 =======================================================
 COLAB SETUP
@@ -28,35 +27,53 @@ COLAB SETUP
 =======================================================
 WHAT IT DOES
 =======================================================
-  1. Checks internet connectivity before installing
+  1. Checks internet + GPU
   2. Installs dependencies (skips if already present)
   3. Clones your repo
   4. Fetches the real MIT-licensed news dataset
-  5. Fine-tunes FinBERT (3 epochs, AMP, batch 32)
-  6. Evaluates on the real held-out validation set
-  7. Zips model weights + result JSON for download
+  5. Runs TWO fine-tune jobs back-to-back:
+       A. FinBERT  4 epochs  + class weights + early stopping
+       B. DeBERTa-v3  4 epochs + class weights + early stopping
+  6. Evaluates both on the held-out validation set
+  7. Zips ALL model weights + result JSONs for download
+
+=======================================================
+WHAT IS DIFFERENT FROM v1
+=======================================================
+  - class weights:  inverse-frequency weights so the model
+    stops ignoring the minority (negative/positive) classes.
+    Directly lifts macro-F1 on neutral-heavy data.
+  - early stopping: saves the best val macro-F1 checkpoint
+    automatically; training stops if val F1 stalls (patience=2).
+  - DeBERTa-v3:  microsoft/deberta-v3-base is currently one
+    of the strongest general-purpose encoders and typically
+    beats vanilla FinBERT by 1-3 macro-F1 points on news text.
+  Expected: FinBERT ~0.85-0.87  DeBERTa ~0.86-0.89
 
 =======================================================
 AFTER DOWNLOADING THE ZIP
 =======================================================
-  - finbert_finetuned/      -> models/finbert_finetuned/
-  - finetune_results.json   -> results/finetune_results.json
+  For each model (finbert, deberta):
+  - {model}_finetuned/       -> models/{model}_finetuned/
+  - finetune_results_{model}.json -> results/
   Then locally:
   python src/integrate_news.py --action generalization --model finbert
+  python src/integrate_news.py --action generalization --model deberta
+  python scripts/compare_ood.py    # rebuilds comparison artifact
   python src/registry.py --update
-  # Update README generalization table and push
+  # Update README table and push
 =======================================================
 """
 
 # ─────────────────────────────────────────────────────────────────────────────
-# CELL 1  Pre-flight: internet connectivity check
+# CELL 1  Pre-flight checks
 # ─────────────────────────────────────────────────────────────────────────────
 import socket
 import subprocess
 import sys
 
 
-def _check_internet(host="pypi.org", port=443, timeout=5) -> bool:
+def _check_internet(host: str = "pypi.org", port: int = 443, timeout: int = 5) -> bool:
     try:
         socket.setdefaulttimeout(timeout)
         socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
@@ -67,27 +84,28 @@ def _check_internet(host="pypi.org", port=443, timeout=5) -> bool:
 
 if not _check_internet():
     raise RuntimeError(
-        "\n"
-        "No internet access detected.\n\n"
+        "\nNo internet access detected.\n\n"
         "KAGGLE FIX:\n"
         "  Right sidebar -> Settings -> Internet -> turn ON\n"
         "  Then restart the kernel and run again.\n\n"
-        "COLAB FIX:\n"
-        "  Colab has internet on by default — if you see this,\n"
-        "  check Runtime -> Manage sessions and reconnect.\n"
+        "COLAB: Colab has internet on by default — reconnect if you see this.\n"
     )
-
-print("Internet connectivity: OK")
+print("[ok] Internet: reachable")
 
 # ─────────────────────────────────────────────────────────────────────────────
-# CELL 2  Install dependencies (skip if already present)
+# CELL 2  Install dependencies
 # ─────────────────────────────────────────────────────────────────────────────
+PACKAGES = [
+    "transformers>=4.40.0",
+    "datasets",
+    "accelerate",
+    "scikit-learn",
+    "tqdm",
+    "sentencepiece",  # required by DeBERTa tokenizer
+]
 
-PACKAGES = ["transformers>=4.40.0", "datasets", "accelerate", "scikit-learn", "tqdm", "sentencepiece"]
 
-
-def _pkg_installed(pkg: str) -> bool:
-    """Return True if the base package name is importable."""
+def _importable(pkg: str) -> bool:
     name = pkg.split(">=")[0].split("==")[0].split("[")[0]
     try:
         __import__(name)
@@ -96,18 +114,14 @@ def _pkg_installed(pkg: str) -> bool:
         return False
 
 
-missing = [p for p in PACKAGES if not _pkg_installed(p)]
+missing = [p for p in PACKAGES if not _importable(p)]
 if missing:
     print(f"Installing: {missing}")
-    result = subprocess.run(
-        [sys.executable, "-m", "pip", "install", "-q"] + missing,
-    )
-    if result.returncode != 0:
-        raise RuntimeError(
-            f"pip install failed (exit {result.returncode}).\nOn Kaggle: make sure Internet is ON in Settings."
-        )
+    r = subprocess.run([sys.executable, "-m", "pip", "install", "-q"] + missing)
+    if r.returncode != 0:
+        raise RuntimeError("pip install failed. On Kaggle: Settings -> Internet -> ON")
 else:
-    print("All dependencies already installed — skipping.")
+    print("[ok] All dependencies present")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # CELL 3  Clone / update repo
@@ -126,22 +140,22 @@ else:
 
 if not Path(REPO_DIR).exists():
     subprocess.run(["git", "clone", "--depth=1", REPO_URL, REPO_DIR], check=True)
-    print(f"Cloned to {REPO_DIR}")
+    print(f"[ok] Cloned to {REPO_DIR}")
 else:
     subprocess.run(["git", "-C", REPO_DIR, "pull", "--ff-only"], check=True)
-    print(f"Repo present at {REPO_DIR} — pulled latest.")
+    print(f"[ok] Repo updated at {REPO_DIR}")
 
 os.chdir(REPO_DIR)
 sys.path.insert(0, os.path.join(REPO_DIR, "src"))
-print("Working dir:", os.getcwd())
+print("[ok] Working dir:", os.getcwd())
 
 # ─────────────────────────────────────────────────────────────────────────────
-# CELL 4  Fetch the real news dataset
+# CELL 4  Fetch real news dataset
 # ─────────────────────────────────────────────────────────────────────────────
 subprocess.run([sys.executable, "scripts/fetch_real_news_dataset.py"], check=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
-# CELL 5  Confirm GPU + AMP
+# CELL 5  Confirm GPU
 # ─────────────────────────────────────────────────────────────────────────────
 import torch
 
@@ -149,92 +163,103 @@ if not torch.cuda.is_available():
     raise RuntimeError(
         "No GPU detected.\n"
         "Kaggle:  Settings sidebar -> Accelerator -> GPU T4 x2\n"
-        "Colab:   Runtime -> Change runtime type -> T4 GPU\n"
-        "Then restart and run again."
+        "Colab:   Runtime -> Change runtime type -> T4 GPU"
     )
 
-print(f"GPU:    {torch.cuda.get_device_name(0)}")
-print(f"Memory: {torch.cuda.get_device_properties(0).total_memory / 1e9:.1f} GB")
-print("Mixed precision (AMP) will be enabled automatically.")
+print(f"[ok] GPU: {torch.cuda.get_device_name(0)}  {torch.cuda.get_device_properties(0).total_memory / 1e9:.1f} GB")
+print("[ok] AMP (mixed precision) will be enabled automatically")
 
 # ─────────────────────────────────────────────────────────────────────────────
-# CELL 6  Fine-tune
-#   Stronger recipe: 4 epochs + class weights (helps macro-F1 on the
-#   neutral-heavy data) + early stopping (keeps the best val checkpoint).
-#   Swap --model finbert for 'deberta' (microsoft/deberta-v3-base) to try a
-#   stronger base, or 'distilbert' for a faster run (~5 min/epoch on T4).
-# ─────────────────────────────────────────────────────────────────────────────
-subprocess.run(
-    [
-        sys.executable,
-        "scripts/finetune_finbert_news.py",
-        "--model",
-        "finbert",
-        "--epochs",
-        "4",
-        "--batch-size",
-        "32",
-        "--lr",
-        "2e-5",
-        "--class-weights",
-        "--early-stopping",
-        "--patience",
-        "2",
-    ],
-    check=True,
-)
-
-# ─────────────────────────────────────────────────────────────────────────────
-# CELL 7  Show results
+# CELL 6  Fine-tune helpers
 # ─────────────────────────────────────────────────────────────────────────────
 import json
-
-r = json.loads(Path("results/finetune_results.json").read_text())
-
-print()
-print("=" * 52)
-print("Fine-tuning result")
-print("=" * 52)
-print(f"Model:      {r['model']}")
-print(f"Dataset:    {r['dataset']}")
-print(f"Train rows: {r['n_train']}    Val rows: {r['n_val']}")
-print(f"Epochs:     {r['epochs']}")
-print(f"Accuracy:   {r['accuracy']:.3f}")
-print(f"Macro-F1:   {r['f1_macro']:.3f}")
-print()
-print("Comparison vs TF-IDF SVM (same val set):")
-print("  Accuracy 0.670   Macro-F1 0.460")
-print(f"  Improvement: +{r['accuracy'] - 0.670:.3f} acc  +{r['f1_macro'] - 0.460:.3f} F1")
-
-# ─────────────────────────────────────────────────────────────────────────────
-# CELL 8  Package for download
-# ─────────────────────────────────────────────────────────────────────────────
 import shutil
 
+RESULTS: dict = {}  # collects output from each run
+
+
+def finetune(model_name: str, epochs: int = 4) -> None:
+    """Run one fine-tune job and record results."""
+    print(f"\n{'=' * 60}")
+    print(f"FINE-TUNING: {model_name.upper()}  epochs={epochs}")
+    print("=" * 60)
+    subprocess.run(
+        [
+            sys.executable,
+            "scripts/finetune_finbert_news.py",
+            "--model",
+            model_name,
+            "--epochs",
+            str(epochs),
+            "--batch-size",
+            "32",
+            "--lr",
+            "2e-5",
+            "--class-weights",  # inverse-freq weights → lifts minority class F1
+            "--early-stopping",  # save best val macro-F1 checkpoint
+            "--patience",
+            "2",
+        ],
+        check=True,
+    )
+    # Read the metrics written by the script.
+    r = json.loads(Path("results/finetune_results.json").read_text())
+    # Save a per-model copy so both results survive.
+    Path(f"results/finetune_results_{model_name}.json").write_text(json.dumps(r, indent=2))
+    RESULTS[model_name] = r
+    print(f"\n  acc={r['accuracy']:.3f}  macro-F1={r['f1_macro']:.3f}")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CELL 7  Run both models
+# ─────────────────────────────────────────────────────────────────────────────
+finetune("finbert", epochs=4)
+finetune("deberta", epochs=4)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CELL 8  Summary comparison
+# ─────────────────────────────────────────────────────────────────────────────
+print("\n" + "=" * 60)
+print("COMPARISON  (real OOD val set, n=2388)")
+print("=" * 60)
+print(f"{'Model':<14}  {'Accuracy':>9}  {'Macro-F1':>9}")
+print(f"{'SVM baseline':<14}  {'0.670':>9}  {'0.460':>9}  <- PhraseBank-trained, no fine-tune")
+for name, r in RESULTS.items():
+    print(f"{name:<14}  {r['accuracy']:>9.3f}  {r['f1_macro']:>9.3f}")
+print()
+print("Previous best (FinBERT v1, 3 epochs, no class weights): acc=0.883  macro-F1=0.844")
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CELL 9  Package everything for download
+# ─────────────────────────────────────────────────────────────────────────────
 if Path("/kaggle/working").exists():
-    OUT_DIR = Path("/kaggle/working/finsight_finetuned")
+    OUT_DIR = Path("/kaggle/working/finsight_finetuned_v2")
 elif Path("/content").exists():
-    OUT_DIR = Path("/content/finsight_finetuned")
+    OUT_DIR = Path("/content/finsight_finetuned_v2")
 else:
-    OUT_DIR = Path(REPO_DIR) / "finsight_finetuned_export"
+    OUT_DIR = Path(REPO_DIR) / "finsight_finetuned_v2_export"
 
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
-model_src = Path(f"models/{r['model']}_finetuned")
-if model_src.exists():
-    shutil.copytree(model_src, OUT_DIR / model_src.name, dirs_exist_ok=True)
-    print(f"Weights copied to {OUT_DIR / model_src.name}")
+for model_name in RESULTS:
+    src = Path(f"models/{model_name}_finetuned")
+    if src.exists():
+        shutil.copytree(src, OUT_DIR / src.name, dirs_exist_ok=True)
+        print(f"Copied weights: {OUT_DIR / src.name}")
+    results_src = Path(f"results/finetune_results_{model_name}.json")
+    if results_src.exists():
+        shutil.copy(results_src, OUT_DIR / results_src.name)
 
-shutil.copy("results/finetune_results.json", OUT_DIR / "finetune_results.json")
 zip_path = shutil.make_archive(str(OUT_DIR), "zip", OUT_DIR)
-
-print(f"\nDownload ready: {zip_path}")
+print(f"\n[ok] Download ready: {zip_path}")
 print()
-print("Copy to your local repo after downloading:")
-print(f"  {r['model']}_finetuned/  ->  models/{r['model']}_finetuned/")
-print("  finetune_results.json   ->  results/finetune_results.json")
+print("After downloading, for each model do:")
+print("  {model}_finetuned/                -> models/{model}_finetuned/")
+print("  finetune_results_{model}.json     -> results/")
 print()
-print("Then run locally:")
-print(f"  python src/integrate_news.py --action generalization --model {r['model']}")
+print("Then locally:")
+print("  python src/integrate_news.py --action generalization --model finbert")
+print("  python src/integrate_news.py --action generalization --model deberta")
+print("  python scripts/compare_ood.py")
 print("  python src/registry.py --update")
-print("  # Update README generalization table and push")
+print("  # Update README table and push")

@@ -125,6 +125,10 @@ def main() -> None:
     out = get_results_dir() / "finetune_results.json"
     out.write_text(json.dumps(results, indent=2), encoding="utf-8")
 
+    # Also write a per-model file so parallel runs don't overwrite each other.
+    per_model = get_results_dir() / f"finetune_results_{args.model}.json"
+    per_model.write_text(json.dumps(results, indent=2), encoding="utf-8")
+
     print("\n" + "=" * 50)
     print("In-domain fine-tuning result")
     print("=" * 50)

@@ -26,30 +26,55 @@ from utils import get_results_dir  # noqa: E402
 
 def main() -> None:
     results_dir = get_results_dir()
-    files = sorted(results_dir.glob("generalization_*.json"))
-    # Exclude the "latest" alias file if present.
-    files = [f for f in files if f.name != "generalization_results.json"]
-
-    if not files:
-        sys.exit("No generalization_<model>.json files found. Run the generalization action first.")
-
+    # Collect per-model generalization results (from evaluate_generalization)
+    # and per-model fine-tune results (from the fine-tune script).
+    seen: set[str] = set()
     models = []
     majority_acc = None
     dataset = None
     n_samples = None
-    for f in files:
+
+    for f in sorted(results_dir.glob("generalization_*.json")):
+        if f.name == "generalization_results.json":
+            continue
         data = json.loads(f.read_text(encoding="utf-8"))
+        name = data["model"]
+        if name in seen:
+            continue
+        seen.add(name)
         majority_acc = data.get("majority_class_accuracy", majority_acc)
         dataset = data.get("dataset", dataset)
         n_samples = data.get("n_samples", n_samples)
         models.append(
             {
-                "model": data["model"],
+                "model": name,
                 "accuracy": round(data["accuracy"], 4),
                 "f1_macro": round(data["f1_macro"], 4),
                 "f1_weighted": round(data.get("f1_weighted", 0.0), 4),
+                "source": "generalization_eval",
             }
         )
+
+    # Also include fine-tune-only results where no generalization eval was run yet.
+    for f in sorted(results_dir.glob("finetune_results_*.json")):
+        data = json.loads(f.read_text(encoding="utf-8"))
+        name = data["model"]
+        if name in seen:
+            continue
+        seen.add(name)
+        models.append(
+            {
+                "model": name,
+                "accuracy": round(data["accuracy"], 4),
+                "f1_macro": round(data["f1_macro"], 4),
+                "f1_weighted": round(data.get("f1_weighted", 0.0), 4),
+                "source": "finetune_train_eval",
+                "note": "training-time eval — run evaluate_generalization for held-out OOD number",
+            }
+        )
+
+    if not models:
+        sys.exit("No per-model result files found. Run generalization or fine-tune first.")
 
     models.sort(key=lambda m: m["f1_macro"])
 
