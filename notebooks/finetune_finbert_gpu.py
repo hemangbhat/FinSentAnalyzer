@@ -101,7 +101,8 @@ PACKAGES = [
     "accelerate",
     "scikit-learn",
     "tqdm",
-    "sentencepiece",  # required by DeBERTa tokenizer
+    "sentencepiece",  # required by DeBERTa-v3 tokenizer
+    "protobuf",  # also required by DeBERTa-v3 tokenizer
 ]
 
 
@@ -178,12 +179,13 @@ import shutil
 RESULTS: dict = {}  # collects output from each run
 
 
-def finetune(model_name: str, epochs: int = 4) -> None:
+def finetune(model_name: str, epochs: int = 4, batch_size: int = 32) -> None:
     """Run one fine-tune job and record results."""
     print(f"\n{'=' * 60}")
-    print(f"FINE-TUNING: {model_name.upper()}  epochs={epochs}")
+    print(f"FINE-TUNING: {model_name.upper()}  epochs={epochs}  batch={batch_size}")
     print("=" * 60)
-    subprocess.run(
+
+    result = subprocess.run(
         [
             sys.executable,
             "scripts/finetune_finbert_news.py",
@@ -192,7 +194,7 @@ def finetune(model_name: str, epochs: int = 4) -> None:
             "--epochs",
             str(epochs),
             "--batch-size",
-            "32",
+            str(batch_size),
             "--lr",
             "2e-5",
             "--class-weights",  # inverse-freq weights → lifts minority class F1
@@ -200,21 +202,40 @@ def finetune(model_name: str, epochs: int = 4) -> None:
             "--patience",
             "2",
         ],
-        check=True,
+        # capture output so the real exception is always visible on failure
+        capture_output=True,
+        text=True,
     )
+
+    # Always show stdout (training progress lives here)
+    if result.stdout:
+        print(result.stdout[-4000:])
+    if result.returncode != 0:
+        print("--- STDERR ---")
+        print(result.stderr[-2000:])
+        raise RuntimeError(
+            f"\nFine-tuning {model_name} failed (exit {result.returncode}).\nThe real exception is printed above."
+        )
+
     # Read the metrics written by the script.
     r = json.loads(Path("results/finetune_results.json").read_text())
     # Save a per-model copy so both results survive.
     Path(f"results/finetune_results_{model_name}.json").write_text(json.dumps(r, indent=2))
     RESULTS[model_name] = r
-    print(f"\n  acc={r['accuracy']:.3f}  macro-F1={r['f1_macro']:.3f}")
+    print(f"\n  [ok] {model_name}: acc={r['accuracy']:.3f}  macro-F1={r['f1_macro']:.3f}")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # CELL 7  Run both models
 # ─────────────────────────────────────────────────────────────────────────────
-finetune("finbert", epochs=4)
-finetune("deberta", epochs=4)
+finetune("finbert", epochs=4, batch_size=32)
+
+# Clear GPU memory before the second (larger) model.
+torch.cuda.empty_cache()
+print("[ok] GPU cache cleared before DeBERTa run")
+
+# DeBERTa-v3 uses a smaller batch to stay within T4 memory limits.
+finetune("deberta", epochs=4, batch_size=16)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # CELL 8  Summary comparison
