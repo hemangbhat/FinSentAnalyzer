@@ -285,34 +285,39 @@ def get_sentiment_trends(model_name: str = "svm", ticker: Optional[str] = None) 
     """
     Get time-series of daily sentiment scores with stock prices.
     Used by the Streamlit Sentiment Trends page.
-
-    Args:
-        model_name: Model for predictions
-        ticker: Optional ticker to filter (None = all)
-
-    Returns:
-        DataFrame with date, ticker, sentiment, and price columns
     """
     news_df = predict_news_sentiment(model_name)
     daily_sentiment = compute_daily_sentiment(news_df)
 
     stock_df = load_stock_data()
 
-    # Reconstruct ticker labels for stock data
-    tickers = ["AAPL", "TSLA", "AMZN"]
-    stock_records = []
-    dates = stock_df["date"].unique()
-    for date in dates:
-        day_rows = stock_df[stock_df["date"] == date]
-        for i, (_, row) in enumerate(day_rows.iterrows()):
-            if i < len(tickers):
-                record = row.to_dict()
-                record["ticker"] = tickers[i]
-                stock_records.append(record)
+    # stock_data.csv may have 1 or 3 rows per date depending on the generator.
+    rows_per_date = stock_df.groupby("date").size().max()
 
-    stock_with_ticker = pd.DataFrame(stock_records)
+    if rows_per_date >= 3:
+        # 3 rows per date: infer ticker from row order (AAPL, TSLA, AMZN).
+        tickers = ["AAPL", "TSLA", "AMZN"]
+        stock_records = []
+        for date in stock_df["date"].unique():
+            day_rows = stock_df[stock_df["date"] == date]
+            for i, (_, row) in enumerate(day_rows.iterrows()):
+                if i < len(tickers):
+                    record = row.to_dict()
+                    record["ticker"] = tickers[i]
+                    stock_records.append(record)
+        stock_with_ticker = pd.DataFrame(stock_records)
+    else:
+        # 1 row per date: the single price series is shared across all tickers
+        # (replicate it for each ticker so the merge still works).
+        tickers = ["AAPL", "TSLA", "AMZN"]
+        frames = []
+        for t in tickers:
+            frame = stock_df.copy()
+            frame["ticker"] = t
+            frames.append(frame)
+        stock_with_ticker = pd.concat(frames, ignore_index=True)
 
-    # Merge
+    # Merge sentiment and price on (date, ticker).
     merged = pd.merge(
         daily_sentiment,
         stock_with_ticker[["date", "ticker", "Close", "Volume"]],

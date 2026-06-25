@@ -74,16 +74,74 @@ with st.expander("Pipeline steps", expanded=False):
 
 ctrl1, ctrl2, ctrl3, ctrl4 = st.columns(4)
 
+# Curated popular tickers grouped for easy discovery.
+# Format: "SYMBOL — Company / Description"
+POPULAR_TICKERS = [
+    # US Large-Cap Tech
+    "AAPL — Apple",
+    "MSFT — Microsoft",
+    "NVDA — NVIDIA",
+    "GOOGL — Alphabet",
+    "AMZN — Amazon",
+    "META — Meta",
+    "TSLA — Tesla",
+    "AVGO — Broadcom",
+    "ORCL — Oracle",
+    "CRM — Salesforce",
+    # US Finance
+    "JPM — JPMorgan Chase",
+    "BAC — Bank of America",
+    "GS — Goldman Sachs",
+    "V — Visa",
+    "MA — Mastercard",
+    # US Healthcare / Consumer
+    "JNJ — Johnson & Johnson",
+    "UNH — UnitedHealth",
+    "PG — Procter & Gamble",
+    "KO — Coca-Cola",
+    "WMT — Walmart",
+    # ETFs & Indices
+    "SPY — S&P 500 ETF",
+    "QQQ — Nasdaq-100 ETF",
+    "DIA — Dow Jones ETF",
+    "IWM — Russell 2000 ETF",
+    # Global Blue-Chips
+    "RELIANCE.NS — Reliance Industries (India)",
+    "TCS.NS — Tata Consultancy (India)",
+    "7203.T — Toyota (Japan)",
+    "BABA — Alibaba",
+    "TSM — TSMC",
+    "SAP — SAP SE",
+    "ASML — ASML Holding",
+    "HSBA.L — HSBC (London)",
+    # Crypto (via yfinance)
+    "BTC-USD — Bitcoin",
+    "ETH-USD — Ethereum",
+    "BNB-USD — BNB",
+    "CUSTOM — Enter symbol manually ↓",
+]
+
 with ctrl1:
-    ticker = (
-        st.text_input(
-            "Ticker",
-            value="AAPL",
-            help="Any Yahoo Finance symbol (e.g., MSFT, NVDA, GOOGL, RELIANCE.NS, 7203.T)",
-        )
-        .strip()
-        .upper()
+    ticker_selection = st.selectbox(
+        "Ticker",
+        options=POPULAR_TICKERS,
+        index=0,
+        help="Select a company or choose CUSTOM to enter any Yahoo Finance symbol.",
     )
+    # Extract the raw symbol from the selection.
+    selected_symbol = ticker_selection.split(" — ")[0].strip()
+    if selected_symbol == "CUSTOM":
+        ticker = (
+            st.text_input(
+                "Custom symbol",
+                value="",
+                placeholder="e.g. RELIANCE.NS, 7203.T, BTC-USD",
+            )
+            .strip()
+            .upper()
+        )
+    else:
+        ticker = selected_symbol
 with ctrl2:
     days_back = st.slider("Days Back", min_value=30, max_value=365, value=90, step=5)
 with ctrl3:
