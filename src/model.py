@@ -176,7 +176,9 @@ class FinancialSentimentModel:
 
                 with torch.autocast(device_type="cuda" if use_amp else "cpu", enabled=use_amp):
                     outputs = self.model(input_ids, attention_mask=attention_mask)
-                    loss = criterion(outputs.logits, labels)
+                    # Cast logits to float32 for the loss — required when the model
+                    # runs in fp16 (e.g. DeBERTa-v3) but the criterion weight is fp32.
+                    loss = criterion(outputs.logits.float(), labels)
                 train_loss += loss.item()
 
                 scaler.scale(loss).backward()

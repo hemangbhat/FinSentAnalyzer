@@ -1,5 +1,5 @@
 # ruff: noqa: E402
-# NOTEBOOK VERSION: v5  (direct in-process training — no subprocess, full tracebacks always visible)
+# NOTEBOOK VERSION: v6  (logits cast to float32 before loss — DeBERTa fp16/fp32 dtype mismatch fix)
 """
 FinBERT / DeBERTa GPU fine-tuning script — v5.
 
@@ -118,13 +118,17 @@ commit = subprocess.run(
 ).stdout.strip()
 print("[ok] Repo commit:", commit)
 
-# Verify the AMP fix is present in model.py on disk.
+# Verify both DeBERTa fixes are present in model.py on disk.
 model_py_text = Path("src/model.py").read_text()
 if "deberta_family" not in model_py_text:
     raise AssertionError(
-        f"Old model.py in repo — DeBERTa AMP fix missing! Commit: {commit}. "
-        "Delete /kaggle/working/FinSentAnalyzer and re-run."
+        f"Old model.py — DeBERTa AMP fix missing! Commit: {commit}. Delete /kaggle/working/FinSentAnalyzer and re-run."
     )
+if "outputs.logits.float()" not in model_py_text:
+    raise AssertionError(
+        f"Old model.py — float cast missing! Commit: {commit}. Delete /kaggle/working/FinSentAnalyzer and re-run."
+    )
+print("[ok] model.py v6 fixes confirmed (AMP + float cast)")
 print("[ok] model.py DeBERTa AMP fix confirmed")
 print("[ok] Working dir:", os.getcwd())
 
