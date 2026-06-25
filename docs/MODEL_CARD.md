@@ -31,10 +31,7 @@ validation, n=2,388) — this is the honest generalization benchmark:
 | TF-IDF SVM (trained on PhraseBank) | 0.67 | 0.46 |
 | Majority-class baseline | 0.66 | — |
 | DistilBERT fine-tuned (1 epoch, CPU) | 0.81 | 0.73 |
-| **FinBERT fine-tuned (3 epochs, GPU)** | **0.87** | **0.83** |
-
-(FinBERT OOD figures are from `evaluate_generalization`; the GPU training-time
-eval reported 0.88 / 0.84 — ~1-pt CPU/GPU float variance, same model.)
+| **FinBERT fine-tuned (4 epochs, GPU, class weights)** | **0.87** | **0.84** |
 
 Per-class breakdowns and confusion matrices are in `results/generalization_*.json`.
 
