@@ -28,6 +28,25 @@ def _finetuned_hf_repo(model_type: str) -> str | None:
     return os.getenv(f"FINSIGHT_{model_type.upper()}_REPO")
 
 
+def _has_usable_local_weights(model_path: Path) -> bool:
+    """
+    True only if the directory holds real transformer weights.
+
+    Guards against Git LFS *pointer* files: on hosts that don't pull LFS
+    (e.g. Streamlit Community Cloud), ``model.safetensors`` is a ~130-byte text
+    pointer rather than the multi-hundred-MB tensor file. Loading that fails, so
+    we treat it as "no local weights" and fall back to the Hugging Face Hub.
+    """
+    if not model_path.exists():
+        return False
+    for fname in ("model.safetensors", "pytorch_model.bin"):
+        f = model_path / fname
+        # Real weights are tens-to-hundreds of MB; an LFS pointer is ~130 bytes.
+        if f.exists() and f.stat().st_size > 1_000_000:
+            return True
+    return False
+
+
 class SentimentPredictor:
     """Unified predictor for baseline and transformer models."""
 
@@ -62,18 +81,20 @@ class SentimentPredictor:
             from model import FinancialSentimentModel
 
             model_path = model_dir / f"{self.model_type}_finetuned"
-            if model_path.exists():
+            if _has_usable_local_weights(model_path):
                 self.model = FinancialSentimentModel.load(model_path)
             else:
-                # Fall back to a Hugging Face Hub repo (for deployments where the
-                # 400 MB+ weights are not committed to git).
+                # Local weights are absent or are an unusable Git LFS pointer
+                # (common on Streamlit Cloud). Fall back to the Hugging Face Hub.
                 hf_repo = _finetuned_hf_repo(self.model_type)
                 if hf_repo:
-                    logger.info("Local weights absent; loading %s from HF Hub: %s", self.model_type, hf_repo)
+                    logger.info("Local weights unusable/absent; loading %s from HF Hub: %s", self.model_type, hf_repo)
                     self.model = FinancialSentimentModel.load(hf_repo)
                 else:
                     raise FileNotFoundError(
-                        f"Model not found: {model_path}. Train with: python src/train.py --model {self.model_type}, "
+                        f"No usable weights for '{self.model_type}' at {model_path} "
+                        f"(directory missing, or contains only a Git LFS pointer). "
+                        f"Train with: python src/train.py --model {self.model_type}, "
                         f"or set FINSIGHT_{self.model_type.upper()}_REPO to a Hugging Face Hub repo id."
                     )
         else:
@@ -278,10 +299,10 @@ def get_available_models() -> List[str]:
 
     # Check fine-tuned transformer models (DistilBERT intentionally excluded
     # from the selector — FinBERT is the production fine-tuned model).
-    # A model is available if its weights are on disk OR a Hugging Face Hub
-    # repo is configured via FINSIGHT_<NAME>_REPO (used in deployments).
+    # Offer a model only if real weights are present locally (not just a Git LFS
+    # pointer) OR a Hugging Face Hub repo is configured via FINSIGHT_<NAME>_REPO.
     for name in ["finbert", "roberta", "bert"]:
-        if (model_dir / f"{name}_finetuned").exists() or _finetuned_hf_repo(name):
+        if _has_usable_local_weights(model_dir / f"{name}_finetuned") or _finetuned_hf_repo(name):
             models.append(name)
 
     return models
