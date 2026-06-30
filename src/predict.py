@@ -254,8 +254,9 @@ def get_available_models() -> List[str]:
     # Always add pre-trained FinBERT (no training needed)
     models.append("finbert_pretrained")
 
-    # Check fine-tuned transformer models
-    for name in ["finbert", "distilbert", "roberta", "bert"]:
+    # Check fine-tuned transformer models (DistilBERT intentionally excluded
+    # from the selector — FinBERT is the production fine-tuned model).
+    for name in ["finbert", "roberta", "bert"]:
         if (model_dir / f"{name}_finetuned").exists():
             models.append(name)
 
