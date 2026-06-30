@@ -15,6 +15,19 @@ from utils import LABEL_MAP_INV, get_model_dir, setup_logging
 logger = setup_logging(__name__)
 
 
+def _finetuned_hf_repo(model_type: str) -> str | None:
+    """
+    Return a Hugging Face Hub repo id for a fine-tuned transformer, if configured.
+
+    Lets deployed environments (e.g. Streamlit Cloud) load large fine-tuned
+    weights that are too big to commit to git. Set, for example:
+        FINSIGHT_FINBERT_REPO=your-username/finbert-financial
+    """
+    import os
+
+    return os.getenv(f"FINSIGHT_{model_type.upper()}_REPO")
+
+
 class SentimentPredictor:
     """Unified predictor for baseline and transformer models."""
 
@@ -49,11 +62,20 @@ class SentimentPredictor:
             from model import FinancialSentimentModel
 
             model_path = model_dir / f"{self.model_type}_finetuned"
-            if not model_path.exists():
-                raise FileNotFoundError(
-                    f"Model not found: {model_path}. Train with: python src/train.py --model {self.model_type}"
-                )
-            self.model = FinancialSentimentModel.load(model_path)
+            if model_path.exists():
+                self.model = FinancialSentimentModel.load(model_path)
+            else:
+                # Fall back to a Hugging Face Hub repo (for deployments where the
+                # 400 MB+ weights are not committed to git).
+                hf_repo = _finetuned_hf_repo(self.model_type)
+                if hf_repo:
+                    logger.info("Local weights absent; loading %s from HF Hub: %s", self.model_type, hf_repo)
+                    self.model = FinancialSentimentModel.load(hf_repo)
+                else:
+                    raise FileNotFoundError(
+                        f"Model not found: {model_path}. Train with: python src/train.py --model {self.model_type}, "
+                        f"or set FINSIGHT_{self.model_type.upper()}_REPO to a Hugging Face Hub repo id."
+                    )
         else:
             model_path = model_dir / f"{self.model_type}.joblib"
             if not model_path.exists():
@@ -256,8 +278,10 @@ def get_available_models() -> List[str]:
 
     # Check fine-tuned transformer models (DistilBERT intentionally excluded
     # from the selector — FinBERT is the production fine-tuned model).
+    # A model is available if its weights are on disk OR a Hugging Face Hub
+    # repo is configured via FINSIGHT_<NAME>_REPO (used in deployments).
     for name in ["finbert", "roberta", "bert"]:
-        if (model_dir / f"{name}_finetuned").exists():
+        if (model_dir / f"{name}_finetuned").exists() or _finetuned_hf_repo(name):
             models.append(name)
 
     return models

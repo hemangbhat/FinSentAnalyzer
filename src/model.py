@@ -323,19 +323,23 @@ class FinancialSentimentModel:
 
     @classmethod
     def load(cls, path: str, device: str = None):
-        """Load a saved model."""
-        path = Path(path)
+        """Load a saved model from a local directory or a Hugging Face Hub repo id."""
         device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+
+        # Keep the original identifier as a string so Hugging Face Hub repo ids
+        # (e.g. "user/finbert-financial") are not mangled by Windows path joining.
+        path_str = str(path)
+        leaf = path_str.replace("\\", "/").rstrip("/").split("/")[-1]
 
         instance = cls.__new__(cls)
         instance.device = device
-        instance.model_name = path.name.replace("_finetuned", "")
-        instance.tokenizer = AutoTokenizer.from_pretrained(path)
-        instance.model = AutoModelForSequenceClassification.from_pretrained(path)
+        instance.model_name = leaf.replace("_finetuned", "")
+        instance.tokenizer = AutoTokenizer.from_pretrained(path_str)
+        instance.model = AutoModelForSequenceClassification.from_pretrained(path_str)
         instance.model.to(device)
         instance.num_labels = instance.model.config.num_labels
 
-        logger.info("Loaded model from: %s", path)
+        logger.info("Loaded model from: %s", path_str)
         return instance
 
 

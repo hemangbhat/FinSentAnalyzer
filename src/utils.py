@@ -213,6 +213,18 @@ _MODEL_METADATA = {
             "110M parameters",
         ],
     },
+    "finbert": {
+        "name": "FinBERT (Fine-tuned)",
+        "type": "Transformer (fine-tuned)",
+        "speed": "Slow (CPU) / Fast (GPU)",
+        "features": [
+            "FinBERT fine-tuned on Financial PhraseBank",
+            "Class-weighted training + early stopping",
+            "Best in-domain accuracy of all models",
+            "Strongest out-of-domain generalization",
+            "110M parameters",
+        ],
+    },
 }
 
 
