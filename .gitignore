@@ -30,6 +30,10 @@ models/*_finetuned/
 !models/.gitkeep
 !models/*.joblib
 
+# Exception: ship the fine-tuned FinBERT in-repo via Git LFS (for deployment).
+!models/finbert_finetuned/
+!models/finbert_finetuned/**
+
 # Jupyter
 .ipynb_checkpoints/
 
