@@ -45,7 +45,11 @@ def evaluate_baseline(model_name: str, split: str = "test") -> dict:
 
     X = df["sentence"].values
     y_true = df["label"].values
-    y_pred = model.predict(X)
+    # The voting ensemble is saved as {"tfidf": ..., "ensemble": ...}, not a Pipeline.
+    if isinstance(model, dict) and "ensemble" in model:
+        y_pred = model["ensemble"].predict(model["tfidf"].transform(X))
+    else:
+        y_pred = model.predict(X)
 
     return compute_metrics(y_true, y_pred, model_name)
 

@@ -1,0 +1,25 @@
+# CI / scheduled-retraining dependencies.
+# scikit-learn is pinned to the version the committed models/*.joblib were
+# pickled with; pandas/numpy are pinned to match requirements.txt. Unpinned
+# installs pull pandas 3 / newer scikit-learn, which break unpickling and
+# label encoding.
+scikit-learn==1.7.2
+numpy==2.2.3
+pandas==2.2.3
+scipy==1.15.2
+joblib==1.4.2
+matplotlib==3.10.1
+datasets==3.3.2
+tqdm==4.67.1
+PyYAML==6.0.2
+
+# Inference API tests
+fastapi>=0.110.0
+uvicorn[standard]>=0.27.0
+slowapi>=0.1.9
+httpx>=0.27.0
+
+# Tooling
+pytest
+ruff
+mypy
