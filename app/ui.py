@@ -1,20 +1,22 @@
 """
-FinSight design system — centralized UI tokens, theme, and reusable components.
+FinSight design system: tokens, global CSS, chart theme and components.
 
-This module is the single source of truth for the app's look and feel:
-- Color + spacing tokens
-- Global CSS (premium dark fintech theme)
-- Plotly dark chart defaults
-- Reusable components (page headers, KPI strips, metric cards, section
-  headers, pills, status banners, chart containers, empty/loading states)
-- Cached model loader and the sidebar
+The visual world is a central bank's quarterly report on its own models:
+a white report ground, a deep-teal shell, hairline rules instead of card
+shadows, numbered exhibits with a source line, and uncertainty drawn as
+bands. Every text colour here meets WCAG AA on the white ground and on the
+panel tone. Sentiment is never colour alone: each label carries a glyph
+(▲ positive, ▶ neutral, ▼ negative) and a word.
 
-Pages import these helpers via ``shared`` (a thin compatibility re-export),
-so every screen shares one consistent design language.
+Native widgets are themed in ``.streamlit/config.toml`` (including the
+self-hosted Public Sans faces); this module styles the HTML Streamlit does
+not draw itself. Pages import everything through ``shared``.
 """
 
 from __future__ import annotations
 
+import html
+import json
 import os
 import sys
 from contextlib import contextmanager
@@ -33,22 +35,24 @@ from predict import SentimentPredictor, get_available_models  # pyre-ignore
 # ─────────────────────────────────────────────────────────────────────────────
 
 COLORS = {
-    "bg": "#0a0e17",
-    "bg_alt": "#0e1320",
-    "surface": "#111827",
-    "card": "rgba(255,255,255,0.025)",
-    "border": "rgba(255,255,255,0.07)",
-    "border_strong": "rgba(255,255,255,0.14)",
-    "text": "#e8eef7",
-    "text_muted": "#94a3b8",
-    "text_faint": "#64748b",
-    "primary": "#3b82f6",
-    "primary_soft": "#60a5fa",
-    "accent": "#8b5cf6",
-    "positive": "#10b981",
-    "negative": "#ef4444",
-    "neutral": "#3b82f6",
-    "warning": "#f59e0b",
+    "bg": "#FFFFFF",
+    "panel": "#F2F5F4",
+    "panel_soft": "#F7F9F8",
+    "border": "#D5DEDC",
+    "border_strong": "#B9C6C3",
+    "text": "#12211F",
+    "text_body": "#2E3F3C",
+    "text_muted": "#4B5D5A",
+    "text_faint": "#5E6E6A",
+    "primary": "#0E6E6A",
+    "primary_soft": "#0E6E6A",
+    "primary_tint": "#E3F0EE",
+    "accent": "#45627A",
+    "positive": "#1D7451",
+    "negative": "#A3322B",
+    "neutral": "#4F6470",
+    "warning": "#9A5B16",
+    "shell": "#0B3A3C",
 }
 
 SENTIMENT_COLORS = {
@@ -56,9 +60,11 @@ SENTIMENT_COLORS = {
     "negative": COLORS["negative"],
     "neutral": COLORS["neutral"],
 }
+SENTIMENT_TINTS = {"positive": "#E2F0E9", "negative": "#F6E4E2", "neutral": "#E6EBEE"}
+SENTIMENT_GLYPHS = {"positive": "▲", "negative": "▼", "neutral": "▶"}
 
-# Restrained categorical palette for charts.
-CHART_SEQUENCE = ["#3b82f6", "#8b5cf6", "#10b981", "#f59e0b", "#ef4444", "#14b8a6"]
+# Chart palette: teal first, then ochre for the one series that needs attention.
+CHART_SEQUENCE = ["#0E6E6A", "#9A5B16", "#45627A", "#A3322B", "#1D7451", "#8FB8B2"]
 
 # Friendly display names for the model selector.
 MODEL_LABELS = {
@@ -69,12 +75,14 @@ MODEL_LABELS = {
     "baseline_gradient_boosting": "Gradient Boosting",
     "baseline_mlp": "Neural Network (MLP)",
     "baseline_ensemble": "Voting Ensemble",
-    "finbert_pretrained": "FinBERT (Transformer)",
-    "finbert": "FinBERT (Fine-tuned)",
-    "distilbert": "DistilBERT (Fine-tuned)",
-    "roberta": "RoBERTa (Fine-tuned)",
-    "bert": "BERT (Fine-tuned)",
+    "finbert_pretrained": "FinBERT (zero-shot)",
+    "finbert": "FinBERT (fine-tuned)",
+    "distilbert": "DistilBERT (fine-tuned)",
+    "roberta": "RoBERTa (fine-tuned)",
+    "bert": "BERT (fine-tuned)",
 }
+
+RESULTS_DIR = Path(__file__).resolve().parent.parent / "results"
 
 
 def model_label(key: str) -> str:
@@ -87,441 +95,469 @@ def get_sentiment_color(label: str) -> str:
     return SENTIMENT_COLORS.get(str(label).lower(), COLORS["text_faint"])
 
 
+def sentiment_tag(label: str, extra: str = "") -> str:
+    """Inline sentiment marker: glyph + word (+ optional figure), never colour alone."""
+    key = str(label).lower()
+    glyph = SENTIMENT_GLYPHS.get(key, "•")
+    tail = f" <span class='fs-num'>{extra}</span>" if extra else ""
+    return f"<span class='fs-tag {key}'><span aria-hidden='true'>{glyph}</span> {html.escape(key.capitalize())}{tail}</span>"
+
+
+@st.cache_data(show_spinner=False)
+def load_result(name: str):
+    """Read ``results/<name>``; ``None`` when missing or an un-fetched Git LFS pointer."""
+    try:
+        return json.loads((RESULTS_DIR / name).read_text(encoding="utf-8"))
+    except Exception:  # noqa: BLE001
+        return None
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# ICONS (authored SVG, one stroke weight; used where Streamlit can't place
+# Material Symbols, i.e. inside custom HTML)
+# ─────────────────────────────────────────────────────────────────────────────
+
+_ICON_PATHS = {
+    "info": "<circle cx='12' cy='12' r='9'/><path d='M12 11v5'/><path d='M12 8h.01'/>",
+    "success": "<circle cx='12' cy='12' r='9'/><path d='m8.5 12.5 2.5 2.5 4.5-5'/>",
+    "warning": "<path d='M12 4 21 19.5H3L12 4z'/><path d='M12 10v4'/><path d='M12 17h.01'/>",
+    "error": "<circle cx='12' cy='12' r='9'/><path d='m9 9 6 6'/><path d='m15 9-6 6'/>",
+    "edit": "<path d='M4 20h4L19 9l-4-4L4 16v4z'/><path d='m13.5 6.5 4 4'/>",
+    "upload": "<path d='M12 15V4'/><path d='m7 9 5-5 5 5'/><path d='M5 15v4h14v-4'/>",
+    "chart": "<path d='M4 20V4'/><path d='M4 20h16'/><path d='M8 16v-4'/><path d='M12 16V8'/><path d='M16 16v-6'/>",
+    "search": "<circle cx='11' cy='11' r='6.5'/><path d='m20 20-4.2-4.2'/>",
+    "flask": "<path d='M9 3h6'/><path d='M10 3v6L4.5 19a1.3 1.3 0 0 0 1.1 2h12.8a1.3 1.3 0 0 0 1.1-2L14 9V3'/><path d='M7.5 14h9'/>",
+}
+
+
+def icon(name: str, size: int = 18) -> str:
+    """Return an inline SVG icon (stroke follows ``currentColor``)."""
+    paths = _ICON_PATHS.get(name, _ICON_PATHS["info"])
+    return (
+        f"<svg class='fs-ico' width='{size}' height='{size}' viewBox='0 0 24 24' fill='none' "
+        "stroke='currentColor' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round' "
+        f"aria-hidden='true'>{paths}</svg>"
+    )
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # GLOBAL CSS
 # ─────────────────────────────────────────────────────────────────────────────
 
 BASE_CSS = """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
-
 :root {
-    --fs-primary: #3b82f6;
-    --fs-accent: #8b5cf6;
-    --fs-positive: #10b981;
-    --fs-negative: #ef4444;
-    --fs-neutral: #3b82f6;
-    --fs-text: #e8eef7;
-    --fs-muted: #94a3b8;
-    --fs-faint: #64748b;
-    --fs-border: rgba(255,255,255,0.07);
-    --fs-radius: 16px;
+    --fs-ink: #12211F; --fs-body: #2E3F3C; --fs-muted: #4B5D5A; --fs-faint: #5E6E6A;
+    --fs-rule: #D5DEDC; --fs-rule-strong: #B9C6C3; --fs-panel: #F2F5F4; --fs-panel-soft: #F7F9F8;
+    --fs-teal: #0E6E6A; --fs-teal-tint: #E3F0EE; --fs-shell: #0B3A3C;
+    --fs-pos: #1D7451; --fs-neg: #A3322B; --fs-neu: #4F6470; --fs-ochre: #9A5B16;
+    --fs-radius: 6px;
 }
 
-/* Base typography — scoped to avoid overriding Material Symbols icon fonts */
-.stApp, .stApp p, .stApp h1, .stApp h2, .stApp h3, .stApp h4, .stApp h5, .stApp h6,
-.stApp label, .stApp li, .stApp td, .stApp th, .stMarkdown, .stMarkdown p {
-    font-family: 'Inter', system-ui, sans-serif;
-}
-code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
+/* Browser surfaces carry the palette too */
+::selection { background: #CDE6E1; color: var(--fs-ink); }
+.stApp { caret-color: var(--fs-teal); }
+.stApp * { scrollbar-width: thin; scrollbar-color: var(--fs-rule-strong) transparent; }
+.stApp a { text-underline-offset: 3px; }
+.stApp :focus-visible { outline: 2px solid var(--fs-teal); outline-offset: 2px; }
+.fs-num, .fs-fig .value, [data-testid="stMetricValue"], [data-testid="stDataFrame"],
+.stApp table { font-variant-numeric: tabular-nums lining-nums; }
 
-/* Never let the icon font be overridden (sidebar collapse, expander arrows, etc.) */
-.material-symbols-rounded, .material-symbols-outlined, .material-icons,
-[data-testid="stIconMaterial"], span[class*="material-symbols"], span[class*="material-icons"] {
-    font-family: 'Material Symbols Rounded', 'Material Symbols Outlined', 'Material Icons' !important;
+/* Never let the icon font be overridden */
+.material-symbols-rounded, [data-testid="stIconMaterial"] {
+    font-family: 'Material Symbols Rounded' !important;
 }
 
-/* App background — deep fintech gradient */
-[data-testid="stAppViewContainer"] {
-    background:
-        radial-gradient(1100px 600px at 12% -8%, rgba(59,130,246,0.10), transparent 60%),
-        radial-gradient(900px 500px at 100% 0%, rgba(139,92,246,0.10), transparent 55%),
-        linear-gradient(180deg, #0a0e17 0%, #090c14 100%);
-    color: var(--fs-text);
-}
-[data-testid="stHeader"] {
-    background: rgba(10,14,23,0.55);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--fs-border);
-}
+/* Page frame */
+[data-testid="stHeader"] { background: rgba(255,255,255,0.92); border-bottom: 1px solid var(--fs-rule); }
 [data-testid="stMainBlockContainer"], .block-container {
-    padding-top: 4.2rem; padding-bottom: 3rem; max-width: 1280px;
+    padding-top: 4.4rem; padding-bottom: 4rem; max-width: 1180px;
 }
+.stApp p, .stApp li { line-height: 1.6; }
+h1, h2, h3, h4 { letter-spacing: -0.015em; color: var(--fs-ink); }
 
-/* Headings */
-h1, h2, h3, h4 { color: var(--fs-text); letter-spacing: -0.02em; font-weight: 700; }
+/* ── Shell (sidebar) ─────────────────────────────────────────────────── */
+[data-testid="stSidebar"] { border-right: none; }
+[data-testid="stSidebarNav"] a { border-radius: 5px; }
+[data-testid="stSidebarNav"] a[aria-current="page"] {
+    background: rgba(143,214,201,0.14); box-shadow: inset 2px 0 0 #8FD6C9;
+}
+[data-testid="stSidebarNav"] a[aria-current="page"] span { color: #FFFFFF; font-weight: 600; }
+[data-testid="stNavSectionHeader"] {
+    color: #A9C4C0 !important; font-size: 0.7rem; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase; margin-top: 12px;
+}
+[data-testid="stLogo"] { height: 1.9rem; max-width: 12rem; }
+.fs-side-label { font-size: 0.72rem; color: #A9C4C0; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; margin: 6px 0 6px 0; }
+.fs-side-status { border-top: 1px solid #24595A; border-bottom: 1px solid #24595A; padding: 10px 2px; margin-top: 12px; }
+.fs-side-status .row { display: flex; align-items: center; gap: 8px; font-size: 0.84rem; color: #E3EEEC; }
+.fs-side-status .row + .row { margin-top: 5px; }
+.fs-side-status .dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+.fs-side-note { margin-top: 12px; font-size: 0.78rem; color: #A9C4C0; line-height: 1.5; }
 
-/* ── Sidebar ─────────────────────────────────────────────────────────── */
-[data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #0d121e 0%, #0a0e17 100%);
-    border-right: 1px solid var(--fs-border);
+/* ── Controls ────────────────────────────────────────────────────────── */
+.stButton > button, .stDownloadButton > button, .stFormSubmitButton > button {
+    font-weight: 600; transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease;
 }
-[data-testid="stSidebar"] .block-container { padding-top: 1.2rem; }
+.stButton > button[kind="primary"]:hover { box-shadow: 0 2px 8px rgba(14,110,106,0.28); }
+[data-testid="stFileUploaderDropzone"] { border-style: dashed; }
 
-/* ── Buttons ─────────────────────────────────────────────────────────── */
-.stButton > button {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--fs-border);
-    border-radius: 10px;
-    color: var(--fs-text);
-    font-weight: 500;
-    padding: 0.55rem 1rem;
-    transition: all 0.18s ease;
-    width: 100%;
-}
-.stButton > button:hover {
-    background: rgba(255,255,255,0.08);
-    border-color: var(--fs-border);
-    transform: translateY(-1px);
-}
-.stButton > button[kind="primary"] {
-    background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
-    border: none; color: #fff; font-weight: 600;
-    box-shadow: 0 6px 18px rgba(59,130,246,0.32);
-}
-.stButton > button[kind="primary"]:hover {
-    box-shadow: 0 10px 26px rgba(59,130,246,0.45); transform: translateY(-1px);
-}
-.stDownloadButton > button { border-radius: 10px; border: 1px solid var(--fs-border); }
+/* ── Report masthead (page header) ──────────────────────────────────── */
+.fs-masthead { border-top: 3px solid var(--fs-teal); padding-top: 18px; margin-bottom: 26px; }
+.fs-masthead .row { display: flex; gap: 24px; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; }
+.fs-masthead h1 { font-size: 2.05rem; font-weight: 700; margin: 0 0 6px 0; line-height: 1.15; padding: 0; }
+.fs-masthead .standfirst { color: var(--fs-muted); font-size: 1.04rem; max-width: 68ch; margin: 0; line-height: 1.55; }
+.fs-masthead .meta { color: var(--fs-faint); font-size: 0.82rem; margin-top: 12px; }
+.fs-masthead .meta b { color: var(--fs-body); font-weight: 600; }
 
-/* ── Inputs ──────────────────────────────────────────────────────────── */
-.stTextInput > div > div > input,
-.stTextArea textarea,
-.stSelectbox > div > div,
-.stMultiSelect > div > div,
-.stNumberInput input {
-    background-color: rgba(255,255,255,0.03);
-    color: var(--fs-text);
-    border: 1px solid var(--fs-border);
-    border-radius: 10px;
-}
-.stTextInput > div > div > input:focus,
-.stTextArea textarea:focus,
-.stSelectbox > div > div:focus-within {
-    border-color: var(--fs-primary);
-    box-shadow: 0 0 0 2px rgba(59,130,246,0.25);
-}
-[data-testid="stFileUploaderDropzone"] {
-    background: rgba(255,255,255,0.02);
-    border: 1.5px dashed var(--fs-border); border-radius: var(--fs-radius);
-}
+/* ── Section and exhibit headings ───────────────────────────────────── */
+.fs-section { border-top: 1px solid var(--fs-rule); padding-top: 14px; margin: 34px 0 12px 0; }
+.fs-section h3 { margin: 0; padding: 0; font-size: 1.14rem; font-weight: 650; line-height: 1.3; }
+.fs-section .cap { color: var(--fs-muted); font-size: 0.9rem; margin: 4px 0 0 0; max-width: 75ch; }
+.fs-section .ex { color: var(--fs-teal); font-weight: 700; margin-right: 8px; }
+.fs-source { color: var(--fs-faint); font-size: 0.78rem; margin: -4px 0 8px 0; }
 
-/* ── Cards (legacy class names kept for backwards compatibility) ─────── */
-.metric-card, .feature-card, .insight-card, .app-card {
-    background: linear-gradient(180deg, rgba(255,255,255,0.035) 0%, rgba(255,255,255,0.015) 100%);
-    border: 1px solid var(--fs-border);
-    border-radius: var(--fs-radius);
-    padding: 22px 24px;
-    box-shadow: 0 2px 14px rgba(0,0,0,0.25);
-    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+/* ── Key figures (a ruled table row, not cards) ─────────────────────── */
+.fs-figs { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    border-top: 1px solid var(--fs-ink); border-bottom: 1px solid var(--fs-rule); margin: 6px 0 10px 0; }
+.fs-fig { padding: 12px 16px 12px 16px; border-left: 1px solid var(--fs-rule); }
+.fs-fig:first-child { border-left: none; padding-left: 0; }
+.fs-fig .label { color: var(--fs-muted); font-size: 0.8rem; font-weight: 600; }
+.fs-fig .value { color: var(--fs-ink); font-size: 1.65rem; font-weight: 700; line-height: 1.25; margin-top: 2px; }
+.fs-fig .sub { color: var(--fs-faint); font-size: 0.8rem; margin-top: 2px; line-height: 1.4; }
+
+/* ── Legacy metric cards render as key figures ──────────────────────── */
+.metric-card { background: none !important; border: none !important; border-top: 1px solid var(--fs-ink) !important;
+    border-radius: 0 !important; padding: 12px 0 10px 0 !important; box-shadow: none !important; }
+.metric-card > div:first-child { font-size: 0.8rem !important; text-transform: none !important; letter-spacing: 0 !important;
+    color: var(--fs-muted) !important; font-weight: 600 !important; }
+.metric-card > div:nth-child(2) { font-size: 1.65rem !important; font-weight: 700 !important; line-height: 1.25 !important;
+    font-variant-numeric: tabular-nums; }
+
+/* ── Panels (legacy class names used by pages) ──────────────────────── */
+.insight-card, .app-card, .feature-card {
+    background: var(--fs-panel-soft); border: 1px solid var(--fs-rule); border-radius: var(--fs-radius);
+    padding: 18px 20px; color: var(--fs-body);
 }
-.feature-card:hover, .app-card:hover {
-    transform: translateY(-3px);
-    border-color: var(--fs-border-strong, rgba(255,255,255,0.16));
-    box-shadow: 0 12px 30px rgba(0,0,0,0.35);
-}
-.card-title { font-size: 1.05em; font-weight: 600; color: var(--fs-text); margin-bottom: 10px; display: flex; align-items: center; gap: 9px; }
+.card-title { font-weight: 650; color: var(--fs-ink); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
 .card-text { color: var(--fs-muted); font-size: 0.93em; line-height: 1.55; }
 
-/* ── Page header / hero ──────────────────────────────────────────────── */
-.fs-eyebrow {
-    display: inline-flex; align-items: center; gap: 7px;
-    font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
-    color: var(--fs-primary-soft, #60a5fa);
-    background: rgba(59,130,246,0.10); border: 1px solid rgba(59,130,246,0.22);
-    padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+/* ── Sentiment tags and pills ───────────────────────────────────────── */
+.fs-tag, .chip, .pill {
+    display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px; border-radius: 4px;
+    font-size: 0.84em; font-weight: 600; margin: 2px; border: 1px solid transparent; white-space: nowrap;
 }
-.fs-page-title { font-size: 2.05rem; font-weight: 800; margin: 0 0 6px 0; line-height: 1.15; }
-.fs-page-sub { color: var(--fs-muted); font-size: 1.02rem; max-width: 760px; line-height: 1.55; margin: 0; }
+.fs-tag.positive, .chip.positive, .pill.positive { background: #E2F0E9; color: var(--fs-pos); border-color: #BFDCCD; }
+.fs-tag.negative, .chip.negative, .pill.negative { background: #F6E4E2; color: var(--fs-neg); border-color: #E6C3BF; }
+.fs-tag.neutral,  .chip.neutral,  .pill.neutral  { background: #E6EBEE; color: var(--fs-neu); border-color: #CBD5DB; }
+.chip, .pill.muted { background: var(--fs-panel); color: var(--fs-body); border-color: var(--fs-rule); }
+.chip.positive::before { content: "▲"; } .chip.negative::before { content: "▼"; } .chip.neutral::before { content: "▶"; }
 
-.fs-hero {
-    position: relative; overflow: hidden;
-    border: 1px solid var(--fs-border); border-radius: 22px;
-    padding: 54px 44px;
-    background:
-        radial-gradient(700px 320px at 8% -30%, rgba(59,130,246,0.20), transparent 60%),
-        radial-gradient(600px 300px at 100% -10%, rgba(139,92,246,0.18), transparent 55%),
-        linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-    margin-bottom: 30px;
-}
-.fs-hero h1 {
-    font-size: 3rem; font-weight: 800; margin: 0 0 14px 0; line-height: 1.08;
-    background: linear-gradient(90deg, #f8fafc 10%, #93b4f5 90%);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-}
-.fs-hero p { color: var(--fs-muted); font-size: 1.12rem; max-width: 640px; line-height: 1.6; margin: 0; }
+/* ── Banners ────────────────────────────────────────────────────────── */
+.fs-banner { display: flex; gap: 10px; align-items: flex-start; border-radius: var(--fs-radius);
+    padding: 12px 16px; margin: 8px 0; border: 1px solid var(--fs-rule); background: var(--fs-panel-soft); }
+.fs-banner .ico { line-height: 0; margin-top: 2px; flex: none; }
+.fs-banner .body { color: var(--fs-body); font-size: 0.93rem; line-height: 1.55; }
+.fs-banner.info .ico { color: var(--fs-teal); }
+.fs-banner.success { background: #EEF6F2; border-color: #BFDCCD; } .fs-banner.success .ico { color: var(--fs-pos); }
+.fs-banner.warning { background: #FBF3E8; border-color: #E8CFA8; } .fs-banner.warning .ico { color: var(--fs-ochre); }
+.fs-banner.error { background: #FBEEEC; border-color: #E6C3BF; } .fs-banner.error .ico { color: var(--fs-neg); }
 
-/* ── Section header ──────────────────────────────────────────────────── */
-.fs-section { display: flex; align-items: center; gap: 12px; margin: 30px 0 14px 0; }
-.fs-section .bar { width: 4px; height: 26px; border-radius: 4px; background: linear-gradient(180deg, #3b82f6, #8b5cf6); }
-.fs-section h3 { margin: 0; font-size: 1.22rem; font-weight: 700; }
-.fs-section .cap { color: var(--fs-faint); font-size: 0.88rem; margin-left: 2px; }
+/* ── Empty state ────────────────────────────────────────────────────── */
+.fs-empty { padding: 34px 28px; border: 1px dashed var(--fs-rule-strong); border-radius: var(--fs-radius);
+    background: var(--fs-panel-soft); display: flex; gap: 16px; align-items: flex-start; }
+.fs-empty .ico { color: var(--fs-teal); line-height: 0; flex: none; margin-top: 2px; }
+.fs-empty h4 { margin: 0 0 4px 0; padding: 0; font-size: 1.02rem; color: var(--fs-ink); }
+.fs-empty p { color: var(--fs-muted); font-size: 0.92rem; max-width: 70ch; margin: 0; line-height: 1.55; }
 
-/* ── KPI strip ───────────────────────────────────────────────────────── */
-.fs-kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin: 6px 0 8px 0; }
-.fs-kpi {
-    background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015));
-    border: 1px solid var(--fs-border); border-radius: 14px; padding: 16px 18px;
-    border-top: 2px solid var(--kpi-accent, #3b82f6);
-}
-.fs-kpi .label { color: var(--fs-muted); font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
-.fs-kpi .value { color: var(--fs-text); font-size: 1.7rem; font-weight: 800; line-height: 1.25; margin-top: 4px; }
-.fs-kpi .sub { color: var(--fs-faint); font-size: 0.8rem; margin-top: 2px; }
+/* ── Verdict with probability band (signature) ──────────────────────── */
+.fs-verdict { border-top: 1px solid var(--fs-ink); padding-top: 14px; }
+.fs-verdict .label { color: var(--fs-muted); font-size: 0.82rem; font-weight: 600; }
+.fs-verdict .word { font-size: 2.6rem; font-weight: 700; line-height: 1.1; margin: 4px 0 2px 0; letter-spacing: -0.02em; }
+.fs-verdict .conf { color: var(--fs-muted); font-size: 0.95rem; }
+.fs-verdict .conf b { color: var(--fs-ink); }
+.fs-band { display: flex; height: 26px; border-radius: 3px; overflow: hidden; margin-top: 16px; gap: 2px; }
+.fs-band > div { height: 100%; min-width: 2px; }
+.fs-band-legend { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 8px; gap: 8px; }
+.fs-band-legend .k { font-size: 0.82rem; color: var(--fs-muted); }
+.fs-band-legend .v { font-size: 1.02rem; font-weight: 650; color: var(--fs-ink); }
 
-/* ── Pills & banners ─────────────────────────────────────────────────── */
-.chip, .pill {
-    display: inline-block; padding: 4px 11px; border-radius: 999px;
-    font-size: 0.8em; font-weight: 600; margin: 2px;
-}
-.chip.positive, .pill.positive { background: rgba(16,185,129,0.14); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
-.chip.negative, .pill.negative { background: rgba(239,68,68,0.14); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
-.chip.neutral,  .pill.neutral  { background: rgba(59,130,246,0.14); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
-.pill.muted { background: rgba(148,163,184,0.12); color: #cbd5e1; border: 1px solid rgba(148,163,184,0.25); }
+/* ── Term tables ────────────────────────────────────────────────────── */
+table.fs-terms { width: 100%; border-collapse: collapse; font-size: 0.92rem; margin: 4px 0 6px 0; border: none; }
+table.fs-terms th, table.fs-terms td { border: none; border-bottom: 1px solid var(--fs-rule); padding: 7px 8px; background: none; }
+table.fs-terms thead th { color: var(--fs-muted); font-size: 0.78rem; font-weight: 600; text-align: left; border-bottom: 1px solid var(--fs-ink); }
+table.fs-terms td.t { font-weight: 600; color: var(--fs-ink); padding-left: 0; }
+table.fs-terms th.t { padding-left: 0; }
+table.fs-terms td.b { width: 40%; }
+table.fs-terms td.n { text-align: right; color: var(--fs-body); }
+table.fs-terms .c { text-align: right; padding-right: 0; }
 
-.fs-banner { display: flex; gap: 12px; align-items: flex-start; border-radius: 12px; padding: 14px 18px; margin: 6px 0; border: 1px solid var(--fs-border); }
-.fs-banner .ico { font-size: 1.15em; line-height: 1.4; }
-.fs-banner .body { color: var(--fs-text); font-size: 0.94rem; line-height: 1.5; }
-.fs-banner.info { background: rgba(59,130,246,0.08); border-color: rgba(59,130,246,0.25); }
-.fs-banner.success { background: rgba(16,185,129,0.08); border-color: rgba(16,185,129,0.25); }
-.fs-banner.warning { background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.28); }
-.fs-banner.error { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.28); }
+/* ── Contents list (home) ───────────────────────────────────────────── */
+.fs-contents-row { border-top: 1px solid var(--fs-rule); padding: 10px 0 4px 0; }
+.fs-contents-desc { color: var(--fs-muted); font-size: 0.88rem; margin: 2px 0 0 0; line-height: 1.5; }
+.fs-tagline-exp { display: inline-block; font-size: 0.72rem; font-weight: 700; color: var(--fs-ochre);
+    border: 1px solid #E8CFA8; background: #FBF3E8; padding: 0 6px; border-radius: 3px; margin-left: 6px; vertical-align: 2px; }
 
-/* ── Empty state ─────────────────────────────────────────────────────── */
-.fs-empty {
-    text-align: center; padding: 48px 28px; border: 1.5px dashed var(--fs-border);
-    border-radius: var(--fs-radius); background: rgba(255,255,255,0.012);
-}
-.fs-empty .ico { font-size: 2.4rem; opacity: 0.7; }
-.fs-empty h4 { margin: 12px 0 6px 0; color: var(--fs-text); }
-.fs-empty p { color: var(--fs-muted); font-size: 0.92rem; max-width: 460px; margin: 0 auto; line-height: 1.55; }
+/* Page links as quiet actions */
+[data-testid="stPageLink"] a { border-radius: 5px; padding: 0.3rem 0.4rem; }
+[data-testid="stPageLink"] a:hover { background: var(--fs-teal-tint); }
+[data-testid="stPageLink"] a p { font-weight: 600; color: var(--fs-teal); }
 
-/* ── Sentiment verdict (single analysis) ─────────────────────────────── */
-.fs-verdict {
-    border: 1px solid var(--fs-border); border-radius: var(--fs-radius); padding: 26px;
-    text-align: center; display: flex; flex-direction: column; justify-content: center; height: 100%;
-    background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
-}
-.fs-verdict .ey { color: var(--fs-muted); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.12em; }
-.fs-verdict .lab { font-size: 3rem; font-weight: 800; line-height: 1.15; text-transform: capitalize; margin: 8px 0; }
-.fs-verdict .conf { color: var(--fs-muted); font-size: 0.98rem; }
-.fs-verdict .conf b { color: var(--fs-text); }
-.fs-conf-track { height: 8px; border-radius: 999px; background: rgba(255,255,255,0.08); margin-top: 14px; overflow: hidden; }
-.fs-conf-fill { height: 100%; border-radius: 999px; }
-
-/* ── Sidebar nav ─────────────────────────────────────────────────────── */
-[data-testid="stSidebarNav"] a { border-radius: 9px; }
-[data-testid="stSidebarNav"] a[aria-current="page"] {
-    background: rgba(59,130,246,0.12); box-shadow: inset 2px 0 0 var(--fs-primary);
-}
-[data-testid="stNavSectionHeader"] {
-    color: var(--fs-faint); font-size: 0.68rem; font-weight: 700;
-    letter-spacing: 0.14em; text-transform: uppercase; margin-top: 10px;
-}
-[data-testid="stLogo"] { height: 2rem; max-width: 12rem; }
-.fs-side-label {
-    font-size: 0.7rem; color: var(--fs-muted); font-weight: 600; letter-spacing: 0.12em;
-    text-transform: uppercase; margin: 4px 0 6px 0;
-}
-.fs-side-status {
-    background: rgba(255,255,255,0.03); border: 1px solid var(--fs-border);
-    border-radius: 12px; padding: 12px 14px; margin-top: 12px;
-}
-.fs-side-status .row { display: flex; align-items: center; gap: 8px; font-size: 0.84rem; color: #e2e8f0; }
-.fs-side-status .row + .row { margin-top: 6px; }
-.fs-side-status .dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
-.fs-side-note { margin-top: 12px; font-size: 0.76rem; color: var(--fs-faint); line-height: 1.5; }
-
-/* ── Page links styled as CTAs / card links ─────────────────────────── */
-[data-testid="stPageLink"] a {
-    border: 1px solid var(--fs-border); border-radius: 10px; padding: 0.45rem 0.9rem;
-    background: rgba(255,255,255,0.03); transition: all 0.18s ease;
-}
-[data-testid="stPageLink"] a:hover { background: rgba(59,130,246,0.10); border-color: rgba(59,130,246,0.35); }
-[data-testid="stPageLink"] a p { font-weight: 600; font-size: 0.9rem; }
-
-/* Bordered containers (st.container(border=True)) as cards */
-[data-testid="stVerticalBlockBorderWrapper"]:has(> div > [data-testid="stVerticalBlock"]) {
-    border-radius: var(--fs-radius);
-}
-
-/* ── Home: the evaluation story ─────────────────────────────────────── */
-.fs-story { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-.fs-step {
-    position: relative; border: 1px solid var(--fs-border); border-radius: var(--fs-radius);
-    padding: 20px 22px; background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.012));
-}
-.fs-step .n { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--fs-faint); }
-.fs-step .t { font-weight: 700; color: var(--fs-text); margin: 6px 0 2px 0; font-size: 1.02rem; }
-.fs-step .big { font-size: 2.2rem; font-weight: 800; line-height: 1.1; margin: 10px 0 2px 0; letter-spacing: -0.02em; }
-.fs-step .unit { color: var(--fs-muted); font-size: 0.8rem; }
-.fs-step .d { color: var(--fs-muted); font-size: 0.9rem; line-height: 1.55; margin-top: 10px; }
-.fs-card-title { display: flex; align-items: center; gap: 10px; font-weight: 650; color: var(--fs-text); font-size: 1.0rem; }
-.fs-card-ico {
-    width: 30px; height: 30px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center;
-    background: rgba(59,130,246,0.12); color: #93b4f5; font-size: 0.95rem; flex: none;
-}
-.fs-card-desc { color: var(--fs-muted); font-size: 0.89rem; line-height: 1.55; margin: 8px 0 4px 0; min-height: 4.4em; }
-.fs-tag {
-    display: inline-block; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
-    color: #fbbf24; background: rgba(245,158,11,0.10); border: 1px solid rgba(245,158,11,0.25);
-    padding: 1px 7px; border-radius: 999px; margin-left: 4px;
-}
-
-/* ── Tables ──────────────────────────────────────────────────────────── */
-[data-testid="stDataFrame"] { border: 1px solid var(--fs-border); border-radius: 12px; overflow: hidden; }
-[data-testid="stMetricValue"] { font-size: 1.7rem !important; font-weight: 800 !important; }
+/* Tables, metrics, tabs, expanders */
+[data-testid="stMetricValue"] { font-weight: 700 !important; }
 [data-testid="stMetricLabel"] { color: var(--fs-muted) !important; font-weight: 600 !important; }
+[data-testid="stExpander"] details { border-radius: var(--fs-radius); }
+hr { border-color: var(--fs-rule); margin: 1.8rem 0; }
 
-/* Dividers */
-hr { border-color: var(--fs-border); margin: 1.8rem 0; }
-
-/* Tabs + expanders */
-.stTabs [data-baseweb="tab-list"] { gap: 4px; }
-.stTabs [data-baseweb="tab"] { border-radius: 9px 9px 0 0; }
-[data-testid="stExpander"] { border: 1px solid var(--fs-border); border-radius: 12px; background: rgba(255,255,255,0.015); }
-
-/* Responsive */
-@media (max-width: 900px) {
-    .fs-story { grid-template-columns: 1fr; }
-}
-@media (max-width: 768px) {
-    .fs-hero { padding: 34px 24px; }
-    .fs-hero h1 { font-size: 2.1rem; }
-    .fs-page-title { font-size: 1.6rem; }
+@media (max-width: 760px) {
+    [data-testid="stMainBlockContainer"], .block-container { padding-top: 3.6rem; padding-left: 16px; padding-right: 16px; }
+    .fs-masthead h1 { font-size: 1.6rem; }
+    .fs-fig { border-left: none; padding-left: 0; border-top: 1px solid var(--fs-rule); }
+    .fs-figs { border-bottom: none; }
+    .fs-verdict .word { font-size: 2.1rem; }
+    .fs-band-legend { grid-template-columns: 1fr; gap: 4px; }
 }
 </style>
 """
 
 
 def inject_css() -> None:
-    """Inject the global design-system CSS. Call once per page."""
+    """Inject the global design-system CSS. Call once per run (the router does)."""
     st.markdown(BASE_CSS, unsafe_allow_html=True)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# PLOTLY DARK THEME
+# PLOTLY THEME
 # ─────────────────────────────────────────────────────────────────────────────
 
-_GRID = "rgba(255,255,255,0.06)"
-_LINE = "rgba(255,255,255,0.12)"
-_FONT = {"color": "#cbd5e1", "family": "Inter, sans-serif"}
+_GRID = "#E6ECEA"
+_LINE = "#B9C6C3"
+_FONT = {"color": "#2E3F3C", "family": "Public Sans, system-ui, sans-serif", "size": 12}
+
+
+def _register_template() -> None:
+    """Make the report style Plotly's default, so every chart (styled or not) shares it."""
+    import plotly.io as pio  # pyre-ignore
+
+    tpl = go.layout.Template(pio.templates["plotly_white"])
+    tpl.layout.update(
+        font=_FONT,
+        colorway=CHART_SEQUENCE,
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        hoverlabel={"bgcolor": "#FFFFFF", "bordercolor": _LINE, "font": {"color": COLORS["text"]}},
+        legend={"orientation": "h", "yanchor": "bottom", "y": 1.02, "xanchor": "left", "x": 0},
+        title={"font": {"size": 14, "color": COLORS["text"]}, "x": 0, "xanchor": "left"},
+    )
+    tpl.layout.xaxis.update(gridcolor=_GRID, linecolor=_LINE, zerolinecolor=_GRID)
+    tpl.layout.yaxis.update(gridcolor=_GRID, linecolor=_LINE, zerolinecolor=_GRID)
+    pio.templates["finsight"] = tpl
+    pio.templates.default = "finsight"
+
+
+_register_template()
 
 
 def style_fig(fig: go.Figure, height: int | None = None, title: str | None = None, legend: bool = True) -> go.Figure:
-    """Apply the consistent dark chart theme to any Plotly figure."""
+    """Apply the report chart theme to any Plotly figure."""
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
         font=_FONT,
-        margin=dict(l=16, r=16, t=46 if title else 18, b=16),
+        margin=dict(l=8, r=8, t=40 if title else 12, b=8),
         colorway=CHART_SEQUENCE,
-        title=({"text": title, "font": {"color": "#f8fafc", "size": 16}} if title else None),
+        title=(
+            {"text": title, "font": {"color": COLORS["text"], "size": 14}, "x": 0, "xanchor": "left"} if title else None
+        ),
         showlegend=legend,
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-        hoverlabel=dict(bgcolor="#111827", bordercolor=_LINE, font_size=12),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0, font={"size": 12}),
+        hoverlabel=dict(bgcolor="#FFFFFF", bordercolor=_LINE, font_size=12, font_color=COLORS["text"]),
     )
     if height:
         fig.update_layout(height=height)
-    fig.update_xaxes(showgrid=True, gridcolor=_GRID, linecolor=_LINE, zeroline=False)
+    fig.update_xaxes(showgrid=False, linecolor=_LINE, ticks="outside", tickcolor=_LINE, zeroline=False)
     fig.update_yaxes(showgrid=True, gridcolor=_GRID, linecolor=_LINE, zeroline=False)
     return fig
 
 
 def render_chart(fig: go.Figure) -> None:
     """Render a Plotly figure full-width with a clean config."""
-    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+    st.plotly_chart(fig, use_container_width=True, theme=None, config={"displayModeBar": False})
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # COMPONENTS
 # ─────────────────────────────────────────────────────────────────────────────
 
+_EXHIBIT_KEY = "_fs_exhibit_no"
 
-def page_header(title: str, subtitle: str = "", eyebrow: str | None = None) -> None:
-    """Render a consistent page header with optional eyebrow tag."""
-    eyebrow_html = f"<div class='fs-eyebrow'>{eyebrow}</div>" if eyebrow else ""
-    sub_html = f"<p class='fs-page-sub'>{subtitle}</p>" if subtitle else ""
+
+def page_header(title: str, subtitle: str = "", eyebrow: str | None = None, meta: str = "") -> None:
+    """
+    Render the page masthead: title, standfirst and an optional metadata line.
+
+    ``eyebrow`` is accepted for backwards compatibility and ignored; the title
+    carries the page on its own. Resets the page's exhibit numbering.
+    """
+    st.session_state[_EXHIBIT_KEY] = 0
+    sub_html = f"<p class='standfirst'>{subtitle}</p>" if subtitle else ""
+    meta_html = f"<div class='meta'>{meta}</div>" if meta else ""
     st.markdown(
-        f"<div style='margin-bottom:22px;'>{eyebrow_html}<div class='fs-page-title'>{title}</div>{sub_html}</div>",
+        f"<div class='fs-masthead'><h1>{title}</h1>{sub_html}{meta_html}</div>",
         unsafe_allow_html=True,
     )
 
 
 def section_header(title: str, caption: str = "") -> None:
-    """Render a section header with an accent bar."""
-    cap = f"<span class='cap'>· {caption}</span>" if caption else ""
+    """Render a ruled section heading with an optional one-line standfirst."""
+    cap = f"<p class='cap'>{caption}</p>" if caption else ""
+    st.markdown(f"<div class='fs-section'><h3>{title}</h3>{cap}</div>", unsafe_allow_html=True)
+
+
+def exhibit(title: str, caption: str = "") -> None:
+    """Render a numbered exhibit heading (numbering restarts on every page)."""
+    n = st.session_state.get(_EXHIBIT_KEY, 0) + 1
+    st.session_state[_EXHIBIT_KEY] = n
+    cap = f"<p class='cap'>{caption}</p>" if caption else ""
     st.markdown(
-        f"<div class='fs-section'><div class='bar'></div><h3>{title}</h3>{cap}</div>",
+        f"<div class='fs-section'><h3><span class='ex'>Exhibit {n}</span>{title}</h3>{cap}</div>",
         unsafe_allow_html=True,
     )
+
+
+def source_note(text: str) -> None:
+    """Render the source line under an exhibit."""
+    st.markdown(f"<div class='fs-source'>Source: {text}</div>", unsafe_allow_html=True)
 
 
 def kpi_strip(items: list[dict]) -> None:
     """
-    Render a horizontal KPI strip.
+    Render key figures as one ruled row.
 
     Each item: {"label": str, "value": str|int, "sub": str?, "accent": hex?}.
+    ``accent`` colours the value only when it is a sentiment colour.
     """
+    semantic = set(SENTIMENT_COLORS.values())
     cells = []
     for it in items:
-        accent = it.get("accent", COLORS["primary"])
+        colour = it.get("accent") if it.get("accent") in semantic else COLORS["text"]
         sub = f"<div class='sub'>{it['sub']}</div>" if it.get("sub") else ""
         cells.append(
-            f"<div class='fs-kpi' style='--kpi-accent:{accent};'>"
-            f"<div class='label'>{it['label']}</div>"
-            f"<div class='value'>{it['value']}</div>{sub}</div>"
+            f"<div class='fs-fig'><div class='label'>{it['label']}</div>"
+            f"<div class='value' style='color:{colour};'>{it['value']}</div>{sub}</div>"
         )
-    st.markdown(f"<div class='fs-kpi-grid'>{''.join(cells)}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='fs-figs'>{''.join(cells)}</div>", unsafe_allow_html=True)
 
 
 def metric_card(label: str, value, sub: str = "", accent: str | None = None) -> None:
-    """Render a single metric card (use inside a column)."""
-    accent = accent or COLORS["primary"]
-    sub_html = f"<div style='color:{COLORS['text_faint']};font-size:0.82rem;margin-top:3px;'>{sub}</div>" if sub else ""
-    st.markdown(
-        f"<div class='metric-card' style='border-top:2px solid {accent};'>"
-        f"<div style='color:{COLORS['text_muted']};font-size:0.74rem;text-transform:uppercase;letter-spacing:0.08em;font-weight:600;'>{label}</div>"
-        f"<div style='font-size:1.8rem;font-weight:800;color:{accent};margin-top:4px;'>{value}</div>{sub_html}</div>",
-        unsafe_allow_html=True,
-    )
+    """Render a single key figure (use inside a column)."""
+    kpi_strip([{"label": label, "value": value, "sub": sub, "accent": accent}])
 
 
 def pill(text: str, kind: str = "muted") -> str:
-    """Return an inline pill HTML snippet (kind: positive|negative|neutral|muted)."""
+    """Return an inline pill (kind: positive|negative|neutral|muted). Sentiment kinds carry a glyph."""
+    if kind in SENTIMENT_GLYPHS:
+        return f"<span class='pill {kind}'><span aria-hidden='true'>{SENTIMENT_GLYPHS[kind]}</span> {text}</span>"
     return f"<span class='pill {kind}'>{text}</span>"
 
 
-def status_banner(text: str, kind: str = "info", icon: str | None = None) -> None:
+def status_banner(text: str, kind: str = "info", icon_name: str | None = None, **_ignored) -> None:
     """Render a status banner (kind: info|success|warning|error)."""
-    icons = {"info": "ℹ️", "success": "✓", "warning": "⚠️", "error": "✕"}
-    ico = icon or icons.get(kind, "ℹ️")
     st.markdown(
-        f"<div class='fs-banner {kind}'><div class='ico'>{ico}</div><div class='body'>{text}</div></div>",
+        f"<div class='fs-banner {kind}' role='status'><div class='ico'>{icon(icon_name or kind)}</div>"
+        f"<div class='body'>{text}</div></div>",
         unsafe_allow_html=True,
     )
 
 
-def empty_state(title: str, body: str = "", icon: str = "📊") -> None:
-    """Render a polished empty state."""
+def empty_state(title: str, body: str = "", icon: str = "chart") -> None:  # noqa: A002  (kept name for callers)
+    """Render an empty state. ``icon`` is a name from the SVG icon set."""
+    name = icon if icon in _ICON_PATHS else "chart"
     st.markdown(
-        f"<div class='fs-empty'><div class='ico'>{icon}</div><h4>{title}</h4><p>{body}</p></div>",
+        f"<div class='fs-empty'><div class='ico'>{_svg(name, 26)}</div><div><h4>{title}</h4><p>{body}</p></div></div>",
         unsafe_allow_html=True,
     )
 
 
-def verdict_card(label: str, confidence: float | None = None) -> None:
-    """Render a sentiment verdict card with a confidence bar."""
-    color = get_sentiment_color(label)
-    conf_html = ""
-    if confidence is not None:
-        pct = max(0.0, min(1.0, float(confidence))) * 100
-        conf_html = (
-            f"<div class='conf'>Confidence <b>{confidence:.1%}</b></div>"
-            f"<div class='fs-conf-track'><div class='fs-conf-fill' style='width:{pct:.1f}%;background:{color};'></div></div>"
+_svg = icon  # alias used where a parameter shadows ``icon``
+
+
+def probability_band(probabilities: dict, predicted: str | None = None) -> str:
+    """
+    The signature: class probabilities as one segmented band.
+
+    The predicted class is drawn solid, the others as tints, so the spread of
+    the model's belief is visible at a glance.
+    """
+    order = [k for k in ("negative", "neutral", "positive") if k in probabilities]
+    segs, legend = [], []
+    for k in order:
+        p = float(probabilities[k])
+        solid = k == predicted
+        fill = SENTIMENT_COLORS[k] if solid else SENTIMENT_TINTS[k]
+        segs.append(f"<div title='{k} {p:.1%}' style='width:{max(p, 0.004) * 100:.2f}%;background:{fill};'></div>")
+        weight = "700" if solid else "600"
+        legend.append(
+            f"<div><div class='k'>{SENTIMENT_GLYPHS[k]} {k.capitalize()}</div>"
+            f"<div class='v fs-num' style='font-weight:{weight};color:{SENTIMENT_COLORS[k] if solid else COLORS['text']};'>{p:.1%}</div></div>"
         )
+    return (
+        f"<div class='fs-band' role='img' aria-label='Class probabilities'>{''.join(segs)}</div>"
+        f"<div class='fs-band-legend'>{''.join(legend)}</div>"
+    )
+
+
+def verdict_card(label: str, confidence: float | None = None, probabilities: dict | None = None) -> None:
+    """Render the sentiment verdict: glyph + word, confidence, and the probability band."""
+    key = str(label).lower()
+    color = get_sentiment_color(key)
+    conf_html = (
+        f"<div class='conf'>Model confidence <b class='fs-num'>{confidence:.1%}</b></div>"
+        if confidence is not None
+        else ""
+    )
+    band = probability_band(probabilities, key) if probabilities else ""
     st.markdown(
-        f"<div class='fs-verdict' style='border-top:3px solid {color};'>"
-        f"<div class='ey'>Predicted Sentiment</div>"
-        f"<div class='lab' style='color:{color};'>{label}</div>{conf_html}</div>",
+        f"<div class='fs-verdict'><div class='label'>Predicted sentiment</div>"
+        f"<div class='word' style='color:{color};'><span aria-hidden='true'>{SENTIMENT_GLYPHS.get(key, '')}</span> "
+        f"{html.escape(key.capitalize())}</div>{conf_html}{band}</div>",
         unsafe_allow_html=True,
+    )
+
+
+def term_table(rows, show_class: bool = True, weight_label: str = "Weight") -> str:
+    """
+    Vocabulary as a ruled table: term, weight bar, value and (optionally) the class it pushes toward.
+
+    ``rows``: iterable of (term, weight, class).
+    """
+    rows = list(rows)
+    top = max((abs(w) for _, w, _ in rows), default=1.0) or 1.0
+    body = []
+    for term, weight, cls in rows:
+        bar = (
+            f"<div style='height:6px;background:{get_sentiment_color(cls)};"
+            f"width:{abs(weight) / top * 100:.0f}%;border-radius:2px;'></div>"
+        )
+        tag = f"<td class='c'>{sentiment_tag(cls)}</td>" if show_class else ""
+        body.append(
+            f"<tr><td class='t'>{html.escape(str(term))}</td><td class='b'>{bar}</td>"
+            f"<td class='n fs-num'>{weight:.3f}</td>{tag}</tr>"
+        )
+    head_tag = "<th class='c'>Pushes toward</th>" if show_class else ""
+    return (
+        "<table class='fs-terms'><thead><tr><th class='t'>Term</th>"
+        f"<th class='b'>{weight_label}</th><th></th>{head_tag}</tr></thead>"
+        f"<tbody>{''.join(body)}</tbody></table>"
     )
 
 
 @contextmanager
 def chart_container(title: str = "", caption: str = ""):
-    """Context manager that renders an optional section header before a chart block."""
+    """Context manager that renders an optional exhibit heading before a chart block."""
     if title:
-        section_header(title, caption)
+        exhibit(title, caption)
     yield
 
 
@@ -531,54 +567,124 @@ def chart_container(title: str = "", caption: str = ""):
 
 
 def create_probability_chart(probabilities: dict) -> go.Figure:
-    """Vertical bar chart of class probabilities, dark-themed."""
-    labels = list(probabilities.keys())
-    values = [probabilities[lbl] * 100 for lbl in labels]
-    colors = [get_sentiment_color(lbl) for lbl in labels]
-
+    """Horizontal bar chart of class probabilities."""
+    order = [k for k in ("positive", "neutral", "negative") if k in probabilities]
+    values = [probabilities[k] * 100 for k in order]
     fig = go.Figure(
         go.Bar(
-            x=[lbl.capitalize() for lbl in labels],
-            y=values,
-            marker_color=colors,
-            marker_line_width=0,
+            y=[f"{SENTIMENT_GLYPHS[k]} {k.capitalize()}" for k in order],
+            x=values,
+            orientation="h",
+            marker_color=[get_sentiment_color(k) for k in order],
             text=[f"{v:.1f}%" for v in values],
             textposition="outside",
-            textfont={"color": "#e2e8f0", "size": 12},
-            width=0.55,
+            cliponaxis=False,
+            width=0.5,
         )
     )
-    style_fig(fig, height=300, title="Sentiment Probabilities", legend=False)
-    fig.update_layout(yaxis_title="Probability (%)", yaxis_range=[0, 112])
-    fig.update_xaxes(showgrid=False)
+    style_fig(fig, height=200, legend=False)
+    fig.update_layout(xaxis_range=[0, 112], xaxis_title="Probability (%)")
+    fig.update_xaxes(showgrid=True, gridcolor=_GRID)
+    fig.update_yaxes(showgrid=False)
     return fig
 
 
 def create_gauge_chart(probabilities: dict, prediction: str) -> go.Figure:
-    """Confidence gauge for the predicted class, dark-themed."""
+    """Confidence gauge for the predicted class."""
     confidence = probabilities[prediction]
-    color = get_sentiment_color(prediction)
     fig = go.Figure(
         go.Indicator(
             mode="gauge+number",
             value=confidence * 100,
-            domain={"x": [0, 1], "y": [0, 1]},
             title={"text": f"Confidence · {prediction.capitalize()}"},
             number={"suffix": "%"},
             gauge={
-                "axis": {"range": [0, 100], "tickcolor": "#64748b"},
-                "bar": {"color": color},
-                "bgcolor": "rgba(255,255,255,0.04)",
+                "axis": {"range": [0, 100], "tickcolor": _LINE},
+                "bar": {"color": get_sentiment_color(prediction)},
+                "bgcolor": COLORS["panel"],
                 "borderwidth": 0,
-                "steps": [
-                    {"range": [0, 33], "color": "rgba(255,255,255,0.03)"},
-                    {"range": [33, 66], "color": "rgba(255,255,255,0.05)"},
-                    {"range": [66, 100], "color": "rgba(255,255,255,0.07)"},
-                ],
             },
         )
     )
     style_fig(fig, height=250, legend=False)
+    return fig
+
+
+def interval_chart(rows: list[dict], reference: float | None = None, reference_label: str = "") -> go.Figure:
+    """
+    Dot-and-interval chart: one row per estimate, the point with its 95% band.
+
+    Row labels sit above each band (not in a left gutter), so the chart keeps
+    its full width on a phone. Each row: {"label", "value", "low", "high", "color"?}.
+    """
+    fig = go.Figure()
+    n = len(rows)
+    for i, r in enumerate(rows):
+        y = n - i
+        c = r.get("color", COLORS["primary"])
+        fig.add_trace(
+            go.Scatter(
+                x=[r["low"], r["high"]],
+                y=[y, y],
+                mode="lines",
+                line={"color": c, "width": 9},
+                opacity=0.25,
+                hoverinfo="skip",
+                showlegend=False,
+            )
+        )
+        fig.add_trace(
+            go.Scatter(
+                x=[r["value"]],
+                y=[y],
+                mode="markers",
+                marker={"color": c, "size": 12, "line": {"color": "#FFFFFF", "width": 2}},
+                hovertemplate=f"{r['label']}<br>macro-F1 %{{x:.3f}}<br>95% interval {r['low']:.3f}–{r['high']:.3f}<extra></extra>",
+                showlegend=False,
+            )
+        )
+        fig.add_annotation(
+            x=0,
+            y=y + 0.38,
+            xref="x",
+            yref="y",
+            xanchor="left",
+            showarrow=False,
+            text=f"{html.escape(r['label'])}",
+            font={"size": 12, "color": COLORS["text_body"]},
+        )
+        fig.add_annotation(
+            x=r["high"],
+            y=y,
+            xref="x",
+            yref="y",
+            xanchor="left",
+            xshift=8,
+            showarrow=False,
+            text=f"<b>{r['value']:.2f}</b>",
+            font={"size": 13, "color": COLORS["text"]},
+        )
+    if reference is not None:
+        fig.add_vline(x=reference, line={"color": COLORS["text_faint"], "dash": "dot", "width": 1.5})
+        fig.add_annotation(
+            x=reference,
+            y=0.35,
+            xref="x",
+            yref="y",
+            xanchor="left",
+            xshift=4,
+            showarrow=False,
+            text=reference_label,
+            font={"size": 11, "color": COLORS["text_muted"]},
+        )
+    style_fig(fig, height=max(220, 62 * n + 70), legend=False)
+    fig.update_layout(margin={"t": 10, "l": 8, "r": 40, "b": 8})
+    fig.update_xaxes(
+        range=[0, 1.04], showgrid=True, gridcolor=_GRID, title="Macro-F1 (dot) with 95% bootstrap interval (band)"
+    )
+    fig.update_yaxes(
+        range=[0.2, n + 0.75], showticklabels=False, showgrid=False, zeroline=False, ticks="", showline=False
+    )
     return fig
 
 
@@ -664,14 +770,14 @@ def setup_sidebar():
         load_error = str(exc)
 
     online = predictor is not None
-    dot = COLORS["positive"] if online else COLORS["negative"]
+    dot = "#6FD6A8" if online else "#F2948A"
     status = "Engine ready" if online else "Engine unavailable"
     is_transformer = not selected_model.startswith("baseline_")
     family = "Transformer · 110M params" if is_transformer else "TF-IDF · classical ML"
     st.sidebar.markdown(
         "<div class='fs-side-status'>"
-        f"<div class='row'><span class='dot' style='background:{dot};box-shadow:0 0 8px {dot};'></span>{status}</div>"
-        f"<div class='row'><span class='dot' style='background:{COLORS['accent']};'></span>{family}</div>"
+        f"<div class='row'><span class='dot' style='background:{dot};'></span>{status}</div>"
+        f"<div class='row'><span class='dot' style='background:#8FD6C9;'></span>{family}</div>"
         "</div>",
         unsafe_allow_html=True,
     )
@@ -703,7 +809,7 @@ def active_model():
             "No model loaded",
             "Pick a model in the sidebar. If none are listed, train the baselines with "
             "<code>python src/train.py --model baselines</code>.",
-            icon="⚠",
+            icon="warning",
         )
         st.stop()
     return selected_model, predictor

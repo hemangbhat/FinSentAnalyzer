@@ -69,3 +69,7 @@ mlruns/
 
 # Claude
 .claude/
+
+# Impeccable design-review scratch (captures, roll records)
+.impeccable/review/
+.impeccable/questions/

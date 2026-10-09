@@ -1,5 +1,7 @@
 """
 Financial Sentiment Analyzer — Word Insights Page.
+
+The vocabulary each TF-IDF model weights most heavily for each class.
 """
 
 import sys
@@ -7,137 +9,106 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 
-import pandas as pd  # pyre-ignore
-import plotly.express as px  # pyre-ignore
+import plotly.graph_objects as go  # pyre-ignore
 import streamlit as st  # pyre-ignore
+from plotly.subplots import make_subplots  # pyre-ignore
 
 from explain import get_feature_importance_summary  # pyre-ignore
-from utils import LABEL_MAP_INV  # pyre-ignore
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from shared import active_model, page_header, section_header  # pyre-ignore
+from shared import (  # pyre-ignore
+    SENTIMENT_GLYPHS,
+    active_model,
+    exhibit,
+    get_sentiment_color,
+    model_label,
+    page_header,
+    render_chart,
+    source_note,
+    status_banner,
+    style_fig,
+    term_table,
+)
 
-# ── Page config ─────────────────────────────────────────────────────────────────
+STOPWORDS = {"is", "be", "and", "the", "to", "of", "in", "a", "from", "by", "has", "will", "our", "its", "will be"}
+CLASSES = ["negative", "neutral", "positive"]
+
 selected_model, predictor = active_model()
-
-if predictor is None:
-    st.stop()
 
 page_header(
     "Word Insights",
-    "Explore the highest-impact vocabulary the model learned, grouped by sentiment.",
-    eyebrow="Learned lexicon",
+    "The terms each model weights most heavily for every sentiment class. "
+    "Weights are the classifier's learned coefficients over TF-IDF features.",
 )
 
 if not selected_model.startswith("baseline_"):
-    st.warning(
-        "Word insights are currently available only for baseline models. "
-        "Please select a baseline model from the sidebar."
+    status_banner(
+        f"{model_label(selected_model)} has no per-term weights: transformers read context, not a vocabulary list. "
+        "Choose a TF-IDF model in the sidebar, or open Explainability for token attribution.",
+        kind="info",
     )
     st.stop()
 
-with st.spinner("Loading word insights..."):
-    try:
-        importance = get_feature_importance_summary(selected_model)
-        assert isinstance(importance, dict), "Importance summary must be a dictionary"
+with st.spinner("Loading learned vocabulary…"):
+    importance = get_feature_importance_summary(selected_model)
 
-        if "error" in importance:
-            st.error(importance["error"])
-            st.stop()
+if not isinstance(importance, dict) or "error" in importance:
+    status_banner(f"Could not read this model's weights: {importance.get('error', 'unknown error')}", kind="error")
+    st.stop()
 
-        # Top words for each sentiment
-        classes = list(LABEL_MAP_INV.values())
-        cols = st.columns(len(classes))
+top = {c: importance.get(f"top_{c}", [])[:12] for c in CLASSES}
 
-        emojis = {"positive": "🔥", "negative": "🧊", "neutral": "⚖️"}
+exhibit(
+    "Highest-weighted terms by class",
+    f"Top 8 terms for {model_label(selected_model)}. Longer bars move a prediction further toward that class.",
+)
+fig = make_subplots(
+    rows=1,
+    cols=3,
+    subplot_titles=[f"{SENTIMENT_GLYPHS[c]} {c.capitalize()}" for c in CLASSES],
+    horizontal_spacing=0.12,
+)
+for i, cls in enumerate(CLASSES, start=1):
+    words = top[cls][:8][::-1]
+    fig.add_trace(
+        go.Bar(
+            x=[w for _, w in words],
+            y=[t for t, _ in words],
+            orientation="h",
+            marker_color=get_sentiment_color(cls),
+            text=[f"{w:.2f}" for _, w in words],
+            textposition="outside",
+            cliponaxis=False,
+            hovertemplate="%{y}: %{x:.3f}<extra></extra>",
+        ),
+        row=1,
+        col=i,
+    )
+style_fig(fig, height=360, legend=False)
+fig.update_layout(margin={"t": 36, "l": 8, "r": 30, "b": 8})
+fig.update_xaxes(showticklabels=False, showgrid=False)
+fig.update_yaxes(showgrid=False, ticks="")
+for ann in fig.layout.annotations:
+    ann.update(x=ann.x, xanchor="center", font={"size": 13, "color": "#12211F"})
+render_chart(fig)
+source_note(f"models/{selected_model}.joblib (classifier coefficients over TF-IDF unigrams and bigrams).")
 
-        # We can map 'sentiment' string to the chip class directly if it matches 'positive', 'negative', 'neutral'
-        class_map = {"positive": "chip positive", "negative": "chip negative", "neutral": "chip neutral"}
+flagged = sorted({t for c in CLASSES for t, _ in top[c] if t.lower() in STOPWORDS})
+if flagged:
+    status_banner(
+        "Function words carry real weight here: "
+        + ", ".join(f"<b>{t}</b>" for t in flagged)
+        + ". The model has partly learned the house style of Financial PhraseBank's annual-report sentences, "
+        "one reason it drops to 0.46 macro-F1 on real news headlines.",
+        kind="warning",
+    )
 
-        for i, sentiment in enumerate(classes):
-            with cols[i]:
-                emoji = emojis.get(sentiment, "📊")
-                chip_class = class_map.get(sentiment, "chip")
-                color = "#10b981" if sentiment == "positive" else "#ef4444" if sentiment == "negative" else "#3b82f6"
-
-                st.markdown(
-                    f"<div class='insight-card' style='height: 100%; border-top: 4px solid {color};'>",
-                    unsafe_allow_html=True,
-                )
-                st.markdown(
-                    f"<h3 style='margin-top:0; color: {color}; display: flex; align-items: center; gap: 8px;'><span style='font-size: 1.2em;'>{emoji}</span> {sentiment.capitalize()} Drivers</h3>",
-                    unsafe_allow_html=True,
-                )
-                st.markdown(
-                    "<p style='color: #94a3b8; font-size: 0.9em; margin-bottom: 15px;'>Top indicative tokens:</p>",
-                    unsafe_allow_html=True,
-                )
-
-                key = f"top_{sentiment}"
-                if key in importance:  # pyre-ignore
-                    chips = []
-                    for word, score in importance[key][:15]:  # pyre-ignore
-                        chips.append(
-                            f"<span class='{chip_class}' style='margin-bottom:8px; display:inline-block;'>{word}</span> <span style='font-size:0.85em; color: #64748b; font-family: monospace; margin-left: 2px; margin-right: 12px;'>{score:.2f}</span>"
-                        )
-                    if chips:
-                        st.markdown(
-                            f"<div style='display: flex; flex-wrap: wrap; line-height: 2.2;'>{''.join(chips)}</div>",
-                            unsafe_allow_html=True,
-                        )
-                st.markdown("</div>", unsafe_allow_html=True)
-
-        # Visualization
-        st.markdown("<hr style='border-color: rgba(255, 255, 255, 0.05); margin: 30px 0;'>", unsafe_allow_html=True)
-        section_header("Cross-Sentiment Comparison")
-
-        chart_data = []
-        for sentiment in classes:
-            key = f"top_{sentiment}"
-            if key in importance:  # pyre-ignore
-                for word, score in importance[key][:5]:  # pyre-ignore
-                    chart_data.append(
-                        {
-                            "Word": word,
-                            "Score": score,
-                            "Sentiment": sentiment.capitalize(),
-                        }
-                    )
-
-        if chart_data:
-            chart_df = pd.DataFrame(chart_data)
-
-            color_map: dict[str, str] = {
-                "Positive": "#10b981",
-                "Negative": "#ef4444",
-                "Neutral": "#3b82f6",
-            }
-            for cls in classes:
-                cls_str = str(cls)
-                if cls_str.capitalize() not in color_map:
-                    color_map[cls_str.capitalize()] = "#64748b"
-
-            fig = px.bar(
-                chart_df,
-                x="Score",
-                y="Word",
-                color="Sentiment",
-                orientation="h",
-                color_discrete_map=color_map,
-                text="Score",
-            )
-            fig.update_traces(texttemplate="%{text:.2f}", textposition="outside", textfont={"color": "#cbd5e1"})
-            fig.update_layout(
-                height=500,
-                yaxis={"categoryorder": "total ascending", "tickfont": {"family": "monospace"}},
-                paper_bgcolor="rgba(0,0,0,0)",
-                plot_bgcolor="rgba(0,0,0,0)",
-                font={"color": "#cbd5e1", "family": "Inter, sans-serif"},
-                margin={"t": 40, "b": 10, "l": 10, "r": 10},
-                xaxis={"showgrid": True, "gridcolor": "rgba(255,255,255,0.05)", "title": "Relative Influence Score"},
-                legend={"orientation": "h", "yanchor": "bottom", "y": 1.02, "xanchor": "right", "x": 1},
-            )
-            st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
-
-    except Exception as e:
-        st.error(f"❌ Error loading word insights: {e}")
+cols = st.columns(3, gap="large")
+for col, cls in zip(cols, CLASSES):
+    with col:
+        st.markdown(
+            f"<div class='fs-section' style='margin-top:18px;'><h3 style='color:{get_sentiment_color(cls)};'>"
+            f"{SENTIMENT_GLYPHS[cls]} {cls.capitalize()}</h3><p class='cap'>Top {len(top[cls])} terms</p></div>",
+            unsafe_allow_html=True,
+        )
+        st.markdown(term_table([(t, w, cls) for t, w in top[cls]], show_class=False), unsafe_allow_html=True)

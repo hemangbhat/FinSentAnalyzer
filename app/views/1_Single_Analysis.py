@@ -17,12 +17,12 @@ from llm_explain import get_llm_explanation  # pyre-ignore
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from shared import (  # pyre-ignore
     active_model,
-    create_probability_chart,
     empty_state,
+    model_label,
     page_header,
-    render_chart,
     section_header,
     status_banner,
+    term_table,
     verdict_card,
 )
 
@@ -35,7 +35,6 @@ page_header(
     "Single Text Analysis",
     "Classify market sentiment from a financial excerpt and see the confidence, "
     "probability breakdown, and the words behind the decision.",
-    eyebrow="Real-time inference",
 )
 
 
@@ -85,7 +84,7 @@ if not analyze:
         "Paste a sentence from an earnings release, filing, or headline",
         "You'll get the predicted sentiment, the model's confidence, the full probability "
         "breakdown, and the words that pushed it there. Change the model in the sidebar to compare.",
-        icon="✎",
+        icon="edit",
     )
 
 if analyze and not text_input.strip():
@@ -99,44 +98,41 @@ if analyze and text_input.strip():
         status_banner(f"Prediction failed: {exc}", kind="error")
         st.stop()
 
-    section_header("Result")
+    section_header("Result", f"{model_label(selected_model)} · {len(text_input.split())} words")
 
     sentiment = result["label"]
     conf = result.get("confidence", 0.0)
+    probs = result.get("probabilities")
 
-    col1, col2 = st.columns([1, 1.25])
-    with col1:
-        verdict_card(sentiment, conf)
-    with col2:
-        if "probabilities" in result:
-            render_chart(create_probability_chart(result["probabilities"]))
-        else:
-            status_banner("This model does not expose class probabilities.", kind="info")
-
-    # ── Plain-language rationale (baseline models only) ──────────────────────
+    explanation = None
     if selected_model.startswith("baseline_"):
-        section_header("Why this verdict", "Template rationale from the model's word weights")
         try:
-            explanation_data = explain_prediction_baseline(text_input, selected_model)
-            llm_explanation = get_llm_explanation(
-                text=text_input,
-                prediction=result["label"],
-                probabilities=result.get("probabilities", {}),
-                word_importance=explanation_data.get("word_importance", []),
-            )
-            st.markdown(
-                f"""
-                <div class='insight-card' style='border-left:3px solid #3b82f6;'>
-                    <div style='line-height:1.65;color:#cbd5e1;font-size:1.02em;'>{_md_bold(llm_explanation)}</div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+            explanation = explain_prediction_baseline(text_input, selected_model)
         except Exception:  # noqa: BLE001
-            status_banner("Open the Explainability page for detailed token-level attribution.", kind="info")
-    else:
-        status_banner(
-            "Token-level rationale is available for baseline models. "
-            "Switch to a baseline model in the sidebar to see it.",
-            kind="info",
+            explanation = None
+
+    col1, col2 = st.columns([1, 1.15], gap="large")
+    with col1:
+        verdict_card(sentiment, conf, probs)
+        if not probs:
+            status_banner("This model does not expose class probabilities.", kind="info")
+    with col2:
+        st.markdown("<div class='fs-verdict'><div class='label'>Key drivers</div></div>", unsafe_allow_html=True)
+        if explanation and explanation.get("word_importance"):
+            st.markdown(term_table(explanation["word_importance"][:6]), unsafe_allow_html=True)
+            st.caption("TF-IDF weight × model coefficient for each term in the text, and the class it pushes toward.")
+        else:
+            st.caption(
+                "Term-level drivers come from the TF-IDF models' weights. Switch to a baseline model in the "
+                "sidebar to see them; for FinBERT, open Explainability."
+            )
+
+    if explanation:
+        section_header("Why this verdict", "Template rationale built from the model's word weights (not an LLM).")
+        rationale = get_llm_explanation(
+            text=text_input,
+            prediction=sentiment,
+            probabilities=probs or {},
+            word_importance=explanation.get("word_importance", []),
         )
+        st.markdown(f"<p style='max-width:75ch;'>{_md_bold(rationale)}</p>", unsafe_allow_html=True)

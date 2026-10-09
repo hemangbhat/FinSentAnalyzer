@@ -32,7 +32,6 @@ if predictor is None:
 page_header(
     "Generalization",
     "Real out-of-distribution generalization plus a synthetic sentiment↔price pipeline demo.",
-    eyebrow="Model validation",
 )
 
 # ── Real generalization (if evaluated) ───────────────────────────────────────
@@ -49,16 +48,16 @@ if _gen_path.exists():
                 "label": "OOD Accuracy",
                 "value": f"{_gen['accuracy']:.2f}",
                 "sub": f"majority {_gen['majority_class_accuracy']:.2f}",
-                "accent": "#3b82f6",
+                "accent": "#0E6E6A",
             },
-            {"label": "OOD Macro-F1", "value": f"{_gen['f1_macro']:.2f}", "sub": "in-domain 0.84", "accent": "#ef4444"},
+            {"label": "OOD Macro-F1", "value": f"{_gen['f1_macro']:.2f}", "sub": "in-domain 0.84", "accent": "#A3322B"},
             {
                 "label": "Samples",
                 "value": f"{_gen['n_samples']:,}",
                 "sub": "real labeled headlines",
-                "accent": "#8b5cf6",
+                "accent": "#45627A",
             },
-            {"label": "Model", "value": _gen["model"].upper(), "accent": "#10b981"},
+            {"label": "Model", "value": _gen["model"].upper(), "accent": "#1D7451"},
         ]
     )
     status_banner(
@@ -80,7 +79,7 @@ if _cmp_path.exists():
     }
     names = [_pretty.get(m["model"], m["model"]) for m in cmp["models"]]
     fig_cmp = go.Figure()
-    for metric, label, color in (("accuracy", "Accuracy", "#3b82f6"), ("f1_macro", "Macro-F1", "#8b5cf6")):
+    for metric, label, color in (("accuracy", "Accuracy", "#0E6E6A"), ("f1_macro", "Macro-F1", "#45627A")):
         vals = [m[metric] for m in cmp["models"]]
         fig_cmp.add_trace(
             go.Bar(
@@ -91,22 +90,22 @@ if _cmp_path.exists():
                 width=0.32,
                 text=[f"{v:.2f}" for v in vals],
                 textposition="outside",
-                textfont={"color": "#e2e8f0"},
+                textfont={"color": "#12211F"},
             )
         )
     maj = cmp.get("majority_class_accuracy")
     if maj:
-        fig_cmp.add_hline(y=maj, line_dash="dash", line_color="#ef4444", annotation_text=f"majority acc {maj:.2f}")
+        fig_cmp.add_hline(y=maj, line_dash="dash", line_color="#A3322B", annotation_text=f"majority acc {maj:.2f}")
     fig_cmp.update_layout(
         barmode="group",
         height=380,
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        font={"color": "#cbd5e1", "family": "Inter, sans-serif"},
-        yaxis={"range": [0, 1.08], "gridcolor": "rgba(255,255,255,0.05)", "title": "Score"},
+        font={"color": "#2E3F3C", "family": "Public Sans, system-ui, sans-serif"},
+        yaxis={"range": [0, 1.08], "gridcolor": "#D5DEDC", "title": "Score"},
         legend={"orientation": "h", "yanchor": "bottom", "y": 1.02, "xanchor": "right", "x": 1},
     )
-    st.plotly_chart(fig_cmp, use_container_width=True, config={"displayModeBar": False})
+    st.plotly_chart(fig_cmp, use_container_width=True, theme=None, config={"displayModeBar": False})
 
 # ── Fine-tuned FinBERT confusion matrix on real OOD data ────────────────────
 _finbert_gen = Path(__file__).parent.parent.parent / "results" / "generalization_finbert.json"
@@ -121,10 +120,10 @@ if _finbert_gen.exists():
                 z=cm,
                 x=[f"pred {lab}" for lab in cm_labels],
                 y=[f"true {lab}" for lab in cm_labels],
-                colorscale=[[0, "#0f172a"], [0.5, "#1e3a8a"], [1, "#3b82f6"]],
+                colorscale=[[0, "#F7F9F8"], [0.5, "#A9D0C9"], [1, "#4F9E93"]],
                 text=cm,
                 texttemplate="%{text}",
-                textfont={"color": "#f8fafc", "size": 14},
+                textfont={"color": "#12211F", "size": 14},
                 xgap=3,
                 ygap=3,
                 showscale=False,
@@ -134,10 +133,10 @@ if _finbert_gen.exists():
             height=360,
             paper_bgcolor="rgba(0,0,0,0)",
             plot_bgcolor="rgba(0,0,0,0)",
-            font={"color": "#cbd5e1", "family": "Inter, sans-serif"},
+            font={"color": "#2E3F3C", "family": "Public Sans, system-ui, sans-serif"},
             yaxis={"autorange": "reversed"},
         )
-        st.plotly_chart(fig_cm, use_container_width=True, config={"displayModeBar": False})
+        st.plotly_chart(fig_cm, use_container_width=True, theme=None, config={"displayModeBar": False})
 
 # Check if the news dataset integration module is available
 try:
@@ -156,7 +155,6 @@ if not INTEGRATION_AVAILABLE:
     st.stop()
 
 # ── Cross-Dataset Results Section ───────────────────────────────────────────────
-st.markdown("<hr style='margin: 20px 0;'>", unsafe_allow_html=True)
 
 # Load pre-computed results if available
 results_dir = Path(__file__).parent.parent.parent / "results"
@@ -184,9 +182,9 @@ if cross_results_path.exists():
     section_header("Cross-Dataset Validation Results")
     st.markdown(
         """
-    <p style='color: #94a3b8;'>Model trained on <b>Financial PhraseBank</b> (expert-annotated),
+    <p style='color: #4B5D5A;'>Model trained on <b>Financial PhraseBank</b> (expert-annotated),
     then run over <b>~2,700 synthetic headlines</b> bundled for pipeline demonstration.
-    <br><span style='color:#f59e0b;'>Note:</span> these headlines are template-generated (not real news),
+    <br><span style='color:#9A5B16;'>Note:</span> these headlines are template-generated (not real news),
     so this section demonstrates the pipeline — it is not a real generalization benchmark.</p>
     """,
         unsafe_allow_html=True,
@@ -205,9 +203,9 @@ if cross_results_path.exists():
     with col1:
         st.markdown(
             f"""
-        <div class='metric-card' style='border-top: 3px solid #3b82f6;'>
-            <div style='color: #94a3b8; font-size: 0.85em; text-transform: uppercase;'>Headlines Analyzed</div>
-            <div style='font-size: 2.2em; font-weight: 800; color: #f8fafc;'>{total_headlines:,}</div>
+        <div class='metric-card'>
+            <div style='color: #4B5D5A; font-size: 0.85em; text-transform: uppercase;'>Headlines Analyzed</div>
+            <div style='font-size: 2.2em; font-weight: 800; color: #12211F;'>{total_headlines:,}</div>
         </div>
         """,
             unsafe_allow_html=True,
@@ -216,9 +214,9 @@ if cross_results_path.exists():
     with col2:
         st.markdown(
             f"""
-        <div class='metric-card' style='border-top: 3px solid #10b981;'>
-            <div style='color: #94a3b8; font-size: 0.85em; text-transform: uppercase;'>Avg Confidence</div>
-            <div style='font-size: 2.2em; font-weight: 800; color: #f8fafc;'>{avg_confidence:.1%}</div>
+        <div class='metric-card'>
+            <div style='color: #4B5D5A; font-size: 0.85em; text-transform: uppercase;'>Avg Confidence</div>
+            <div style='font-size: 2.2em; font-weight: 800; color: #12211F;'>{avg_confidence:.1%}</div>
         </div>
         """,
             unsafe_allow_html=True,
@@ -228,9 +226,9 @@ if cross_results_path.exists():
         pos_pct = (pos_count / total_headlines * 100) if total_headlines > 0 else 0
         st.markdown(
             f"""
-        <div class='metric-card' style='border-top: 3px solid #10b981;'>
-            <div style='color: #94a3b8; font-size: 0.85em; text-transform: uppercase;'>Positive Ratio</div>
-            <div style='font-size: 2.2em; font-weight: 800; color: #10b981;'>{pos_pct:.1f}%</div>
+        <div class='metric-card'>
+            <div style='color: #4B5D5A; font-size: 0.85em; text-transform: uppercase;'>Positive Ratio</div>
+            <div style='font-size: 2.2em; font-weight: 800; color: #1D7451;'>{pos_pct:.1f}%</div>
         </div>
         """,
             unsafe_allow_html=True,
@@ -240,9 +238,9 @@ if cross_results_path.exists():
         neg_pct = (neg_count / total_headlines * 100) if total_headlines > 0 else 0
         st.markdown(
             f"""
-        <div class='metric-card' style='border-top: 3px solid #ef4444;'>
-            <div style='color: #94a3b8; font-size: 0.85em; text-transform: uppercase;'>Negative Ratio</div>
-            <div style='font-size: 2.2em; font-weight: 800; color: #ef4444;'>{neg_pct:.1f}%</div>
+        <div class='metric-card'>
+            <div style='color: #4B5D5A; font-size: 0.85em; text-transform: uppercase;'>Negative Ratio</div>
+            <div style='font-size: 2.2em; font-weight: 800; color: #A3322B;'>{neg_pct:.1f}%</div>
         </div>
         """,
             unsafe_allow_html=True,
@@ -251,10 +249,9 @@ if cross_results_path.exists():
     # Correlation results
     correlations = cross_results.get("correlations", {})
     if correlations:
-        st.markdown("<hr style='margin: 30px 0;'>", unsafe_allow_html=True)
         section_header("Sentiment ↔ Stock Price Correlations")
         st.markdown(
-            "<p style='color: #94a3b8;'>Pearson correlation between daily news sentiment and stock returns</p>",
+            "<p style='color: #4B5D5A;'>Pearson correlation between daily news sentiment and stock returns</p>",
             unsafe_allow_html=True,
         )
 
@@ -265,24 +262,24 @@ if cross_results_path.exists():
                 next_day = data.get("pearson_next_day", 0)
                 n_points = data.get("num_data_points", 0)
 
-                same_color = "#10b981" if same_day > 0 else "#ef4444"
-                next_color = "#10b981" if next_day > 0 else "#ef4444"
+                same_color = "#1D7451" if same_day > 0 else "#A3322B"
+                next_color = "#1D7451" if next_day > 0 else "#A3322B"
 
                 st.markdown(
                     f"""
-                <div class='insight-card' style='text-align: center; border-top: 3px solid #8b5cf6;'>
-                    <div style='font-size: 1.4em; font-weight: 700; color: #f8fafc; margin-bottom: 15px;'>{ticker}</div>
-                    <div style='display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05);'>
-                        <span style='color: #94a3b8;'>Same-day</span>
-                        <span style='color: {same_color}; font-weight: 700; font-family: monospace;'>{same_day:+.4f}</span>
+                <div class='insight-card' style='text-align: center; border-top: 3px solid #45627A;'>
+                    <div style='font-size: 1.4em; font-weight: 700; color: #12211F; margin-bottom: 15px;'>{ticker}</div>
+                    <div style='display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #D5DEDC;'>
+                        <span style='color: #4B5D5A;'>Same-day</span>
+                        <span style='color: {same_color}; font-weight: 700; font-variant-numeric: tabular-nums;'>{same_day:+.4f}</span>
                     </div>
-                    <div style='display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05);'>
-                        <span style='color: #94a3b8;'>Next-day</span>
-                        <span style='color: {next_color}; font-weight: 700; font-family: monospace;'>{next_day:+.4f}</span>
+                    <div style='display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #D5DEDC;'>
+                        <span style='color: #4B5D5A;'>Next-day</span>
+                        <span style='color: {next_color}; font-weight: 700; font-variant-numeric: tabular-nums;'>{next_day:+.4f}</span>
                     </div>
                     <div style='display: flex; justify-content: space-between; padding: 8px 0;'>
-                        <span style='color: #94a3b8;'>Data points</span>
-                        <span style='color: #f8fafc; font-weight: 600;'>{n_points}</span>
+                        <span style='color: #4B5D5A;'>Data points</span>
+                        <span style='color: #12211F; font-weight: 600;'>{n_points}</span>
                     </div>
                 </div>
                 """,
@@ -290,7 +287,6 @@ if cross_results_path.exists():
                 )
 
 # ── Interactive Sentiment Trends Chart ──────────────────────────────────────────
-st.markdown("<hr style='border-color: rgba(255,255,255,0.05); margin: 30px 0;'>", unsafe_allow_html=True)
 section_header("Interactive Sentiment & Price Chart")
 
 ticker_choice = st.selectbox("Select Ticker", ["AAPL", "TSLA", "AMZN"], key="trend_ticker")
@@ -328,16 +324,16 @@ if st.button("Generate trend chart", type="primary", use_container_width=True):
                     y=trend_data["Close"],
                     mode="lines",
                     name="Close Price",
-                    line=dict(color="#3b82f6", width=2),
+                    line=dict(color="#0E6E6A", width=2),
                     fill="tozeroy",
-                    fillcolor="rgba(59, 130, 246, 0.1)",
+                    fillcolor="rgba(14,110,106,0.1)",
                 ),
                 row=1,
                 col=1,
             )
 
             # Sentiment score bars
-            colors = ["#10b981" if v > 0 else "#ef4444" if v < 0 else "#64748b" for v in trend_data["mean_sentiment"]]
+            colors = ["#1D7451" if v > 0 else "#A3322B" if v < 0 else "#5E6E6A" for v in trend_data["mean_sentiment"]]
             fig.add_trace(
                 go.Bar(
                     x=trend_data["date"],
@@ -354,29 +350,29 @@ if st.button("Generate trend chart", type="primary", use_container_width=True):
                 height=600,
                 paper_bgcolor="rgba(0,0,0,0)",
                 plot_bgcolor="rgba(0,0,0,0)",
-                font=dict(color="#cbd5e1", family="Inter, sans-serif"),
+                font=dict(color="#2E3F3C", family="Inter, sans-serif"),
                 showlegend=True,
                 legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
                 xaxis2=dict(
                     showgrid=True,
-                    gridcolor="rgba(255,255,255,0.05)",
-                    linecolor="rgba(255,255,255,0.1)",
+                    gridcolor="#D5DEDC",
+                    linecolor="#B9C6C3",
                 ),
                 yaxis=dict(
                     title="Price ($)",
                     showgrid=True,
-                    gridcolor="rgba(255,255,255,0.05)",
-                    linecolor="rgba(255,255,255,0.1)",
+                    gridcolor="#D5DEDC",
+                    linecolor="#B9C6C3",
                 ),
                 yaxis2=dict(
                     title="Sentiment Score",
                     showgrid=True,
-                    gridcolor="rgba(255,255,255,0.05)",
-                    linecolor="rgba(255,255,255,0.1)",
+                    gridcolor="#D5DEDC",
+                    linecolor="#B9C6C3",
                 ),
             )
 
-            st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+            st.plotly_chart(fig, use_container_width=True, theme=None, config={"displayModeBar": False})
 
             # Summary metrics for this ticker
             mcol1, mcol2, mcol3, mcol4 = st.columns(4)
@@ -390,12 +386,11 @@ if st.button("Generate trend chart", type="primary", use_container_width=True):
                 st.metric("Headlines/Day", f"{trend_data['num_headlines'].mean():.1f}")
 
     except FileNotFoundError as e:
-        st.error(f"❌ {e}")
+        st.error(f"{e}")
     except Exception as e:
-        st.error(f"❌ Error generating trends: {e}")
+        st.error(f"Error generating trends: {e}")
 
 # ── SHAP Results Section ────────────────────────────────────────────────────────
-st.markdown("<hr style='border-color: rgba(255,255,255,0.05); margin: 30px 0;'>", unsafe_allow_html=True)
 section_header("SHAP Feature Importance")
 
 # Check for pre-computed SHAP results
@@ -410,7 +405,7 @@ if shap_files:
 
         top_features = shap_data.get("top_features", [])[:15]
         if top_features:
-            with st.expander(f"🔍 {model_label} — Top SHAP Features", expanded=True):
+            with st.expander(f"{model_label} — Top SHAP Features", expanded=True):
                 features = [f["feature"] for f in top_features]
                 importances = [f["importance"] for f in top_features]
 
@@ -419,36 +414,36 @@ if shap_files:
                         x=importances,
                         y=features,
                         orientation="h",
-                        marker_color="#8b5cf6",
-                        marker_line_color="rgba(139, 92, 246, 0.6)",
+                        marker_color="#45627A",
+                        marker_line_color="rgba(69,98,122,0.6)",
                         marker_line_width=1,
                     )
                 )
                 fig.update_layout(
                     title={
                         "text": f"SHAP Feature Importance — {model_label}",
-                        "font": {"color": "#f8fafc", "size": 14},
+                        "font": {"color": "#12211F", "size": 14},
                     },
                     xaxis_title="Mean |SHAP Value|",
                     height=450,
                     paper_bgcolor="rgba(0,0,0,0)",
                     plot_bgcolor="rgba(0,0,0,0)",
-                    font={"color": "#cbd5e1", "family": "Inter, sans-serif"},
+                    font={"color": "#2E3F3C", "family": "Public Sans, system-ui, sans-serif"},
                     yaxis={"autorange": "reversed"},
-                    xaxis={"showgrid": True, "gridcolor": "rgba(255,255,255,0.05)"},
-                    yaxis_tickfont={"size": 12, "family": "monospace"},
+                    xaxis={"showgrid": True, "gridcolor": "#D5DEDC"},
+                    yaxis_tickfont={"size": 12},
                     margin=dict(l=150),
                 )
-                st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+                st.plotly_chart(fig, use_container_width=True, theme=None, config={"displayModeBar": False})
 
                 # Class-specific features
                 class_features = shap_data.get("class_features", {})
                 if class_features:
                     ccols = st.columns(3)
-                    class_colors = {"negative": "#ef4444", "neutral": "#64748b", "positive": "#10b981"}
+                    class_colors = {"negative": "#A3322B", "neutral": "#5E6E6A", "positive": "#1D7451"}
                     for i, (cls_name, cls_feats) in enumerate(class_features.items()):
                         with ccols[i]:
-                            color = class_colors.get(cls_name, "#94a3b8")
+                            color = class_colors.get(cls_name, "#4B5D5A")
                             st.markdown(
                                 f"<div style='color: {color}; font-weight: 600; text-transform: capitalize; margin-bottom: 10px;'>{cls_name} Class Drivers</div>",
                                 unsafe_allow_html=True,
@@ -456,7 +451,7 @@ if shap_files:
                             for feat in cls_feats[:5]:
                                 direction_icon = "↑" if feat["direction"] == "positive" else "↓"
                                 st.markdown(
-                                    f"<div style='display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9em;'><span style='font-family: monospace; color: #cbd5e1;'>{feat['feature']}</span><span style='color: {color};'>{direction_icon} {feat['shap_value']:.3f}</span></div>",
+                                    f"<div style='display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid #D5DEDC; font-size: 0.9em;'><span style='font-variant-numeric: tabular-nums; color: #2E3F3C;'>{feat['feature']}</span><span style='color: {color};'>{direction_icon} {feat['shap_value']:.3f}</span></div>",
                                     unsafe_allow_html=True,
                                 )
 else:
@@ -469,7 +464,6 @@ else:
 cv_results_path = results_dir / "cv_results.json" if results_dir.exists() else None
 
 if cv_results_path and cv_results_path.exists():
-    st.markdown("<hr style='border-color: rgba(255,255,255,0.05); margin: 30px 0;'>", unsafe_allow_html=True)
     section_header("5-Fold Cross-Validation Results")
 
     with open(cv_results_path) as f:
@@ -490,7 +484,7 @@ if cv_results_path and cv_results_path.exists():
                 x=[m.replace("_", " ").title() for m in models],
                 y=acc_means,
                 error_y=dict(type="data", array=acc_stds, visible=True),
-                marker_color="#3b82f6",
+                marker_color="#0E6E6A",
             )
         )
         fig.add_trace(
@@ -499,22 +493,22 @@ if cv_results_path and cv_results_path.exists():
                 x=[m.replace("_", " ").title() for m in models],
                 y=f1_means,
                 error_y=dict(type="data", array=f1_stds, visible=True),
-                marker_color="#8b5cf6",
+                marker_color="#45627A",
             )
         )
         fig.update_layout(
             barmode="group",
-            title={"text": "Model Comparison — 5-Fold Stratified CV", "font": {"color": "#f8fafc", "size": 16}},
+            title={"text": "Model Comparison — 5-Fold Stratified CV", "font": {"color": "#12211F", "size": 16}},
             yaxis_title="Score",
             height=400,
             paper_bgcolor="rgba(0,0,0,0)",
             plot_bgcolor="rgba(0,0,0,0)",
-            font={"color": "#cbd5e1", "family": "Inter, sans-serif"},
-            yaxis={"showgrid": True, "gridcolor": "rgba(255,255,255,0.05)", "range": [0.7, 1.0]},
+            font={"color": "#2E3F3C", "family": "Public Sans, system-ui, sans-serif"},
+            yaxis={"showgrid": True, "gridcolor": "#D5DEDC", "range": [0.7, 1.0]},
             xaxis={"showgrid": False},
             legend={"orientation": "h", "yanchor": "bottom", "y": 1.02, "xanchor": "right", "x": 1},
         )
-        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+        st.plotly_chart(fig, use_container_width=True, theme=None, config={"displayModeBar": False})
 
         # Best model highlight
         best_model = max(cv_data, key=lambda m: cv_data[m]["f1_macro_mean"])
@@ -522,10 +516,10 @@ if cv_results_path and cv_results_path.exists():
         best_std = cv_data[best_model]["f1_macro_std"]
         st.markdown(
             f"""
-        <div class='insight-card' style='border-left: 4px solid #10b981; padding: 20px;'>
-            <span style='color: #10b981; font-weight: 700;'>🏆 Best Model (by F1 Macro):</span>
-            <span style='color: #f8fafc; font-weight: 600;'>{best_model.replace("_", " ").title()}</span>
-            — <span style='color: #f8fafc; font-family: monospace;'>{best_f1:.4f} ± {best_std:.4f}</span>
+        <div class='insight-card' style='padding: 20px;'>
+            <span style='color: #1D7451; font-weight: 700;'>Best Model (by F1 Macro):</span>
+            <span style='color: #12211F; font-weight: 600;'>{best_model.replace("_", " ").title()}</span>
+            — <span style='color: #12211F; font-variant-numeric: tabular-nums;'>{best_f1:.4f} ± {best_std:.4f}</span>
         </div>
         """,
             unsafe_allow_html=True,

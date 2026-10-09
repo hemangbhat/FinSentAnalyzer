@@ -1,15 +1,67 @@
+# FinSight theme: a central-bank report on its own models.
+# White report ground, deep-teal shell, one self-hosted sans (Public Sans).
+# Palette contrast is WCAG AA (>= 4.5:1) for every text colour used.
+
 [theme]
-base = "dark"
-primaryColor = "#3b82f6"
-backgroundColor = "#0a0e17"
-secondaryBackgroundColor = "#131a2a"
-textColor = "#e8eef7"
-font = "sans serif"
+base = "light"
+primaryColor = "#0E6E6A"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F2F5F4"
+textColor = "#12211F"
+linkColor = "#0E6E6A"
+borderColor = "#D5DEDC"
+dataframeBorderColor = "#D5DEDC"
+dataframeHeaderBackgroundColor = "#F2F5F4"
+showWidgetBorder = true
+baseRadius = "6px"
+buttonRadius = "6px"
+font = "Public Sans, system-ui, sans-serif"
+headingFont = "Public Sans, system-ui, sans-serif"
+headingFontWeights = [700, 650, 600, 600, 600, 600]
+headingFontSizes = ["2.25rem", "1.5rem", "1.2rem", "1.05rem", "1rem", "0.9rem"]
+codeFont = "monospace"
+redColor = "#A3322B"
+greenColor = "#1D7451"
+orangeColor = "#9A5B16"
+yellowColor = "#9A5B16"
+blueColor = "#45627A"
+grayColor = "#4F6470"
+chartCategoricalColors = ["#0E6E6A", "#9A5B16", "#45627A", "#A3322B", "#1D7451", "#8FB8B2"]
+chartSequentialColors = ["#F2F5F4", "#D3E6E2", "#A9D0C9", "#7CB8AE", "#4F9E93", "#2F857B", "#0E6E6A", "#0B5754", "#08403E", "#052B29"]
+
+[[theme.fontFaces]]
+family = "Public Sans"
+url = "app/static/fonts/public-sans-latin-400-normal.woff2"
+weight = 400
+
+[[theme.fontFaces]]
+family = "Public Sans"
+url = "app/static/fonts/public-sans-latin-500-normal.woff2"
+weight = 500
+
+[[theme.fontFaces]]
+family = "Public Sans"
+url = "app/static/fonts/public-sans-latin-600-normal.woff2"
+weight = 600
+
+[[theme.fontFaces]]
+family = "Public Sans"
+url = "app/static/fonts/public-sans-latin-700-normal.woff2"
+weight = 700
+
+[theme.sidebar]
+backgroundColor = "#0B3A3C"
+secondaryBackgroundColor = "#124749"
+textColor = "#E3EEEC"
+primaryColor = "#8FD6C9"
+borderColor = "#24595A"
+linkColor = "#8FD6C9"
 
 [client]
 # Hide the "Deploy" button and developer menu items for viewers.
 toolbarMode = "minimal"
 
 [server]
+enableStaticServing = true
 enableXsrfProtection = true
 enableCORS = true

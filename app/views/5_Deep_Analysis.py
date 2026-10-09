@@ -30,7 +30,6 @@ if predictor is None:
 page_header(
     "Deep Analysis",
     "Rule-based chain-of-thought reasoning, named-entity extraction, and Loughran-McDonald lexicon decomposition.",
-    eyebrow="Advanced NLP",
 )
 
 if not ADVANCED_NLP_AVAILABLE:
@@ -47,7 +46,7 @@ deep_text = st.text_area(
     key="deep_analysis_input",
 )
 
-if st.button("🔬 Run Deep Analysis", type="primary", use_container_width=True):
+if st.button("Run Deep Analysis", type="primary", use_container_width=True):
     if deep_text.strip():
         nlp_result = {}
         cot_result = None
@@ -58,7 +57,7 @@ if st.button("🔬 Run Deep Analysis", type="primary", use_container_width=True)
                 nlp_result = nlp_analyzer.analyze(deep_text)
                 cot_result = cot_reasoner.analyze(deep_text)
         except Exception as e:
-            st.error(f"❌ Deep analysis failed: {e}")
+            st.error(f"Deep analysis failed: {e}")
             st.stop()
 
         if cot_result is None or nlp_result is None:
@@ -69,7 +68,6 @@ if st.button("🔬 Run Deep Analysis", type="primary", use_container_width=True)
         assert nlp_result is not None
 
         # ── Summary Card ────────────────────────────────────────────────────
-        st.markdown("<hr style='margin: 30px 0;'>", unsafe_allow_html=True)
         section_header("Executive Summary")
 
         sentiment = cot_result.final_sentiment
@@ -78,20 +76,20 @@ if st.button("🔬 Run Deep Analysis", type="primary", use_container_width=True)
 
         st.markdown(
             f"""
-        <div class='insight-card' style='background: linear-gradient(135deg, rgba(26,29,36,0.9) 0%, rgba(20,22,28,0.95) 100%);
-                    padding: 30px; border-left: 5px solid {color}; border-top: 1px solid rgba(255,255,255,0.05); margin-bottom: 25px;'>
+        <div class='insight-card' style='background: linear-gradient(135deg, #F7F9F8 0%, #F7F9F8 100%);
+                    padding: 30px; border-top: 1px solid #D5DEDC; margin-bottom: 25px;'>
             <div style='display: flex; justify-content: space-between; align-items: center;'>
                 <div>
-                    <div style='color: #94a3b8; font-size: 0.95em; text-transform: uppercase; letter-spacing: 1px;'>Final Synthesized Sentiment</div>
+                    <div style='color: #4B5D5A; font-size: 0.95em; text-transform: uppercase; letter-spacing: 1px;'>Final Synthesized Sentiment</div>
                     <div style='margin: 5px 0 0 0; color: {color}; font-size: 2.5em; font-weight: 800; text-transform: capitalize;'>{sentiment}</div>
                 </div>
                 <div style='text-align: right;'>
-                    <div style='color: #94a3b8; font-size: 0.95em; text-transform: uppercase; letter-spacing: 1px;'>Reliability Metrics</div>
-                    <div style='font-size: 1.2em; color: #cbd5e1; margin-top: 5px;'>
-                        Confidence: <span style='font-weight: 700; color: #f8fafc;'>{confidence:.1%}</span>
+                    <div style='color: #4B5D5A; font-size: 0.95em; text-transform: uppercase; letter-spacing: 1px;'>Reliability Metrics</div>
+                    <div style='font-size: 1.2em; color: #2E3F3C; margin-top: 5px;'>
+                        Confidence: <span style='font-weight: 700; color: #12211F;'>{confidence:.1%}</span>
                     </div>
-                    <div style='font-size: 1.2em; color: #cbd5e1;'>
-                        Lexicon Baseline: <span style='font-weight: 700; color: #f8fafc;'>{nlp_result["features"]["sentiment_score"]:.2f}</span>
+                    <div style='font-size: 1.2em; color: #2E3F3C;'>
+                        Lexicon Baseline: <span style='font-weight: 700; color: #12211F;'>{nlp_result["features"]["sentiment_score"]:.2f}</span>
                     </div>
                 </div>
             </div>
@@ -107,11 +105,11 @@ if st.button("🔬 Run Deep Analysis", type="primary", use_container_width=True)
         with col1:
             st.markdown(
                 f"""
-            <div class='metric-card' style='border-top: 3px solid #8b5cf6;'>
-                <div style='color: #94a3b8; font-size: 0.85em; text-transform: uppercase;'>Polarity Profile</div>
-                <div style='display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.05);'><span>Lexicon Score</span> <span style='color: #f8fafc; font-weight: 600;'>{nlp_result["features"]["sentiment_score"]:.3f}</span></div>
-                <div style='display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.05);'><span>Uncertainty</span> <span style='color: #f8fafc; font-weight: 600;'>{nlp_result["features"]["uncertainty_score"]:.3f}</span></div>
-                <div style='display: flex; justify-content: space-between; padding: 5px 0;'><span>Subjectivity</span> <span style='color: #f8fafc; font-weight: 600;'>{nlp_result["features"]["subjectivity_score"]:.3f}</span></div>
+            <div class='metric-card'>
+                <div style='color: #4B5D5A; font-size: 0.85em; text-transform: uppercase;'>Polarity Profile</div>
+                <div style='display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #D5DEDC;'><span>Lexicon Score</span> <span style='color: #12211F; font-weight: 600;'>{nlp_result["features"]["sentiment_score"]:.3f}</span></div>
+                <div style='display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #D5DEDC;'><span>Uncertainty</span> <span style='color: #12211F; font-weight: 600;'>{nlp_result["features"]["uncertainty_score"]:.3f}</span></div>
+                <div style='display: flex; justify-content: space-between; padding: 5px 0;'><span>Subjectivity</span> <span style='color: #12211F; font-weight: 600;'>{nlp_result["features"]["subjectivity_score"]:.3f}</span></div>
             </div>
             """,
                 unsafe_allow_html=True,
@@ -120,11 +118,11 @@ if st.button("🔬 Run Deep Analysis", type="primary", use_container_width=True)
         with col2:
             st.markdown(
                 f"""
-            <div class='metric-card' style='border-top: 3px solid #ec4899;'>
-                <div style='color: #94a3b8; font-size: 0.85em; text-transform: uppercase;'>Vocabulary Spread</div>
-                <div style='display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.05);'><span>Positive Tokens</span> <span style='color: #10b981; font-weight: 600;'>{nlp_result["features"]["positive_word_count"]}</span></div>
-                <div style='display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.05);'><span>Negative Tokens</span> <span style='color: #ef4444; font-weight: 600;'>{nlp_result["features"]["negative_word_count"]}</span></div>
-                <div style='display: flex; justify-content: space-between; padding: 5px 0;'><span>Uncertainty Tokens</span> <span style='color: #f59e0b; font-weight: 600;'>{nlp_result["features"]["uncertainty_word_count"]}</span></div>
+            <div class='metric-card'>
+                <div style='color: #4B5D5A; font-size: 0.85em; text-transform: uppercase;'>Vocabulary Spread</div>
+                <div style='display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #D5DEDC;'><span>Positive Tokens</span> <span style='color: #1D7451; font-weight: 600;'>{nlp_result["features"]["positive_word_count"]}</span></div>
+                <div style='display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #D5DEDC;'><span>Negative Tokens</span> <span style='color: #A3322B; font-weight: 600;'>{nlp_result["features"]["negative_word_count"]}</span></div>
+                <div style='display: flex; justify-content: space-between; padding: 5px 0;'><span>Uncertainty Tokens</span> <span style='color: #9A5B16; font-weight: 600;'>{nlp_result["features"]["uncertainty_word_count"]}</span></div>
             </div>
             """,
                 unsafe_allow_html=True,
@@ -133,28 +131,23 @@ if st.button("🔬 Run Deep Analysis", type="primary", use_container_width=True)
         with col3:
             st.markdown(
                 f"""
-            <div class='metric-card' style='border-top: 3px solid #14b8a6;'>
-                <div style='color: #94a3b8; font-size: 0.85em; text-transform: uppercase;'>Structural Blueprint</div>
-                <div style='display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.05);'><span>Total Words</span> <span style='color: #f8fafc; font-weight: 600;'>{nlp_result["features"]["word_count"]}</span></div>
-                <div style='display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.05);'><span>Sentences</span> <span style='color: #f8fafc; font-weight: 600;'>{nlp_result["features"]["sentence_count"]}</span></div>
-                <div style='display: flex; justify-content: space-between; padding: 5px 0;'><span>Avg Word Length</span> <span style='color: #f8fafc; font-weight: 600;'>{nlp_result["features"]["avg_word_length"]:.1f}</span></div>
+            <div class='metric-card'>
+                <div style='color: #4B5D5A; font-size: 0.85em; text-transform: uppercase;'>Structural Blueprint</div>
+                <div style='display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #D5DEDC;'><span>Total Words</span> <span style='color: #12211F; font-weight: 600;'>{nlp_result["features"]["word_count"]}</span></div>
+                <div style='display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #D5DEDC;'><span>Sentences</span> <span style='color: #12211F; font-weight: 600;'>{nlp_result["features"]["sentence_count"]}</span></div>
+                <div style='display: flex; justify-content: space-between; padding: 5px 0;'><span>Avg Word Length</span> <span style='color: #12211F; font-weight: 600;'>{nlp_result["features"]["avg_word_length"]:.1f}</span></div>
             </div>
             """,
                 unsafe_allow_html=True,
             )
 
         # ── Detected words ──────────────────────────────────────────────────
-        st.markdown("<hr style='border-color: rgba(255, 255, 255, 0.05); margin: 30px 0;'>", unsafe_allow_html=True)
         section_header("Detected Sentiment Tokens")
         word_col1, word_col2, word_col3 = st.columns(3)
 
         with word_col1:
             st.markdown(
-                "<div class='insight-card' style='border-top: 4px solid #10b981; height: 100%;'>",
-                unsafe_allow_html=True,
-            )
-            st.markdown(
-                "<div style='color: #10b981; font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;'><span style='font-size: 1.2em;'>✅</span> <span>Positive Drivers</span></div>",
+                "<div style='color: #1D7451; font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;'><span style='font-size: 1.2em;'></span> <span>Positive Drivers</span></div>",
                 unsafe_allow_html=True,
             )
             pos_words = nlp_result["features"]["positive_words"]
@@ -168,17 +161,12 @@ if st.button("🔬 Run Deep Analysis", type="primary", use_container_width=True)
                 st.markdown(f"<div>{words_html}</div>", unsafe_allow_html=True)
             else:
                 st.markdown(
-                    "<span style='color: #64748b; font-style: italic;'>None detected</span>", unsafe_allow_html=True
+                    "<span style='color: #5E6E6A; font-style: italic;'>None detected</span>", unsafe_allow_html=True
                 )
-            st.markdown("</div>", unsafe_allow_html=True)
 
         with word_col2:
             st.markdown(
-                "<div class='insight-card' style='border-top: 4px solid #ef4444; height: 100%;'>",
-                unsafe_allow_html=True,
-            )
-            st.markdown(
-                "<div style='color: #ef4444; font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;'><span style='font-size: 1.2em;'>❌</span> <span>Negative Drivers</span></div>",
+                "<div style='color: #A3322B; font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;'><span style='font-size: 1.2em;'></span> <span>Negative Drivers</span></div>",
                 unsafe_allow_html=True,
             )
             neg_words = nlp_result["features"]["negative_words"]
@@ -192,178 +180,156 @@ if st.button("🔬 Run Deep Analysis", type="primary", use_container_width=True)
                 st.markdown(f"<div>{words_html}</div>", unsafe_allow_html=True)
             else:
                 st.markdown(
-                    "<span style='color: #64748b; font-style: italic;'>None detected</span>", unsafe_allow_html=True
+                    "<span style='color: #5E6E6A; font-style: italic;'>None detected</span>", unsafe_allow_html=True
                 )
-            st.markdown("</div>", unsafe_allow_html=True)
 
         with word_col3:
             st.markdown(
-                "<div class='insight-card' style='border-top: 4px solid #f59e0b; height: 100%;'>",
-                unsafe_allow_html=True,
-            )
-            st.markdown(
-                "<div style='color: #f59e0b; font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;'><span style='font-size: 1.2em;'>⚠️</span> <span>Uncertainty Markers</span></div>",
+                "<div style='color: #9A5B16; font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;'><span style='font-size: 1.2em;'></span> <span>Uncertainty Markers</span></div>",
                 unsafe_allow_html=True,
             )
             unc_words = nlp_result["features"]["uncertainty_words"]
             if unc_words:
                 words_html = "".join(
                     [
-                        f"<span class='chip' style='background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); margin-right: 6px; margin-bottom: 6px; display: inline-block;'>{w}</span>"
+                        f"<span class='chip' style='background: rgba(154,91,22,0.15); color: #9A5B16; border: 1px solid rgba(154,91,22,0.3); margin-right: 6px; margin-bottom: 6px; display: inline-block;'>{w}</span>"
                         for w in unc_words[:8]
                     ]
                 )
                 st.markdown(f"<div>{words_html}</div>", unsafe_allow_html=True)
             else:
                 st.markdown(
-                    "<span style='color: #64748b; font-style: italic;'>None detected</span>", unsafe_allow_html=True
+                    "<span style='color: #5E6E6A; font-style: italic;'>None detected</span>", unsafe_allow_html=True
                 )
-            st.markdown("</div>", unsafe_allow_html=True)
-
-        st.markdown("<hr style='border-color: rgba(255, 255, 255, 0.05); margin: 30px 0;'>", unsafe_allow_html=True)
 
         # ── Entities ────────────────────────────────────────────────────────
         section_header("Named Entities & Variables")
         entity_col1, entity_col2, entity_col3 = st.columns(3)
 
         with entity_col1:
-            st.markdown("<div class='insight-card' style='height: 100%;'>", unsafe_allow_html=True)
             st.markdown(
-                "<div style='color: #cbd5e1; font-weight: 600; margin-bottom: 10px;'>📊 Percentages & Ratios</div>",
+                "<div style='color: #2E3F3C; font-weight: 600; margin-bottom: 10px;'>Percentages & Ratios</div>",
                 unsafe_allow_html=True,
             )
             if nlp_result["entities"]["percentages"]:
                 for pct in nlp_result["entities"]["percentages"]:
                     st.markdown(
-                        f"<div style='background: #334155; padding: 4px 10px; border-radius: 6px; font-family: monospace; display: inline-block; margin: 2px;'>{pct}</div>",
+                        f"<div style='background: #D5DEDC; padding: 4px 10px; border-radius: 6px; font-variant-numeric: tabular-nums; display: inline-block; margin: 2px;'>{pct}</div>",
                         unsafe_allow_html=True,
                     )
             else:
                 st.markdown(
-                    "<span style='color: #64748b; font-style: italic;'>None found</span>", unsafe_allow_html=True
+                    "<span style='color: #5E6E6A; font-style: italic;'>None found</span>", unsafe_allow_html=True
                 )
-            st.markdown("</div>", unsafe_allow_html=True)
 
         with entity_col2:
-            st.markdown("<div class='insight-card' style='height: 100%;'>", unsafe_allow_html=True)
             st.markdown(
-                "<div style='color: #cbd5e1; font-weight: 600; margin-bottom: 10px;'>💰 Financial Figures</div>",
+                "<div style='color: #2E3F3C; font-weight: 600; margin-bottom: 10px;'>Financial Figures</div>",
                 unsafe_allow_html=True,
             )
             if nlp_result["entities"]["currencies"]:
                 for curr in nlp_result["entities"]["currencies"][:5]:
                     st.markdown(
-                        f"<div style='background: #334155; padding: 4px 10px; border-radius: 6px; font-family: monospace; display: inline-block; margin: 2px;'>{curr}</div>",
+                        f"<div style='background: #D5DEDC; padding: 4px 10px; border-radius: 6px; font-variant-numeric: tabular-nums; display: inline-block; margin: 2px;'>{curr}</div>",
                         unsafe_allow_html=True,
                     )
             else:
                 st.markdown(
-                    "<span style='color: #64748b; font-style: italic;'>None found</span>", unsafe_allow_html=True
+                    "<span style='color: #5E6E6A; font-style: italic;'>None found</span>", unsafe_allow_html=True
                 )
-            st.markdown("</div>", unsafe_allow_html=True)
 
         with entity_col3:
-            st.markdown("<div class='insight-card' style='height: 100%;'>", unsafe_allow_html=True)
             st.markdown(
-                "<div style='color: #cbd5e1; font-weight: 600; margin-bottom: 10px;'>🏛️ Corporate Entities</div>",
+                "<div style='color: #2E3F3C; font-weight: 600; margin-bottom: 10px;'>Corporate Entities</div>",
                 unsafe_allow_html=True,
             )
             if nlp_result["entities"]["companies"]:
                 for comp in nlp_result["entities"]["companies"][:5]:
                     st.markdown(
-                        f"<div style='background: #334155; padding: 4px 10px; border-radius: 6px; font-family: monospace; display: inline-block; margin: 2px;'>{comp}</div>",
+                        f"<div style='background: #D5DEDC; padding: 4px 10px; border-radius: 6px; font-variant-numeric: tabular-nums; display: inline-block; margin: 2px;'>{comp}</div>",
                         unsafe_allow_html=True,
                     )
             else:
                 st.markdown(
-                    "<span style='color: #64748b; font-style: italic;'>None found</span>", unsafe_allow_html=True
+                    "<span style='color: #5E6E6A; font-style: italic;'>None found</span>", unsafe_allow_html=True
                 )
-            st.markdown("</div>", unsafe_allow_html=True)
 
         # ── Chain of Thought Reasoning ──────────────────────────────────────
-        st.markdown("<hr style='border-color: rgba(255, 255, 255, 0.05); margin: 30px 0;'>", unsafe_allow_html=True)
         section_header("Rule-based Reasoning Steps")
         st.markdown(
-            "<p style='color: #94a3b8;'>Step-by-step reasoning algorithm breakdown:</p>", unsafe_allow_html=True
+            "<p style='color: #4B5D5A;'>Step-by-step reasoning algorithm breakdown:</p>", unsafe_allow_html=True
         )
 
-        with st.expander("📖 View Full Execution Trace", expanded=False):
-            st.markdown(
-                "<div style='margin-left: 20px; border-left: 2px solid rgba(255,255,255,0.1); padding-left: 20px; padding-bottom: 10px;'>",
-                unsafe_allow_html=True,
-            )
+        with st.expander("View Full Execution Trace", expanded=False):
             for i, step in enumerate(cot_result.steps, 1):
                 step_name = step.step.value.replace("_", " ").title()
 
                 step_colors = {
-                    "comprehension": "#14b8a6",
-                    "entity_extraction": "#8b5cf6",
-                    "sentiment_detection": "#10b981",
-                    "context_analysis": "#f59e0b",
-                    "confidence_calibration": "#ec4899",
-                    "final_synthesis": "#3b82f6",
+                    "comprehension": "#4F9E93",
+                    "entity_extraction": "#45627A",
+                    "sentiment_detection": "#1D7451",
+                    "context_analysis": "#9A5B16",
+                    "confidence_calibration": "#9A5B16",
+                    "final_synthesis": "#0E6E6A",
                 }
-                step_color = step_colors.get(step.step.value, "#64748b")
+                step_color = step_colors.get(step.step.value, "#5E6E6A")
 
                 st.markdown(
                     f"""
-                <div class='insight-card' style='position: relative; padding: 20px; background: rgba(20,22,28,0.7);
-                            margin-bottom: 20px; border-left: 0; border: 1px solid rgba(255,255,255,0.05);'>
-                    <div style='position: absolute; left: -32px; top: 25px; width: 22px; height: 22px; background: {step_color}; border-radius: 50%; box-shadow: 0 0 10px {step_color}; border: 4px solid #1a1d24;'></div>
+                <div class='insight-card' style='position: relative; padding: 20px; background: #F7F9F8;
+                            margin-bottom: 20px; border-left: 0; border: 1px solid #D5DEDC;'>
+                    <div style='position: absolute; left: -32px; top: 25px; width: 22px; height: 22px; background: {step_color}; border-radius: 50%; box-shadow: 0 0 10px {step_color}; border: 4px solid #F7F9F8;'></div>
                     <h4 style='margin: 0 0 15px 0; color: {step_color}; display: flex; align-items: center; justify-content: space-between;'>
                         <span>Step {i}: {step_name}</span>
-                        <span style='font-size: 0.8em; color: rgba(255,255,255,0.3); font-weight: normal; font-family: monospace;'>CONF: {step.confidence:.2f}</span>
+                        <span style='font-size: 0.8em; color: #B9C6C3; font-weight: normal; font-variant-numeric: tabular-nums;'>CONF: {step.confidence:.2f}</span>
                     </h4>
                     <div style='display: grid; grid-template-columns: 100px 1fr; gap: 10px; margin-bottom: 8px;'>
-                        <div style='color: #94a3b8; font-weight: 600; text-transform: uppercase; font-size: 0.8em; margin-top: 3px;'>Observation</div>
-                        <div style='color: #cbd5e1;'>{step.observation}</div>
+                        <div style='color: #4B5D5A; font-weight: 600; text-transform: uppercase; font-size: 0.8em; margin-top: 3px;'>Observation</div>
+                        <div style='color: #2E3F3C;'>{step.observation}</div>
                     </div>
                     <div style='display: grid; grid-template-columns: 100px 1fr; gap: 10px; margin-bottom: 8px;'>
-                        <div style='color: #94a3b8; font-weight: 600; text-transform: uppercase; font-size: 0.8em; margin-top: 3px;'>Reasoning</div>
-                        <div style='color: #cbd5e1;'>{step.reasoning}</div>
+                        <div style='color: #4B5D5A; font-weight: 600; text-transform: uppercase; font-size: 0.8em; margin-top: 3px;'>Reasoning</div>
+                        <div style='color: #2E3F3C;'>{step.reasoning}</div>
                     </div>
                     <div style='display: grid; grid-template-columns: 100px 1fr; gap: 10px;'>
                         <div style='color: {step_color}; font-weight: 600; text-transform: uppercase; font-size: 0.8em; margin-top: 3px;'>Conclusion</div>
-                        <div style='color: #f8fafc; font-weight: 500;'>{step.conclusion}</div>
+                        <div style='color: #12211F; font-weight: 500;'>{step.conclusion}</div>
                     </div>
                 </div>
                 """,
                     unsafe_allow_html=True,
                 )
-            st.markdown("</div>", unsafe_allow_html=True)
 
         colA, colB = st.columns([1, 1])
         with colA:
             # Key Factors
             section_header("Driving Factors")
-            st.markdown("<div class='insight-card'>", unsafe_allow_html=True)
             if cot_result.key_factors:
                 for factor in cot_result.key_factors:
                     st.markdown(
-                        f"<div style='margin-bottom: 8px; display: flex; align-items: start; gap: 10px;'><span style='color: #3b82f6;'>•</span> <span style='color: #e2e8f0; line-height: 1.5;'>{factor}</span></div>",
+                        f"<div style='margin-bottom: 8px; display: flex; align-items: start; gap: 10px;'><span style='color: #0E6E6A;'>•</span> <span style='color: #12211F; line-height: 1.5;'>{factor}</span></div>",
                         unsafe_allow_html=True,
                     )
             else:
                 st.markdown(
-                    "<span style='color: #64748b; font-style: italic;'>No specific key factors identified</span>",
+                    "<span style='color: #5E6E6A; font-style: italic;'>No specific key factors identified</span>",
                     unsafe_allow_html=True,
                 )
-            st.markdown("</div>", unsafe_allow_html=True)
 
         with colB:
             # Final Explanation
             section_header("Final Executive Synthesis")
             st.markdown(
                 f"""
-            <div class='insight-card' style='border-top: 4px solid #3b82f6; background: rgba(30, 41, 59, 0.4); height: 100%;'>
-                <p style='color: #e2e8f0; line-height: 1.6; font-size: 1.05em; margin: 0;'>{cot_result.explanation}</p>
+            <div class='insight-card' style='background: #F7F9F8; height: 100%;'>
+                <p style='color: #12211F; line-height: 1.6; font-size: 1.05em; margin: 0;'>{cot_result.explanation}</p>
             </div>
             """,
                 unsafe_allow_html=True,
             )
 
         # About Loughran-McDonald
-        with st.expander("ℹ️ About the Loughran-McDonald Financial Lexicon"):
+        with st.expander("About the Loughran-McDonald Financial Lexicon"):
             st.markdown("""
             The **Loughran-McDonald Dictionary** (2011) is the gold standard for financial sentiment analysis.
             Unlike general sentiment lexicons, it was specifically designed for financial text.

@@ -18,7 +18,7 @@ from preprocess import load_processed_data  # pyre-ignore
 from utils import LABEL_MAP_INV, get_model_dir  # pyre-ignore
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from shared import active_model, page_header, section_header  # pyre-ignore
+from shared import active_model, exhibit, page_header, section_header  # pyre-ignore
 
 # ── Page config ─────────────────────────────────────────────────────────────────
 selected_model, predictor = active_model()
@@ -29,7 +29,6 @@ if predictor is None:
 page_header(
     "Error Analysis",
     "Inspect misclassifications, confusion flows, and confidence calibration to understand where the model is weakest.",
-    eyebrow="Model diagnostics",
 )
 
 if not selected_model.startswith("baseline_"):
@@ -125,9 +124,9 @@ col1, col2, col3, col4 = st.columns(4)
 with col1:
     st.markdown(
         f"""
-    <div class='metric-card' style='border-top: 3px solid #3b82f6;'>
-        <div style='color: #94a3b8; font-size: 0.85em; text-transform: uppercase;'>Total Samples</div>
-        <div style='font-size: 2.2em; font-weight: 800; color: #f8fafc;'>{total}</div>
+    <div class='metric-card'>
+        <div style='color: #4B5D5A; font-size: 0.85em; text-transform: uppercase;'>Total Samples</div>
+        <div style='font-size: 2.2em; font-weight: 800; color: #12211F;'>{total}</div>
     </div>
     """,
         unsafe_allow_html=True,
@@ -135,9 +134,9 @@ with col1:
 with col2:
     st.markdown(
         f"""
-    <div class='metric-card' style='border-top: 3px solid #10b981;'>
-        <div style='color: #94a3b8; font-size: 0.85em; text-transform: uppercase;'>Correct</div>
-        <div style='font-size: 2.2em; font-weight: 800; color: #10b981;'>{correct}</div>
+    <div class='metric-card'>
+        <div style='color: #4B5D5A; font-size: 0.85em; text-transform: uppercase;'>Correct</div>
+        <div style='font-size: 2.2em; font-weight: 800; color: #1D7451;'>{correct}</div>
     </div>
     """,
         unsafe_allow_html=True,
@@ -145,9 +144,9 @@ with col2:
 with col3:
     st.markdown(
         f"""
-    <div class='metric-card' style='border-top: 3px solid #ef4444;'>
-        <div style='color: #94a3b8; font-size: 0.85em; text-transform: uppercase;'>Errors</div>
-        <div style='font-size: 2.2em; font-weight: 800; color: #ef4444;'>{errors}</div>
+    <div class='metric-card'>
+        <div style='color: #4B5D5A; font-size: 0.85em; text-transform: uppercase;'>Errors</div>
+        <div style='font-size: 2.2em; font-weight: 800; color: #A3322B;'>{errors}</div>
     </div>
     """,
         unsafe_allow_html=True,
@@ -155,22 +154,24 @@ with col3:
 with col4:
     st.markdown(
         f"""
-    <div class='metric-card' style='border-top: 3px solid #8b5cf6;'>
-        <div style='color: #94a3b8; font-size: 0.85em; text-transform: uppercase;'>Accuracy</div>
-        <div style='font-size: 2.2em; font-weight: 800; color: #f8fafc;'>{accuracy:.1%}</div>
+    <div class='metric-card'>
+        <div style='color: #4B5D5A; font-size: 0.85em; text-transform: uppercase;'>Accuracy</div>
+        <div style='font-size: 2.2em; font-weight: 800; color: #12211F;'>{accuracy:.1%}</div>
     </div>
     """,
         unsafe_allow_html=True,
     )
 
 # ── Confusion Pattern Analysis ──────────────────────────────────────────────────
-st.markdown("<hr style='border-color: rgba(255,255,255,0.05); margin: 30px 0;'>", unsafe_allow_html=True)
-section_header("Confusion Pattern Analysis")
+exhibit(
+    "Where the errors flow",
+    "Each band is a group of misclassified sentences, from true label (left) to predicted label (right).",
+)
 
 errors_df = results_df[~results_df["correct"]].copy()
 
 if len(errors_df) == 0:
-    st.success("🎉 Perfect accuracy! No misclassifications found on this split.")
+    st.success("Perfect accuracy! No misclassifications found on this split.")
 else:
     # Confusion pattern breakdown
     confusion_patterns = errors_df.groupby(["true_label", "pred_label"]).size().reset_index(name="count")
@@ -182,16 +183,16 @@ else:
             node=dict(
                 pad=15,
                 thickness=20,
-                line=dict(color="rgba(255,255,255,0.1)", width=0.5),
+                line=dict(color="#B9C6C3", width=0.5),
                 label=[
-                    "True: negative",
-                    "True: neutral",
-                    "True: positive",
-                    "Pred: negative",
-                    "Pred: neutral",
-                    "Pred: positive",
+                    "True ▼ negative",
+                    "True ▶ neutral",
+                    "True ▲ positive",
+                    "Predicted ▼ negative",
+                    "Predicted ▶ neutral",
+                    "Predicted ▲ positive",
                 ],
-                color=["#ef4444", "#64748b", "#10b981", "#ef4444", "#64748b", "#10b981"],
+                color=["#A3322B", "#5E6E6A", "#1D7451", "#A3322B", "#5E6E6A", "#1D7451"],
             ),
             link=dict(
                 source=[],
@@ -199,6 +200,7 @@ else:
                 value=[],
                 color=[],
             ),
+            textfont=dict(color="#12211F", size=12, shadow="none"),
         )
     )
 
@@ -206,9 +208,9 @@ else:
     label_to_source = {"negative": 0, "neutral": 1, "positive": 2}
     label_to_target = {"negative": 3, "neutral": 4, "positive": 5}
     link_colors = {
-        "negative": "rgba(239,68,68,0.3)",
-        "neutral": "rgba(100,116,139,0.3)",
-        "positive": "rgba(16,185,129,0.3)",
+        "negative": "rgba(163,50,43,0.3)",
+        "neutral": "rgba(79,100,112,0.3)",
+        "positive": "rgba(29,116,81,0.3)",
     }
 
     sources, targets, values, colors = [], [], [], []
@@ -224,43 +226,44 @@ else:
     fig.data[0].link.color = colors
 
     fig.update_layout(
-        title={"text": f"Misclassification Flow ({len(errors_df)} errors)", "font": {"color": "#f8fafc", "size": 16}},
         height=350,
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        font={"color": "#cbd5e1", "family": "Inter, sans-serif"},
+        font={"color": "#2E3F3C", "family": "Public Sans, system-ui, sans-serif"},
     )
-    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+    st.plotly_chart(fig, use_container_width=True, theme=None, config={"displayModeBar": False})
 
     # Top confusion pairs
     section_header("Most Common Confusion Pairs")
     for _, row in confusion_patterns.head(5).iterrows():
-        true_color = {"negative": "#ef4444", "neutral": "#64748b", "positive": "#10b981"}[row["true_label"]]
-        pred_color = {"negative": "#ef4444", "neutral": "#64748b", "positive": "#10b981"}[row["pred_label"]]
+        true_color = {"negative": "#A3322B", "neutral": "#5E6E6A", "positive": "#1D7451"}[row["true_label"]]
+        pred_color = {"negative": "#A3322B", "neutral": "#5E6E6A", "positive": "#1D7451"}[row["pred_label"]]
         pct = row["count"] / len(errors_df) * 100
         st.markdown(
             f"""
         <div style='display: flex; align-items: center; padding: 10px 15px; margin: 5px 0;
-                    background: rgba(255,255,255,0.02); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);'>
+                    background: #F7F9F8; border-radius: 8px; border: 1px solid #D5DEDC;'>
             <span style='color: {true_color}; font-weight: 600; min-width: 90px; text-transform: capitalize;'>{row["true_label"]}</span>
-            <span style='color: #475569; margin: 0 12px;'>→</span>
+            <span style='color: #4F6470; margin: 0 12px;'>→</span>
             <span style='color: {pred_color}; font-weight: 600; min-width: 90px; text-transform: capitalize;'>{row["pred_label"]}</span>
-            <span style='color: #94a3b8; margin-left: auto; font-family: monospace;'>{row["count"]} errors ({pct:.1f}%)</span>
+            <span style='color: #4B5D5A; margin-left: auto; font-variant-numeric: tabular-nums;'>{row["count"]} errors ({pct:.1f}%)</span>
         </div>
         """,
             unsafe_allow_html=True,
         )
 
     # ── Confidence distribution for errors vs correct ────────────────────────────
-    st.markdown("<hr style='border-color: rgba(255,255,255,0.05); margin: 30px 0;'>", unsafe_allow_html=True)
-    section_header("Confidence Distribution: Correct vs Errors")
+    exhibit(
+        "Confidence on correct predictions vs errors",
+        "A calibrated model is less sure when it is wrong, so low confidence can route a sentence to human review.",
+    )
 
     fig2 = go.Figure()
     fig2.add_trace(
         go.Histogram(
             x=results_df[results_df["correct"]]["confidence"],
             name="Correct",
-            marker_color="#10b981",
+            marker_color="#1D7451",
             opacity=0.7,
             nbinsx=20,
         )
@@ -269,37 +272,37 @@ else:
         go.Histogram(
             x=results_df[~results_df["correct"]]["confidence"],
             name="Errors",
-            marker_color="#ef4444",
+            marker_color="#A3322B",
             opacity=0.7,
             nbinsx=20,
         )
     )
     fig2.update_layout(
         barmode="overlay",
-        title={"text": "Model Confidence: Correct Predictions vs Errors", "font": {"color": "#f8fafc", "size": 14}},
+        title={"text": "Model Confidence: Correct Predictions vs Errors", "font": {"color": "#12211F", "size": 14}},
         xaxis_title="Confidence",
         yaxis_title="Count",
         height=350,
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        font={"color": "#cbd5e1", "family": "Inter, sans-serif"},
-        xaxis={"showgrid": True, "gridcolor": "rgba(255,255,255,0.05)"},
-        yaxis={"showgrid": True, "gridcolor": "rgba(255,255,255,0.05)"},
+        font={"color": "#2E3F3C", "family": "Public Sans, system-ui, sans-serif"},
+        xaxis={"showgrid": True, "gridcolor": "#D5DEDC"},
+        yaxis={"showgrid": True, "gridcolor": "#D5DEDC"},
         legend={"orientation": "h", "yanchor": "bottom", "y": 1.02, "xanchor": "right", "x": 1},
     )
-    st.plotly_chart(fig2, use_container_width=True, config={"displayModeBar": False})
+    st.plotly_chart(fig2, use_container_width=True, theme=None, config={"displayModeBar": False})
 
     # Key insight
     avg_conf_correct = results_df[results_df["correct"]]["confidence"].mean()
     avg_conf_error = results_df[~results_df["correct"]]["confidence"].mean()
     st.markdown(
         f"""
-    <div class='insight-card' style='border-left: 4px solid #f59e0b; padding: 15px 20px;'>
-        <span style='color: #f59e0b; font-weight: 700;'>💡 Insight:</span>
-        Average confidence on <span style='color: #10b981; font-weight: 600;'>correct</span> predictions:
-        <span style='font-family: monospace; color: #f8fafc;'>{avg_conf_correct:.3f}</span> |
-        Average confidence on <span style='color: #ef4444; font-weight: 600;'>errors</span>:
-        <span style='font-family: monospace; color: #f8fafc;'>{avg_conf_error:.3f}</span>
+    <div class='insight-card' style='padding: 15px 20px;'>
+        <span style='color: #9A5B16; font-weight: 700;'>Insight:</span>
+        Average confidence on <span style='color: #1D7451; font-weight: 600;'>correct</span> predictions:
+        <span style='font-variant-numeric: tabular-nums; color: #12211F;'>{avg_conf_correct:.3f}</span> |
+        Average confidence on <span style='color: #A3322B; font-weight: 600;'>errors</span>:
+        <span style='font-variant-numeric: tabular-nums; color: #12211F;'>{avg_conf_error:.3f}</span>
         {"— The model is well-calibrated (lower confidence on errors)." if avg_conf_error < avg_conf_correct else "— The model is overconfident on errors (calibration needed)."}
     </div>
     """,
@@ -307,7 +310,6 @@ else:
     )
 
     # ── Misclassified Examples Table ─────────────────────────────────────────────
-    st.markdown("<hr style='border-color: rgba(255,255,255,0.05); margin: 30px 0;'>", unsafe_allow_html=True)
     section_header("Misclassified Examples")
 
     # Filter controls
@@ -335,25 +337,25 @@ else:
     # Display errors
     display_count = min(20, len(filtered))
     for idx, (_, row) in enumerate(filtered.head(display_count).iterrows()):
-        true_color = {"negative": "#ef4444", "neutral": "#64748b", "positive": "#10b981"}[row["true_label"]]
-        pred_color = {"negative": "#ef4444", "neutral": "#64748b", "positive": "#10b981"}[row["pred_label"]]
+        true_color = {"negative": "#A3322B", "neutral": "#5E6E6A", "positive": "#1D7451"}[row["true_label"]]
+        pred_color = {"negative": "#A3322B", "neutral": "#5E6E6A", "positive": "#1D7451"}[row["pred_label"]]
 
         st.markdown(
             f"""
-        <div style='padding: 15px 20px; margin: 8px 0; background: rgba(255,255,255,0.02);
-                    border-radius: 10px; border: 1px solid rgba(255,255,255,0.06);'>
-            <div style='color: #e2e8f0; font-size: 0.95em; line-height: 1.5; margin-bottom: 10px;'>
+        <div style='padding: 15px 20px; margin: 8px 0; background: #F7F9F8;
+                    border-radius: 10px; border: 1px solid #D5DEDC;'>
+            <div style='color: #12211F; font-size: 0.95em; line-height: 1.5; margin-bottom: 10px;'>
                 "{row["sentence"][:200]}{"..." if len(row["sentence"]) > 200 else ""}"
             </div>
             <div style='display: flex; gap: 20px; align-items: center;'>
-                <span style='font-size: 0.8em; color: #94a3b8;'>True:
+                <span style='font-size: 0.8em; color: #4B5D5A;'>True:
                     <span style='color: {true_color}; font-weight: 700; text-transform: capitalize;'>{row["true_label"]}</span>
                 </span>
-                <span style='font-size: 0.8em; color: #94a3b8;'>Predicted:
+                <span style='font-size: 0.8em; color: #4B5D5A;'>Predicted:
                     <span style='color: {pred_color}; font-weight: 700; text-transform: capitalize;'>{row["pred_label"]}</span>
                 </span>
-                <span style='font-size: 0.8em; color: #94a3b8; margin-left: auto;'>Confidence:
-                    <span style='font-family: monospace; color: #f8fafc;'>{row["confidence"]:.3f}</span>
+                <span style='font-size: 0.8em; color: #4B5D5A; margin-left: auto;'>Confidence:
+                    <span style='font-variant-numeric: tabular-nums; color: #12211F;'>{row["confidence"]:.3f}</span>
                 </span>
             </div>
         </div>

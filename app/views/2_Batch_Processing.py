@@ -38,7 +38,6 @@ if predictor is None:
 page_header(
     "Batch Processing",
     "Score thousands of headlines or transcripts in one pass, review aggregate signals, and export a report.",
-    eyebrow="Bulk inference",
 )
 
 uploaded_file = st.file_uploader(
@@ -52,7 +51,7 @@ if not uploaded_file:
         "No file uploaded yet",
         "Drop a CSV (with a text column) or a TXT file (one text per line) to begin. "
         "You'll be able to preview and validate before running analysis.",
-        icon="📁",
+        icon="upload",
     )
     st.stop()
 
@@ -195,7 +194,7 @@ with chart_col:
         values=sentiment_counts.values,
         names=sentiment_counts.index,
         color=sentiment_counts.index,
-        color_discrete_map={"positive": "#10b981", "negative": "#ef4444", "neutral": "#3b82f6", "error": "#f59e0b"},
+        color_discrete_map={"positive": "#1D7451", "negative": "#A3322B", "neutral": "#0E6E6A", "error": "#9A5B16"},
         hole=0.55,
     )
     fig.update_traces(textinfo="percent", textfont_size=13)
@@ -206,19 +205,19 @@ with trend_col:
     pos_pct = pos_count / total * 100
     neg_pct = neg_count / total * 100
     if pos_pct > neg_pct + 10:
-        trend, trend_color, trend_icon = "Bullish", "#10b981", "▲"
+        trend, trend_color, trend_icon = "Bullish", "#1D7451", "▲"
     elif neg_pct > pos_pct + 10:
-        trend, trend_color, trend_icon = "Bearish", "#ef4444", "▼"
+        trend, trend_color, trend_icon = "Bearish", "#A3322B", "▼"
     else:
-        trend, trend_color, trend_icon = "Mixed / Sideways", "#3b82f6", "≈"
+        trend, trend_color, trend_icon = "Mixed / Sideways", "#0E6E6A", "≈"
     st.markdown(
         f"""
-        <div class='insight-card' style='border-left:4px solid {trend_color};height:100%;display:flex;flex-direction:column;justify-content:center;'>
-            <div style='color:#94a3b8;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.08em;'>Aggregate Signal</div>
+        <div class='insight-card' style='height:100%;display:flex;flex-direction:column;justify-content:center;'>
+            <div style='color:#4B5D5A;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.08em;'>Aggregate Signal</div>
             <div style='color:{trend_color};font-size:2.1rem;font-weight:800;margin:6px 0;'>{trend_icon} {trend}</div>
-            <div style='color:#94a3b8;font-size:0.92rem;line-height:1.5;'>
+            <div style='color:#4B5D5A;font-size:0.92rem;line-height:1.5;'>
                 Based on {total:,} scored texts, with mean model confidence of
-                <b style='color:#f8fafc;'>{avg_confidence:.1%}</b>.
+                <b style='color:#12211F;'>{avg_confidence:.1%}</b>.
             </div>
         </div>
         """,

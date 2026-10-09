@@ -35,7 +35,6 @@ page_header(
     "Stock Prediction Extension",
     "End-to-end pipeline executed in-app: stock download, live news, FinBERT "
     "sentiment, feature engineering, and an LSTM next-day direction forecast.",
-    eyebrow="Experimental · LSTM",
 )
 
 st.warning(
@@ -278,16 +277,16 @@ if st.button("Run Full Extension Pipeline", type="primary", use_container_width=
                 y=trend_data["Close"],
                 mode="lines",
                 name="Close",
-                line={"color": "#3b82f6", "width": 2.5},
+                line={"color": "#0E6E6A", "width": 2.5},
                 fill="tozeroy",
-                fillcolor="rgba(59,130,246,0.10)",
+                fillcolor="rgba(14,110,106,0.10)",
             ),
             row=1,
             col=1,
         )
 
         sentiment_colors = [
-            "#10b981" if value > 0 else "#ef4444" if value < 0 else "#64748b" for value in trend_data["daily_sentiment"]
+            "#1D7451" if value > 0 else "#A3322B" if value < 0 else "#5E6E6A" for value in trend_data["daily_sentiment"]
         ]
 
         fig.add_trace(
@@ -307,14 +306,14 @@ if st.button("Run Full Extension Pipeline", type="primary", use_container_width=
             showlegend=True,
             paper_bgcolor="rgba(0,0,0,0)",
             plot_bgcolor="rgba(0,0,0,0)",
-            font={"color": "#cbd5e1", "family": "Inter, sans-serif"},
+            font={"color": "#2E3F3C", "family": "Public Sans, system-ui, sans-serif"},
             legend={"orientation": "h", "yanchor": "bottom", "y": 1.02, "xanchor": "right", "x": 1},
-            xaxis2={"showgrid": True, "gridcolor": "rgba(255,255,255,0.05)"},
-            yaxis={"title": "Price ($)", "showgrid": True, "gridcolor": "rgba(255,255,255,0.05)"},
-            yaxis2={"title": "Sentiment", "showgrid": True, "gridcolor": "rgba(255,255,255,0.05)"},
+            xaxis2={"showgrid": True, "gridcolor": "#D5DEDC"},
+            yaxis={"title": "Price ($)", "showgrid": True, "gridcolor": "#D5DEDC"},
+            yaxis2={"title": "Sentiment", "showgrid": True, "gridcolor": "#D5DEDC"},
         )
 
-        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+        st.plotly_chart(fig, use_container_width=True, theme=None, config={"displayModeBar": False})
 
         section_header("Latest Headlines Used")
         if result.headlines.empty:

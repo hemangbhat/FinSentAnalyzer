@@ -20,7 +20,7 @@ st.set_page_config(
     page_title="FinSight · Sentiment Intelligence",
     page_icon=str(APP_DIR / "assets" / "icon.svg"),
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="auto",
 )
 
 from shared import inject_css, setup_sidebar  # pyre-ignore  # noqa: E402

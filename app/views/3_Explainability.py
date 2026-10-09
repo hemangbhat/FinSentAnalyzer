@@ -41,7 +41,6 @@ if predictor is None:
 page_header(
     "Explainability",
     "Deconstruct a prediction to see exactly which words drove it — locally per prediction and globally with SHAP.",
-    eyebrow="Interpretable ML",
 )
 
 if not selected_model.startswith("baseline_"):
@@ -64,11 +63,10 @@ if st.button("Explain prediction", type="primary", use_container_width=True):
             with st.spinner("Analyzing..."):
                 explanation = explain_prediction_baseline(explain_text, selected_model)
         except Exception as e:
-            st.error(f"❌ Explainability analysis failed: {e}")
+            st.error(f"Explainability analysis failed: {e}")
             st.stop()
 
         # Show prediction
-        st.markdown("<hr style='margin: 30px 0;'>", unsafe_allow_html=True)
         section_header("Prediction Results")
 
         col1, col2 = st.columns([1, 1.2])
@@ -79,7 +77,7 @@ if st.button("Explain prediction", type="primary", use_container_width=True):
             st.markdown(
                 f"""
             <div class='insight-card' style='text-align: center; display: flex; flex-direction: column; justify-content: center; height: 100%; border-top: 4px solid {color};'>
-                <div style='color: #94a3b8; font-size: 0.9em; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;'>Final Verdict</div>
+                <div style='color: #4B5D5A; font-size: 0.9em; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;'>Final Verdict</div>
                 <div style='font-size: 3.5em; font-weight: 800; color: {color}; line-height: 1.2; text-transform: capitalize;'>
                     {sentiment}
                 </div>
@@ -90,22 +88,19 @@ if st.button("Explain prediction", type="primary", use_container_width=True):
 
         with col2:
             if explanation["probabilities"]:
-                st.markdown("<div class='insight-card' style='padding: 10px;'>", unsafe_allow_html=True)
                 fig = create_probability_chart(explanation["probabilities"])
-                st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
-                st.markdown("</div>", unsafe_allow_html=True)
+                st.plotly_chart(fig, use_container_width=True, theme=None, config={"displayModeBar": False})
 
         # Highlighted text
-        st.markdown("<hr style='border-color: rgba(255,255,255,0.02); margin: 20px 0;'>", unsafe_allow_html=True)
         section_header("Text Analysis")
         st.markdown(
-            "<p style='color: #94a3b8;'>Words highlighted by their sentiment contribution magnitude:</p>",
+            "<p style='color: #4B5D5A;'>Words highlighted by their sentiment contribution magnitude:</p>",
             unsafe_allow_html=True,
         )
 
         highlighted = highlight_text(explain_text, explanation["word_importance"])
         st.markdown(
-            f"<div class='insight-card' style='font-size: 1.1em; line-height: 1.8; color: #e2e8f0;'>"
+            f"<div class='insight-card' style='font-size: 1.1em; line-height: 1.8; color: #12211F;'>"
             f"{highlighted}</div>",
             unsafe_allow_html=True,
         )
@@ -113,28 +108,23 @@ if st.button("Explain prediction", type="primary", use_container_width=True):
         st.markdown(
             """
         <div style='margin-top: 15px; font-size: 0.9em; display: flex; gap: 15px;'>
-            <div style='display: flex; align-items: center; gap: 5px;'><span style='display: inline-block; width: 12px; height: 12px; background: rgba(16, 185, 129, 0.4); border-radius: 2px;'></span> <span style='color: #94a3b8;'>Positive Driver</span></div>
-            <div style='display: flex; align-items: center; gap: 5px;'><span style='display: inline-block; width: 12px; height: 12px; background: rgba(239, 68, 68, 0.4); border-radius: 2px;'></span> <span style='color: #94a3b8;'>Negative Driver</span></div>
-            <div style='display: flex; align-items: center; gap: 5px;'><span style='display: inline-block; width: 12px; height: 12px; background: rgba(59, 130, 246, 0.4); border-radius: 2px;'></span> <span style='color: #94a3b8;'>Neutral / Uncertain</span></div>
+            <div style='display: flex; align-items: center; gap: 5px;'><span style='display: inline-block; width: 12px; height: 12px; background: rgba(29,116,81,0.4); border-radius: 2px;'></span> <span style='color: #4B5D5A;'>Positive Driver</span></div>
+            <div style='display: flex; align-items: center; gap: 5px;'><span style='display: inline-block; width: 12px; height: 12px; background: rgba(163,50,43,0.4); border-radius: 2px;'></span> <span style='color: #4B5D5A;'>Negative Driver</span></div>
+            <div style='display: flex; align-items: center; gap: 5px;'><span style='display: inline-block; width: 12px; height: 12px; background: rgba(14,110,106,0.4); border-radius: 2px;'></span> <span style='color: #4B5D5A;'>Neutral / Uncertain</span></div>
         </div>
         """,
             unsafe_allow_html=True,
         )
 
         # Word importance
-        st.markdown("<hr style='border-color: rgba(255,255,255,0.02); margin: 30px 0;'>", unsafe_allow_html=True)
         section_header("Extracted Features")
         col1, col2, col3 = st.columns(3)
 
         with col1:
-            st.markdown(
-                "<div class='insight-card' style='height: 100%; border-top: 4px solid #10b981;'>",
-                unsafe_allow_html=True,
-            )
-            st.markdown("<h4 style='color: #10b981; margin-top: 0;'>Positive Drivers</h4>", unsafe_allow_html=True)
+            st.markdown("<h4 style='color: #1D7451; margin-top: 0;'>Positive Drivers</h4>", unsafe_allow_html=True)
             if explanation.get("lexicon_positive"):
                 st.markdown(
-                    "<div style='font-size: 0.85em; color: #94a3b8; margin-bottom: 5px; text-transform: uppercase;'>Lexicon Matches</div>",
+                    "<div style='font-size: 0.85em; color: #4B5D5A; margin-bottom: 5px; text-transform: uppercase;'>Lexicon Matches</div>",
                     unsafe_allow_html=True,
                 )
                 words_html = "".join(
@@ -146,29 +136,24 @@ if st.button("Explain prediction", type="primary", use_container_width=True):
                 st.markdown(f"<div>{words_html}</div>", unsafe_allow_html=True)
             if explanation["positive_words"]:
                 st.markdown(
-                    "<div style='font-size: 0.85em; color: #94a3b8; margin: 10px 0 5px 0; text-transform: uppercase;'>Top Model Weights</div>",
+                    "<div style='font-size: 0.85em; color: #4B5D5A; margin: 10px 0 5px 0; text-transform: uppercase;'>Top Model Weights</div>",
                     unsafe_allow_html=True,
                 )
                 for word, score in explanation["positive_words"]:
                     st.markdown(
-                        f"<div style='display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05); color: #cbd5e1;'><span style='font-family: monospace;'>{word}</span> <span>{score:.3f}</span></div>",
+                        f"<div style='display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #D5DEDC; color: #2E3F3C;'><span style='font-variant-numeric: tabular-nums;'>{word}</span> <span>{score:.3f}</span></div>",
                         unsafe_allow_html=True,
                     )
             if not explanation.get("lexicon_positive") and not explanation["positive_words"]:
                 st.markdown(
-                    "<span style='color: #64748b; font-style: italic;'>None detected</span>", unsafe_allow_html=True
+                    "<span style='color: #5E6E6A; font-style: italic;'>None detected</span>", unsafe_allow_html=True
                 )
-            st.markdown("</div>", unsafe_allow_html=True)
 
         with col2:
-            st.markdown(
-                "<div class='insight-card' style='height: 100%; border-top: 4px solid #ef4444;'>",
-                unsafe_allow_html=True,
-            )
-            st.markdown("<h4 style='color: #ef4444; margin-top: 0;'>Negative Drivers</h4>", unsafe_allow_html=True)
+            st.markdown("<h4 style='color: #A3322B; margin-top: 0;'>Negative Drivers</h4>", unsafe_allow_html=True)
             if explanation.get("lexicon_negative"):
                 st.markdown(
-                    "<div style='font-size: 0.85em; color: #94a3b8; margin-bottom: 5px; text-transform: uppercase;'>Lexicon Matches</div>",
+                    "<div style='font-size: 0.85em; color: #4B5D5A; margin-bottom: 5px; text-transform: uppercase;'>Lexicon Matches</div>",
                     unsafe_allow_html=True,
                 )
                 words_html = "".join(
@@ -180,29 +165,24 @@ if st.button("Explain prediction", type="primary", use_container_width=True):
                 st.markdown(f"<div>{words_html}</div>", unsafe_allow_html=True)
             if explanation["negative_words"]:
                 st.markdown(
-                    "<div style='font-size: 0.85em; color: #94a3b8; margin: 10px 0 5px 0; text-transform: uppercase;'>Top Model Weights</div>",
+                    "<div style='font-size: 0.85em; color: #4B5D5A; margin: 10px 0 5px 0; text-transform: uppercase;'>Top Model Weights</div>",
                     unsafe_allow_html=True,
                 )
                 for word, score in explanation["negative_words"]:
                     st.markdown(
-                        f"<div style='display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05); color: #cbd5e1;'><span style='font-family: monospace;'>{word}</span> <span>{score:.3f}</span></div>",
+                        f"<div style='display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #D5DEDC; color: #2E3F3C;'><span style='font-variant-numeric: tabular-nums;'>{word}</span> <span>{score:.3f}</span></div>",
                         unsafe_allow_html=True,
                     )
             if not explanation.get("lexicon_negative") and not explanation["negative_words"]:
                 st.markdown(
-                    "<span style='color: #64748b; font-style: italic;'>None detected</span>", unsafe_allow_html=True
+                    "<span style='color: #5E6E6A; font-style: italic;'>None detected</span>", unsafe_allow_html=True
                 )
-            st.markdown("</div>", unsafe_allow_html=True)
 
         with col3:
-            st.markdown(
-                "<div class='insight-card' style='height: 100%; border-top: 4px solid #3b82f6;'>",
-                unsafe_allow_html=True,
-            )
-            st.markdown("<h4 style='color: #3b82f6; margin-top: 0;'>Neutral / Uncertain</h4>", unsafe_allow_html=True)
+            st.markdown("<h4 style='color: #0E6E6A; margin-top: 0;'>Neutral / Uncertain</h4>", unsafe_allow_html=True)
             if explanation.get("lexicon_uncertainty"):
                 st.markdown(
-                    "<div style='font-size: 0.85em; color: #94a3b8; margin-bottom: 5px; text-transform: uppercase;'>Lexicon Matches</div>",
+                    "<div style='font-size: 0.85em; color: #4B5D5A; margin-bottom: 5px; text-transform: uppercase;'>Lexicon Matches</div>",
                     unsafe_allow_html=True,
                 )
                 words_html = "".join(
@@ -214,19 +194,18 @@ if st.button("Explain prediction", type="primary", use_container_width=True):
                 st.markdown(f"<div>{words_html}</div>", unsafe_allow_html=True)
             if explanation["neutral_words"]:
                 st.markdown(
-                    "<div style='font-size: 0.85em; color: #94a3b8; margin: 10px 0 5px 0; text-transform: uppercase;'>Top Model Weights</div>",
+                    "<div style='font-size: 0.85em; color: #4B5D5A; margin: 10px 0 5px 0; text-transform: uppercase;'>Top Model Weights</div>",
                     unsafe_allow_html=True,
                 )
                 for word, score in explanation["neutral_words"]:
                     st.markdown(
-                        f"<div style='display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05); color: #cbd5e1;'><span style='font-family: monospace;'>{word}</span> <span>{score:.3f}</span></div>",
+                        f"<div style='display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #D5DEDC; color: #2E3F3C;'><span style='font-variant-numeric: tabular-nums;'>{word}</span> <span>{score:.3f}</span></div>",
                         unsafe_allow_html=True,
                     )
             if not explanation.get("lexicon_uncertainty") and not explanation["neutral_words"]:
                 st.markdown(
-                    "<span style='color: #64748b; font-style: italic;'>None detected</span>", unsafe_allow_html=True
+                    "<span style='color: #5E6E6A; font-style: italic;'>None detected</span>", unsafe_allow_html=True
                 )
-            st.markdown("</div>", unsafe_allow_html=True)
 
         # Top words chart
         if explanation["word_importance"]:
@@ -246,17 +225,17 @@ if st.button("Explain prediction", type="primary", use_container_width=True):
                 )
             )
             fig.update_layout(
-                title={"text": "Top 10 High Impact Words", "font": {"color": "#f8fafc", "size": 16}},
+                title={"text": "Top 10 High Impact Words", "font": {"color": "#12211F", "size": 16}},
                 xaxis_title="Influence Score",
                 yaxis={"autorange": "reversed"},
                 height=400,
                 paper_bgcolor="rgba(0,0,0,0)",
                 plot_bgcolor="rgba(0,0,0,0)",
-                font={"color": "#cbd5e1", "family": "Inter, sans-serif"},
-                xaxis={"showgrid": True, "gridcolor": "rgba(255,255,255,0.05)", "linecolor": "rgba(255,255,255,0.1)"},
-                yaxis_tickfont={"size": 13, "family": "monospace"},
+                font={"color": "#2E3F3C", "family": "Public Sans, system-ui, sans-serif"},
+                xaxis={"showgrid": True, "gridcolor": "#D5DEDC", "linecolor": "#B9C6C3"},
+                yaxis_tickfont={"size": 13},
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, use_container_width=True, theme=None)
     else:
         st.warning("Please enter text to explain.")
 
@@ -272,7 +251,7 @@ shap_data = None
 if shap_results_path.exists():
     with open(shap_results_path) as f:
         shap_data = json.load(f)
-    st.success(f"✅ Loaded pre-computed SHAP results for **{classifier_name}**")
+    st.success(f"Loaded pre-computed SHAP results for **{classifier_name}**")
 elif SHAP_AVAILABLE:
     st.info(f"No pre-computed SHAP results for **{classifier_name}**. Click below to generate them (may take ~30s).")
     if st.button("Run SHAP analysis", type="primary", use_container_width=True):
@@ -283,9 +262,9 @@ elif SHAP_AVAILABLE:
                 results_dir.mkdir(parents=True, exist_ok=True)
                 with open(shap_results_path, "w") as f:
                     json.dump(shap_data, f, indent=2)
-                st.success("✅ SHAP analysis complete and saved!")
+                st.success("SHAP analysis complete and saved!")
             except Exception as e:
-                st.error(f"❌ SHAP analysis failed: {e}")
+                st.error(f"SHAP analysis failed: {e}")
 else:
     st.warning("**SHAP** library is not installed. Install with: `pip install shap`")
 
@@ -300,40 +279,39 @@ if shap_data:
                 x=importances,
                 y=features,
                 orientation="h",
-                marker_color="#8b5cf6",
-                marker_line_color="rgba(139, 92, 246, 0.6)",
+                marker_color="#45627A",
+                marker_line_color="rgba(69,98,122,0.6)",
                 marker_line_width=1,
             )
         )
         fig.update_layout(
             title={
                 "text": f"SHAP Feature Importance — {classifier_name.replace('_', ' ').title()}",
-                "font": {"color": "#f8fafc", "size": 16},
+                "font": {"color": "#12211F", "size": 16},
             },
             xaxis_title="Mean |SHAP Value|",
             height=500,
             paper_bgcolor="rgba(0,0,0,0)",
             plot_bgcolor="rgba(0,0,0,0)",
-            font={"color": "#cbd5e1", "family": "Inter, sans-serif"},
+            font={"color": "#2E3F3C", "family": "Public Sans, system-ui, sans-serif"},
             yaxis={"autorange": "reversed"},
-            xaxis={"showgrid": True, "gridcolor": "rgba(255,255,255,0.05)"},
-            yaxis_tickfont={"size": 12, "family": "monospace"},
+            xaxis={"showgrid": True, "gridcolor": "#D5DEDC"},
+            yaxis_tickfont={"size": 12},
             margin=dict(l=150),
         )
-        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+        st.plotly_chart(fig, use_container_width=True, theme=None, config={"displayModeBar": False})
 
     # Per-class drivers
     class_features = shap_data.get("class_features", {})
     if class_features:
         section_header("Per-Class Feature Drivers")
         ccols = st.columns(3)
-        class_colors = {"negative": "#ef4444", "neutral": "#64748b", "positive": "#10b981"}
+        class_colors = {"negative": "#A3322B", "neutral": "#5E6E6A", "positive": "#1D7451"}
         for i, (cls_name, cls_feats) in enumerate(class_features.items()):
             with ccols[i]:
-                color = class_colors.get(cls_name, "#94a3b8")
+                color = class_colors.get(cls_name, "#4B5D5A")
                 st.markdown(
                     f"""
-                <div class='insight-card' style='border-top: 3px solid {color};'>
                     <h4 style='color: {color}; text-transform: capitalize; margin-top: 0;'>{cls_name}</h4>
                 """,
                     unsafe_allow_html=True,
@@ -342,11 +320,10 @@ if shap_data:
                     icon = "↑" if feat["direction"] == "positive" else "↓"
                     st.markdown(
                         f"""
-                    <div style='display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9em;'>
-                        <span style='font-family: monospace; color: #cbd5e1;'>{feat["feature"]}</span>
+                    <div style='display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #D5DEDC; font-size: 0.9em;'>
+                        <span style='font-variant-numeric: tabular-nums; color: #2E3F3C;'>{feat["feature"]}</span>
                         <span style='color: {color};'>{icon} {feat["shap_value"]:.3f}</span>
                     </div>
                     """,
                         unsafe_allow_html=True,
                     )
-                st.markdown("</div>", unsafe_allow_html=True)
