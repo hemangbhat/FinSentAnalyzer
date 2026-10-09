@@ -18,12 +18,10 @@ from preprocess import load_processed_data  # pyre-ignore
 from utils import LABEL_MAP_INV, get_model_dir  # pyre-ignore
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from shared import inject_css, page_header, setup_sidebar  # pyre-ignore
+from shared import active_model, page_header, section_header  # pyre-ignore
 
 # ── Page config ─────────────────────────────────────────────────────────────────
-st.set_page_config(page_title="Error Analysis", page_icon="🔬", layout="wide")
-inject_css()
-selected_model, predictor = setup_sidebar()
+selected_model, predictor = active_model()
 
 if predictor is None:
     st.stop()
@@ -167,7 +165,7 @@ with col4:
 
 # ── Confusion Pattern Analysis ──────────────────────────────────────────────────
 st.markdown("<hr style='border-color: rgba(255,255,255,0.05); margin: 30px 0;'>", unsafe_allow_html=True)
-st.markdown("### 🎯 Confusion Pattern Analysis")
+section_header("Confusion Pattern Analysis")
 
 errors_df = results_df[~results_df["correct"]].copy()
 
@@ -235,7 +233,7 @@ else:
     st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
     # Top confusion pairs
-    st.markdown("#### Most Common Confusion Pairs")
+    section_header("Most Common Confusion Pairs")
     for _, row in confusion_patterns.head(5).iterrows():
         true_color = {"negative": "#ef4444", "neutral": "#64748b", "positive": "#10b981"}[row["true_label"]]
         pred_color = {"negative": "#ef4444", "neutral": "#64748b", "positive": "#10b981"}[row["pred_label"]]
@@ -255,7 +253,7 @@ else:
 
     # ── Confidence distribution for errors vs correct ────────────────────────────
     st.markdown("<hr style='border-color: rgba(255,255,255,0.05); margin: 30px 0;'>", unsafe_allow_html=True)
-    st.markdown("### 📊 Confidence Distribution: Correct vs Errors")
+    section_header("Confidence Distribution: Correct vs Errors")
 
     fig2 = go.Figure()
     fig2.add_trace(
@@ -310,7 +308,7 @@ else:
 
     # ── Misclassified Examples Table ─────────────────────────────────────────────
     st.markdown("<hr style='border-color: rgba(255,255,255,0.05); margin: 30px 0;'>", unsafe_allow_html=True)
-    st.markdown("### 📋 Misclassified Examples")
+    section_header("Misclassified Examples")
 
     # Filter controls
     filter_col1, filter_col2 = st.columns(2)

@@ -76,7 +76,7 @@ Financial sentiment analysis is a critical tool for quantitative finance, risk m
 - **GridSearchCV Tuning** — Automated hyperparameter optimization for SVM and Gradient Boosting
 - **SHAP Explainability** — Global feature importance with per-class drivers
 - **Pipeline demo (synthetic data)** — Runs the model over ~2,700 *template-generated* headlines to demonstrate the scoring/aggregation/correlation pipeline. This is **not** real news and **not** a generalization benchmark (see [Limitations](#limitations)).
-- **Real generalization test** — Honest out-of-distribution evaluation on a real, MIT-licensed dataset (`zeroshot/twitter-financial-news-sentiment`, n=2,388): the TF-IDF baseline drops to macro-F1 **0.46** OOD, and fine-tuning DistilBERT on in-domain news recovers it to **0.73** — both reported transparently.
+- **Real generalization test** — Honest out-of-distribution evaluation on a real, MIT-licensed dataset (`zeroshot/twitter-financial-news-sentiment`, n=2,388): the TF-IDF baseline drops to macro-F1 **0.46** OOD, and fine-tuning on in-domain news recovers it (DistilBERT **0.73**, FinBERT **0.84**) — all reported transparently.
 - **Stock Prediction Extension** — Experimental end-to-end flow (yfinance → FinBERT → LSTM). The LSTM is **chance-level** on this small/synthetic data — it's an engineering showcase, not a real forecast.
 - **Error Analysis** — Inspect misclassified examples with Sankey diagrams and confidence histograms
 - **Deep Linguistic Analysis** — Named Entity Recognition, rule-based Chain-of-Thought reasoning, Loughran-McDonald financial lexicon matching
@@ -151,9 +151,13 @@ flowchart TD
 ```
 financial-sentiment-analyzer/
 ├── app/                            # Streamlit Dashboard
-│   ├── app.py                      # Main entry point (Home page)
-│   ├── shared.py                   # Shared CSS, components, cached model loading
-│   └── pages/
+│   ├── app.py                      # Entrypoint: st.navigation router + persistent sidebar
+│   ├── home.py                     # Home page (headline metrics read from results/)
+│   ├── ui.py                       # Design system: tokens, CSS, components, chart theme
+│   ├── shared.py                   # Re-exports ui.py for the pages
+│   ├── assets/                     # Logo + favicon (SVG)
+│   └── views/                      # One file per page (not `pages/`, so Streamlit's
+│                                   #   legacy auto-discovery stays off)
 │       ├── 1_Single_Analysis.py    # Real-time single text prediction
 │       ├── 2_Batch_Processing.py   # CSV/TXT bulk analysis
 │       ├── 3_Explainability.py     # Word importance + SHAP global analysis
@@ -203,7 +207,7 @@ financial-sentiment-analyzer/
 │   ├── shap_gradient_boosting.json # SHAP feature importance (GB)
 │   └── shap_svm.json              # SHAP feature importance (SVM)
 │
-├── tests/                          # Automated test suite (88 tests)
+├── tests/                          # Automated test suite (116 tests)
 │   ├── conftest.py                 # Shared fixtures
 │   ├── test_utils.py
 │   ├── test_preprocess.py
@@ -392,7 +396,7 @@ column is the more reliable signal.
 | Random Forest | 88.50% | 0.838 | 0.755 ± 0.028 | Medium |
 | Naive Bayes | 88.05% | 0.848 | 0.784 ± 0.016 | Very Fast |
 | MLP Neural Network | 88.05% | 0.841 | 0.801 ± 0.012 | Medium |
-| Voting Ensemble | (probability-calibrated; see error analysis) | | | Slow |
+| Voting Ensemble | 92.04% | 0.891 | — | Slow |
 
 > On the test split Gradient Boosting scores highest, but under 5-fold CV SVM and
 > Gradient Boosting are statistically tied (0.838 vs 0.835, overlapping std). SVM
@@ -463,13 +467,22 @@ human-labeled, out-of-distribution** dataset:
 > Numbers are from `evaluate_generalization` on the held-out val set (reproducible
 > locally). The GPU training-time eval reported 0.874/0.841; the two are the same
 > model — minor variance from CPU/GPU float precision.
+>
+> **Read these two rows differently.** For the PhraseBank model, the news set is
+> genuinely out-of-domain. The fine-tuned transformers were trained on the news
+> *train* split, so for them the validation split is an **in-domain held-out**
+> set — the comparison shows that domain-matched training data closes the gap,
+> not that FinBERT generalizes zero-shot. Also note the fine-tuning run selects
+> its best epoch on the first 500 rows of that same validation split, so the
+> 0.84 carries a small optimistic bias; a clean re-run would carve a separate
+> dev split out of `train` for early stopping.
 
 **Honest takeaway:** the PhraseBank-trained model **generalizes poorly** to a
 different domain — on real financial-news headlines its accuracy barely exceeds
 the majority-class baseline (0.67 vs 0.66) and macro-F1 nearly halves. **The gap
 is domain mismatch, not a broken pipeline:** fine-tuning on in-domain news closes
-it — DistilBERT (1 epoch, CPU) reaches macro-F1 0.73, and FinBERT (3 epochs, GPU)
-reaches **~0.83 macro-F1 / ~0.87 accuracy** on the same held-out set. Reproduce:
+it — DistilBERT (1 epoch, CPU) reaches macro-F1 0.73, and FinBERT (4 epochs, GPU)
+reaches **0.84 macro-F1 / 0.87 accuracy** on the same held-out set. Reproduce:
 
 ```bash
 python scripts/fetch_real_news_dataset.py
@@ -481,12 +494,13 @@ python src/integrate_news.py --action generalization --model svm   # baseline nu
 > 6k-example, CPU** run — deliberately bounded for reproducibility on a laptop.
 >
 > **GPU upgrade (Kaggle / Colab free tier) — done:**
-> `notebooks/finetune_finbert_gpu.py` fine-tuned **FinBERT for 3 epochs** on a
-> T4 and **achieved accuracy 0.88 / macro-F1 0.84** on the real news test set
-> (vs 0.67 / 0.46 for the TF-IDF baseline). Mixed precision (AMP) is enabled
-> automatically on CUDA. `results/finetune_results.json` holds the metrics; the
-> weights live in `models/finbert_finetuned/` (gitignored — regenerate with the
-> notebook).
+> `notebooks/finetune_finbert_gpu.py` fine-tuned **FinBERT for 4 epochs** (class
+> weights, early stopping) on a T4 and **achieved accuracy 0.87 / macro-F1 0.84**
+> on the held-out news validation split (vs 0.67 / 0.46 for the TF-IDF baseline).
+> Mixed precision (AMP) is enabled automatically on CUDA.
+> `results/finetune_results_finbert.json` holds the metrics; the weights ship in
+> `models/finbert_finetuned/` via Git LFS, with a Hugging Face Hub fallback when
+> only the LFS pointer is present.
 
 ## Pipeline Demo on Synthetic Headlines
 
@@ -560,7 +574,7 @@ Furthermore, the **Error Analysis** module mathematically breaks down failures m
 ## Dashboard Pages
 
 ### 🏠 Home
-Landing page with 9 feature cards linking to each module.
+Headline metrics (read live from `results/`), the three-step evaluation story (train → stress-test → fix), and a card linking to every module. Pages are grouped in the sidebar (Analyze · Explain · Evaluate · Labs) and the chosen model persists across pages.
 
 ### 📝 1. Single Analysis
 - Enter any financial text

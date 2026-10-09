@@ -1,6 +1,14 @@
 [theme]
-base="dark"
-primaryColor="#007bff"
+base = "dark"
+primaryColor = "#3b82f6"
+backgroundColor = "#0a0e17"
+secondaryBackgroundColor = "#131a2a"
+textColor = "#e8eef7"
+font = "sans serif"
+
+[client]
+# Hide the "Deploy" button and developer menu items for viewers.
+toolbarMode = "minimal"
 
 [server]
 enableXsrfProtection = true

@@ -2,6 +2,8 @@
 Financial Sentiment Analyzer — Single Text Analysis (flagship page).
 """
 
+import html
+import re
 import sys
 from pathlib import Path
 
@@ -14,19 +16,17 @@ from llm_explain import get_llm_explanation  # pyre-ignore
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from shared import (  # pyre-ignore
+    active_model,
     create_probability_chart,
-    inject_css,
+    empty_state,
     page_header,
     render_chart,
     section_header,
-    setup_sidebar,
     status_banner,
     verdict_card,
 )
 
-st.set_page_config(page_title="Single Analysis", page_icon="📝", layout="wide")
-inject_css()
-selected_model, predictor = setup_sidebar()
+selected_model, predictor = active_model()
 
 if predictor is None:
     st.stop()
@@ -38,34 +38,55 @@ page_header(
     eyebrow="Real-time inference",
 )
 
+
+def _md_bold(text: str) -> str:
+    """Render **bold** markdown inside an HTML block (escaping everything else)."""
+    return re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", html.escape(text))
+
+
 # ── Examples ─────────────────────────────────────────────────────────────────
-if "example_text" not in st.session_state:
-    st.session_state.example_text = ""
+EXAMPLES = {
+    "Revenue up 25%": "The company reported a 25% increase in quarterly revenue.",
+    "Shares fall on earnings": "Stock prices fell sharply after a disappointing earnings report.",
+    "Dividend unchanged": "The firm announced it will maintain its current dividend policy.",
+    "Profit EUR 8.7m → 13.1m": "Operating profit rose to EUR 13.1 mn from EUR 8.7 mn.",
+    "Plant closure, 300 jobs cut": "The company will close its Tampere plant, cutting 300 jobs.",
+}
 
-EXAMPLES = [
-    "The company reported a 25% increase in quarterly revenue.",
-    "Stock prices fell sharply after a disappointing earnings report.",
-    "The firm announced it will maintain its current dividend policy.",
-    "Operating profit rose to EUR 13.1 mn from EUR 8.7 mn.",
-    "The company's market share remained unchanged at 15%.",
-]
 
-with st.expander("Try an example", expanded=False):
-    ex_cols = st.columns(len(EXAMPLES))
-    for i, (col, example) in enumerate(zip(ex_cols, EXAMPLES)):
-        with col:
-            if st.button(f"Example {i + 1}", key=f"example_{i}", use_container_width=True):
-                st.session_state.example_text = example
+def _use_example() -> None:
+    choice = st.session_state.get("sa_example")
+    if choice:
+        st.session_state.sa_text = EXAMPLES[choice]
+        st.session_state.sa_run = True
+
+
+st.pills(
+    "Try an example",
+    list(EXAMPLES),
+    key="sa_example",
+    on_change=_use_example,
+)
 
 # ── Input ────────────────────────────────────────────────────────────────────
 text_input = st.text_area(
     "Financial text",
-    value=st.session_state.example_text,
-    height=150,
+    key="sa_text",
+    height=130,
     placeholder="e.g., The company reported strong Q3 earnings, beating analyst expectations…",
 )
 
-analyze = st.button("Analyze Sentiment", type="primary", use_container_width=True)
+analyze = st.button("Analyze sentiment", type="primary", use_container_width=True)
+analyze = analyze or st.session_state.pop("sa_run", False)
+
+if not analyze:
+    st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+    empty_state(
+        "Paste a sentence from an earnings release, filing, or headline",
+        "You'll get the predicted sentiment, the model's confidence, the full probability "
+        "breakdown, and the words that pushed it there. Change the model in the sidebar to compare.",
+        icon="✎",
+    )
 
 if analyze and not text_input.strip():
     status_banner("Enter some financial text to analyze.", kind="warning")
@@ -78,7 +99,6 @@ if analyze and text_input.strip():
         status_banner(f"Prediction failed: {exc}", kind="error")
         st.stop()
 
-    st.markdown("<hr>", unsafe_allow_html=True)
     section_header("Result")
 
     sentiment = result["label"]
@@ -107,7 +127,7 @@ if analyze and text_input.strip():
             st.markdown(
                 f"""
                 <div class='insight-card' style='border-left:3px solid #3b82f6;'>
-                    <div style='line-height:1.65;color:#cbd5e1;font-size:1.02em;'>{llm_explanation}</div>
+                    <div style='line-height:1.65;color:#cbd5e1;font-size:1.02em;'>{_md_bold(llm_explanation)}</div>
                 </div>
                 """,
                 unsafe_allow_html=True,

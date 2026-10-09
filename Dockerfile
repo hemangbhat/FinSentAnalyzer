@@ -28,7 +28,7 @@ COPY data/ ./data/
 COPY .streamlit/ ./.streamlit/
 
 # Copy the nested stock-prediction extension (code + data only, no virtualenvs).
-# Required by app/pages/9_Stock_Prediction_Extension.py and src/stock_extension.py.
+# Required by app/views/9_Stock_Prediction_Extension.py and src/stock_extension.py.
 COPY external-datasets/financial-news-stock-prediction/src/ ./external-datasets/financial-news-stock-prediction/src/
 COPY external-datasets/financial-news-stock-prediction/data/ ./external-datasets/financial-news-stock-prediction/data/
 COPY external-datasets/financial-news-stock-prediction/models/ ./external-datasets/financial-news-stock-prediction/models/

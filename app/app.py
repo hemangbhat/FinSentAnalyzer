@@ -1,5 +1,9 @@
 """
-Financial Sentiment Analyzer — Home (Streamlit multipage app entrypoint).
+Financial Sentiment Analyzer — Streamlit entrypoint and router.
+
+Uses ``st.navigation`` so the sidebar (brand + model selector) is rendered once
+here and persists across pages; each page reads the selection via
+``shared.active_model()``.
 """
 
 import sys
@@ -9,109 +13,52 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 sys.path.insert(0, str(Path(__file__).parent))
 
 import streamlit as st  # pyre-ignore
-from shared import inject_css, kpi_strip, section_header, setup_sidebar  # pyre-ignore
+
+APP_DIR = Path(__file__).resolve().parent
 
 st.set_page_config(
     page_title="FinSight · Sentiment Intelligence",
-    page_icon="◆",
+    page_icon=str(APP_DIR / "assets" / "icon.svg"),
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
+from shared import inject_css, setup_sidebar  # pyre-ignore  # noqa: E402
+
+
+def _page(file: str, title: str, icon: str, url_path: str, default: bool = False):
+    return st.Page(str(APP_DIR / file), title=title, icon=icon, url_path=url_path, default=default)
+
+
+PAGES = {
+    "Overview": [
+        _page("home.py", "Home", ":material/space_dashboard:", "home", default=True),
+    ],
+    "Analyze": [
+        _page("views/1_Single_Analysis.py", "Single Analysis", ":material/edit_note:", "Single_Analysis"),
+        _page("views/2_Batch_Processing.py", "Batch Processing", ":material/upload_file:", "Batch_Processing"),
+    ],
+    "Explain": [
+        _page("views/3_Explainability.py", "Explainability", ":material/troubleshoot:", "Explainability"),
+        _page("views/4_Word_Insights.py", "Word Insights", ":material/match_word:", "Word_Insights"),
+        _page("views/5_Deep_Analysis.py", "Deep Analysis", ":material/psychology:", "Deep_Analysis"),
+    ],
+    "Evaluate": [
+        _page("views/6_Model_Info.py", "Model Registry", ":material/leaderboard:", "Model_Info"),
+        _page("views/8_Error_Analysis.py", "Error Analysis", ":material/rule:", "Error_Analysis"),
+        _page("views/7_Sentiment_Trends.py", "Generalization", ":material/public:", "Sentiment_Trends"),
+    ],
+    "Labs": [
+        _page(
+            "views/9_Stock_Prediction_Extension.py",
+            "Stock Prediction",
+            ":material/science:",
+            "Stock_Prediction_Extension",
+        ),
+    ],
+}
+
+nav = st.navigation(PAGES)
 inject_css()
-selected_model, predictor = setup_sidebar()
-
-# ── Hero ─────────────────────────────────────────────────────────────────────
-st.markdown(
-    """
-<div class='fs-hero'>
-    <div class='fs-eyebrow'>Financial NLP · Explainable ML</div>
-    <h1>Financial Sentiment Intelligence</h1>
-    <p>
-        Classify market sentiment from financial text, see exactly which words drove each
-        decision, and inspect the model with explainability and error analysis — in one transparent dashboard.
-    </p>
-</div>
-""",
-    unsafe_allow_html=True,
-)
-
-# ── KPI strip (honest, verifiable facts) ─────────────────────────────────────
-kpi_strip(
-    [
-        {"label": "Trained Models", "value": "7 + 1", "sub": "7 baselines + pre-trained FinBERT", "accent": "#3b82f6"},
-        {"label": "Sentiment Classes", "value": "3", "sub": "positive · neutral · negative", "accent": "#10b981"},
-        {"label": "Best Macro-F1", "value": "0.90", "sub": "SVM on test (n=226)", "accent": "#8b5cf6"},
-        {"label": "Explainability", "value": "SHAP", "sub": "+ per-token attribution", "accent": "#f59e0b"},
-    ]
-)
-
-# ── Capabilities ─────────────────────────────────────────────────────────────
-section_header("Capabilities", "Each page is focused on a single task")
-
-CARDS = [
-    (
-        "📝",
-        "Single Analysis",
-        "Classify any financial excerpt and get confidence, probabilities, and a plain-language rationale in one flow.",
-    ),
-    ("📁", "Batch Processing", "Upload a CSV or TXT file, validate it, analyze at scale, and export a results report."),
-    ("🔍", "Explainability", "Per-token attribution plus SHAP global feature importance for baseline models."),
-    ("💡", "Word Insights", "Browse the highest-impact vocabulary the models learned, grouped by sentiment."),
-    ("🧠", "Deep Analysis", "Rule-based reasoning, NER, and Loughran-McDonald lexicon decomposition."),
-    ("📊", "Model Registry", "Compare every model's metrics, architecture, and training data."),
-    (
-        "📈",
-        "Sentiment Trends",
-        "Pipeline demo: model sentiment vs. price on synthetic headlines (template-generated, not real news).",
-    ),
-    ("🔬", "Error Analysis", "Confusion flows, confidence calibration, and inspectable misclassifications."),
-    (
-        "📉",
-        "Stock Extension",
-        "Experimental end-to-end LSTM demo (chance-level on this data) — engineering showcase, not a real forecast.",
-    ),
-]
-
-for row_start in range(0, len(CARDS), 3):
-    cols = st.columns(3)
-    for col, (icon, title, desc) in zip(cols, CARDS[row_start : row_start + 3]):
-        with col:
-            st.markdown(
-                f"""
-                <div class='feature-card' style='height:100%;'>
-                    <div class='card-title'><span style='font-size:1.3em;'>{icon}</span> {title}</div>
-                    <div class='card-text'>{desc}</div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-
-# ── How it works ─────────────────────────────────────────────────────────────
-section_header("How it works", "From raw text to an explainable verdict")
-
-steps = st.columns(4)
-STEPS = [
-    ("01", "Select a model", "Pick a baseline or the FinBERT transformer from the sidebar."),
-    ("02", "Provide text", "Type an excerpt or upload a file for batch scoring."),
-    ("03", "Get a verdict", "Sentiment, confidence, and a probability breakdown."),
-    ("04", "Understand why", "Token attribution and SHAP reveal the drivers."),
-]
-for col, (num, title, desc) in zip(steps, STEPS):
-    with col:
-        st.markdown(
-            f"""
-            <div class='app-card' style='height:100%;'>
-                <div style='font-family:JetBrains Mono,monospace;font-size:0.9rem;color:#60a5fa;font-weight:600;'>{num}</div>
-                <div style='font-weight:600;color:#f8fafc;margin:6px 0 4px 0;'>{title}</div>
-                <div class='card-text'>{desc}</div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-st.markdown(
-    "<div style='text-align:center;opacity:0.55;padding:30px 0 6px 0;font-size:0.88rem;'>"
-    "Use the <b>sidebar</b> to choose a model and navigate between modules.</div>",
-    unsafe_allow_html=True,
-)
+setup_sidebar()
+nav.run()

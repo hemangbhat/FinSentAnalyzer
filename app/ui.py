@@ -135,7 +135,7 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
     border-bottom: 1px solid var(--fs-border);
 }
 [data-testid="stMainBlockContainer"], .block-container {
-    padding-top: 2.4rem; padding-bottom: 3rem; max-width: 1280px;
+    padding-top: 4.2rem; padding-bottom: 3rem; max-width: 1280px;
 }
 
 /* Headings */
@@ -298,8 +298,64 @@ h1, h2, h3, h4 { color: var(--fs-text); letter-spacing: -0.02em; font-weight: 70
 .fs-conf-track { height: 8px; border-radius: 999px; background: rgba(255,255,255,0.08); margin-top: 14px; overflow: hidden; }
 .fs-conf-fill { height: 100%; border-radius: 999px; }
 
-/* ── Sidebar nav links ───────────────────────────────────────────────── */
+/* ── Sidebar nav ─────────────────────────────────────────────────────── */
 [data-testid="stSidebarNav"] a { border-radius: 9px; }
+[data-testid="stSidebarNav"] a[aria-current="page"] {
+    background: rgba(59,130,246,0.12); box-shadow: inset 2px 0 0 var(--fs-primary);
+}
+[data-testid="stNavSectionHeader"] {
+    color: var(--fs-faint); font-size: 0.68rem; font-weight: 700;
+    letter-spacing: 0.14em; text-transform: uppercase; margin-top: 10px;
+}
+[data-testid="stLogo"] { height: 2rem; max-width: 12rem; }
+.fs-side-label {
+    font-size: 0.7rem; color: var(--fs-muted); font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase; margin: 4px 0 6px 0;
+}
+.fs-side-status {
+    background: rgba(255,255,255,0.03); border: 1px solid var(--fs-border);
+    border-radius: 12px; padding: 12px 14px; margin-top: 12px;
+}
+.fs-side-status .row { display: flex; align-items: center; gap: 8px; font-size: 0.84rem; color: #e2e8f0; }
+.fs-side-status .row + .row { margin-top: 6px; }
+.fs-side-status .dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+.fs-side-note { margin-top: 12px; font-size: 0.76rem; color: var(--fs-faint); line-height: 1.5; }
+
+/* ── Page links styled as CTAs / card links ─────────────────────────── */
+[data-testid="stPageLink"] a {
+    border: 1px solid var(--fs-border); border-radius: 10px; padding: 0.45rem 0.9rem;
+    background: rgba(255,255,255,0.03); transition: all 0.18s ease;
+}
+[data-testid="stPageLink"] a:hover { background: rgba(59,130,246,0.10); border-color: rgba(59,130,246,0.35); }
+[data-testid="stPageLink"] a p { font-weight: 600; font-size: 0.9rem; }
+
+/* Bordered containers (st.container(border=True)) as cards */
+[data-testid="stVerticalBlockBorderWrapper"]:has(> div > [data-testid="stVerticalBlock"]) {
+    border-radius: var(--fs-radius);
+}
+
+/* ── Home: the evaluation story ─────────────────────────────────────── */
+.fs-story { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.fs-step {
+    position: relative; border: 1px solid var(--fs-border); border-radius: var(--fs-radius);
+    padding: 20px 22px; background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.012));
+}
+.fs-step .n { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--fs-faint); }
+.fs-step .t { font-weight: 700; color: var(--fs-text); margin: 6px 0 2px 0; font-size: 1.02rem; }
+.fs-step .big { font-size: 2.2rem; font-weight: 800; line-height: 1.1; margin: 10px 0 2px 0; letter-spacing: -0.02em; }
+.fs-step .unit { color: var(--fs-muted); font-size: 0.8rem; }
+.fs-step .d { color: var(--fs-muted); font-size: 0.9rem; line-height: 1.55; margin-top: 10px; }
+.fs-card-title { display: flex; align-items: center; gap: 10px; font-weight: 650; color: var(--fs-text); font-size: 1.0rem; }
+.fs-card-ico {
+    width: 30px; height: 30px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center;
+    background: rgba(59,130,246,0.12); color: #93b4f5; font-size: 0.95rem; flex: none;
+}
+.fs-card-desc { color: var(--fs-muted); font-size: 0.89rem; line-height: 1.55; margin: 8px 0 4px 0; min-height: 4.4em; }
+.fs-tag {
+    display: inline-block; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    color: #fbbf24; background: rgba(245,158,11,0.10); border: 1px solid rgba(245,158,11,0.25);
+    padding: 1px 7px; border-radius: 999px; margin-left: 4px;
+}
 
 /* ── Tables ──────────────────────────────────────────────────────────── */
 [data-testid="stDataFrame"] { border: 1px solid var(--fs-border); border-radius: 12px; overflow: hidden; }
@@ -315,6 +371,9 @@ hr { border-color: var(--fs-border); margin: 1.8rem 0; }
 [data-testid="stExpander"] { border: 1px solid var(--fs-border); border-radius: 12px; background: rgba(255,255,255,0.015); }
 
 /* Responsive */
+@media (max-width: 900px) {
+    .fs-story { grid-template-columns: 1fr; }
+}
 @media (max-width: 768px) {
     .fs-hero { padding: 34px 24px; }
     .fs-hero h1 { font-size: 2.1rem; }
@@ -557,41 +616,43 @@ def _list_models() -> list[str]:
     return get_available_models()
 
 
+ASSETS = Path(__file__).parent / "assets"
+
+# Default engine: the fastest well-calibrated baseline (CV macro-F1 0.838).
+DEFAULT_MODEL = "baseline_svm"
+
+_SESSION_KEY = "_fs_active_model"
+
+
 def setup_sidebar():
     """
-    Render the premium sidebar (brand, model selector, status).
+    Render the persistent sidebar (brand, model selector, status).
+
+    Called once per run from the navigation entrypoint (``app.py``), so the
+    model selection survives page switches. Pages read it via ``active_model()``.
 
     Returns
     -------
     tuple[str | None, SentimentPredictor | None]
     """
-    st.sidebar.markdown(
-        "<div style='padding:6px 2px 16px 2px;'>"
-        "<div style='font-size:1.5em;font-weight:800;letter-spacing:-0.02em;"
-        "background:linear-gradient(90deg,#f8fafc,#7aa7f5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;'>"
-        "◆ FinSight</div>"
-        "<div style='font-size:0.72em;color:#64748b;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;margin-top:2px;'>"
-        "Sentiment Intelligence</div></div>",
-        unsafe_allow_html=True,
-    )
+    st.logo(str(ASSETS / "logo.svg"), size="large", icon_image=str(ASSETS / "icon.svg"))
 
     available_models = _list_models()
     if not available_models:
         st.sidebar.error("No trained models found. Run `python src/train.py --model baselines`.")
+        st.session_state[_SESSION_KEY] = (None, None)
         return None, None
 
-    st.sidebar.markdown(
-        "<div style='font-size:0.74em;color:#94a3b8;font-weight:600;letter-spacing:0.08em;"
-        "text-transform:uppercase;margin-bottom:6px;'>Model Engine</div>",
-        unsafe_allow_html=True,
-    )
+    st.sidebar.markdown("<div class='fs-side-label'>Model engine</div>", unsafe_allow_html=True)
+    default_index = available_models.index(DEFAULT_MODEL) if DEFAULT_MODEL in available_models else 0
     selected_model = st.sidebar.selectbox(
         "Model",
         available_models,
-        index=0,
+        index=default_index,
+        key="fs_model_choice",
         format_func=model_label,
         label_visibility="collapsed",
-        help="Choose the model used across analysis pages.",
+        help="The model used across every analysis page.",
     )
 
     predictor = None
@@ -603,17 +664,14 @@ def setup_sidebar():
         load_error = str(exc)
 
     online = predictor is not None
-    dot = "#10b981" if online else "#ef4444"
+    dot = COLORS["positive"] if online else COLORS["negative"]
     status = "Engine ready" if online else "Engine unavailable"
+    is_transformer = not selected_model.startswith("baseline_")
+    family = "Transformer · 110M params" if is_transformer else "TF-IDF · classical ML"
     st.sidebar.markdown(
-        "<div style='background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);"
-        "border-radius:12px;padding:14px 16px;margin-top:16px;'>"
-        "<div style='font-size:0.72em;color:#94a3b8;font-weight:600;letter-spacing:0.08em;"
-        "text-transform:uppercase;margin-bottom:10px;'>System Status</div>"
-        f"<div style='display:flex;align-items:center;gap:8px;font-size:0.9em;color:#e2e8f0;margin-bottom:7px;'>"
-        f"<span style='width:8px;height:8px;border-radius:50%;background:{dot};box-shadow:0 0 8px {dot};'></span>{status}</div>"
-        f"<div style='display:flex;align-items:center;gap:8px;font-size:0.9em;color:#e2e8f0;'>"
-        f"<span style='width:8px;height:8px;border-radius:50%;background:#3b82f6;'></span>{model_label(selected_model)}</div>"
+        "<div class='fs-side-status'>"
+        f"<div class='row'><span class='dot' style='background:{dot};box-shadow:0 0 8px {dot};'></span>{status}</div>"
+        f"<div class='row'><span class='dot' style='background:{COLORS['accent']};'></span>{family}</div>"
         "</div>",
         unsafe_allow_html=True,
     )
@@ -621,11 +679,31 @@ def setup_sidebar():
     if load_error:
         st.sidebar.error(f"Failed to load model: {load_error}")
 
-    st.sidebar.markdown(
-        "<div style='margin-top:14px;font-size:0.78em;color:#64748b;line-height:1.5;'>"
-        "Models are trained on the Financial PhraseBank. Sentiment is classified as "
-        "positive, neutral, or negative.</div>",
-        unsafe_allow_html=True,
-    )
+    if selected_model == "finbert":
+        note = "Fine-tuned on real financial news headlines (Twitter Financial News, MIT)."
+    elif is_transformer:
+        note = "ProsusAI/finbert, used zero-shot (no task-specific fine-tuning)."
+    else:
+        note = "Trained on Financial PhraseBank (2,264 sentences, 100% annotator agreement)."
+    st.sidebar.markdown(f"<div class='fs-side-note'>{note}</div>", unsafe_allow_html=True)
 
+    st.session_state[_SESSION_KEY] = (selected_model, predictor)
+    return selected_model, predictor
+
+
+def active_model():
+    """
+    Return ``(model_key, predictor)`` chosen in the sidebar.
+
+    Stops the page with a friendly message if no model could be loaded.
+    """
+    selected_model, predictor = st.session_state.get(_SESSION_KEY, (None, None))
+    if predictor is None:
+        empty_state(
+            "No model loaded",
+            "Pick a model in the sidebar. If none are listed, train the baselines with "
+            "<code>python src/train.py --model baselines</code>.",
+            icon="⚠",
+        )
+        st.stop()
     return selected_model, predictor

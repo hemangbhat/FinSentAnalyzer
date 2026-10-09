@@ -25,7 +25,7 @@ sys.path.insert(0, str(APP))
 # Project modules whose imports we validate (src modules + app-level helpers).
 PROJECT_MODULES = {p.stem for p in SRC.glob("*.py")} | {"shared", "ui"}
 
-PAGE_FILES = sorted((APP / "pages").glob("*.py")) + [APP / "app.py", APP / "shared.py"]
+PAGE_FILES = sorted((APP / "views").glob("*.py")) + [APP / "app.py", APP / "home.py", APP / "shared.py"]
 
 
 def _project_imports(path: Path):

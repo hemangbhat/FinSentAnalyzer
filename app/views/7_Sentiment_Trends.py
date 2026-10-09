@@ -16,24 +16,21 @@ from plotly.subplots import make_subplots  # pyre-ignore
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from shared import (  # pyre-ignore
-    inject_css,
+    active_model,
     kpi_strip,
     page_header,
     section_header,
-    setup_sidebar,
     status_banner,
 )
 
 # ── Page config ─────────────────────────────────────────────────────────────────
-st.set_page_config(page_title="Sentiment Trends", page_icon="📈", layout="wide")
-inject_css()
-selected_model, predictor = setup_sidebar()
+selected_model, predictor = active_model()
 
 if predictor is None:
     st.stop()
 
 page_header(
-    "Sentiment Trends",
+    "Generalization",
     "Real out-of-distribution generalization plus a synthetic sentiment↔price pipeline demo.",
     eyebrow="Model validation",
 )
@@ -67,7 +64,8 @@ if _gen_path.exists():
     status_banner(
         "Honest result: the TF-IDF baseline generalizes poorly across this domain shift "
         "(macro-F1 0.84 in-domain → 0.46 on real news). Fine-tuning on in-domain news "
-        "closes the gap — FinBERT (3 epochs, GPU) reaches ~0.87 accuracy / ~0.83 macro-F1. See the README.",
+        "closes the gap — FinBERT fine-tuned on the news training split (4 epochs, GPU, class weights) "
+        "reaches 0.87 accuracy / 0.84 macro-F1 on the held-out validation split. See the README.",
         kind="warning",
     )
 
@@ -75,15 +73,27 @@ if _gen_path.exists():
 _cmp_path = Path(__file__).parent.parent.parent / "results" / "model_comparison_ood.json"
 if _cmp_path.exists():
     cmp = json.loads(_cmp_path.read_text())
-    section_header("Model comparison on real news (OOD)", cmp.get("dataset", ""))
-    names = [m["model"] for m in cmp["models"]]
+    section_header("Model comparison on real news", cmp.get("dataset", ""))
+    _pretty = {
+        "svm": "TF-IDF + SVM<br><sup>trained on PhraseBank (out-of-domain)</sup>",
+        "finbert": "FinBERT<br><sup>fine-tuned on news train split</sup>",
+    }
+    names = [_pretty.get(m["model"], m["model"]) for m in cmp["models"]]
     fig_cmp = go.Figure()
-    fig_cmp.add_trace(
-        go.Bar(name="Accuracy", x=names, y=[m["accuracy"] for m in cmp["models"]], marker_color="#3b82f6")
-    )
-    fig_cmp.add_trace(
-        go.Bar(name="Macro-F1", x=names, y=[m["f1_macro"] for m in cmp["models"]], marker_color="#8b5cf6")
-    )
+    for metric, label, color in (("accuracy", "Accuracy", "#3b82f6"), ("f1_macro", "Macro-F1", "#8b5cf6")):
+        vals = [m[metric] for m in cmp["models"]]
+        fig_cmp.add_trace(
+            go.Bar(
+                name=label,
+                x=names,
+                y=vals,
+                marker_color=color,
+                width=0.32,
+                text=[f"{v:.2f}" for v in vals],
+                textposition="outside",
+                textfont={"color": "#e2e8f0"},
+            )
+        )
     maj = cmp.get("majority_class_accuracy")
     if maj:
         fig_cmp.add_hline(y=maj, line_dash="dash", line_color="#ef4444", annotation_text=f"majority acc {maj:.2f}")
@@ -93,7 +103,7 @@ if _cmp_path.exists():
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
         font={"color": "#cbd5e1", "family": "Inter, sans-serif"},
-        yaxis={"range": [0, 1], "gridcolor": "rgba(255,255,255,0.05)", "title": "Score"},
+        yaxis={"range": [0, 1.08], "gridcolor": "rgba(255,255,255,0.05)", "title": "Score"},
         legend={"orientation": "h", "yanchor": "bottom", "y": 1.02, "xanchor": "right", "x": 1},
     )
     st.plotly_chart(fig_cmp, use_container_width=True, config={"displayModeBar": False})
@@ -105,15 +115,18 @@ if _finbert_gen.exists():
     cm = fb.get("confusion_matrix")
     cm_labels = fb.get("labels", ["negative", "neutral", "positive"])
     if cm:
-        section_header("Fine-tuned FinBERT — confusion matrix (real OOD)", f"n={fb.get('n_samples')}")
+        section_header("Fine-tuned FinBERT — confusion matrix (held-out news)", f"n={fb.get('n_samples')}")
         fig_cm = go.Figure(
             data=go.Heatmap(
                 z=cm,
                 x=[f"pred {lab}" for lab in cm_labels],
                 y=[f"true {lab}" for lab in cm_labels],
-                colorscale="Blues",
+                colorscale=[[0, "#0f172a"], [0.5, "#1e3a8a"], [1, "#3b82f6"]],
                 text=cm,
                 texttemplate="%{text}",
+                textfont={"color": "#f8fafc", "size": 14},
+                xgap=3,
+                ygap=3,
                 showscale=False,
             )
         )
@@ -168,7 +181,7 @@ if cross_results_path.exists():
         except (TypeError, ValueError):
             return default
 
-    st.markdown("### 📊 Cross-Dataset Validation Results")
+    section_header("Cross-Dataset Validation Results")
     st.markdown(
         """
     <p style='color: #94a3b8;'>Model trained on <b>Financial PhraseBank</b> (expert-annotated),
@@ -239,7 +252,7 @@ if cross_results_path.exists():
     correlations = cross_results.get("correlations", {})
     if correlations:
         st.markdown("<hr style='margin: 30px 0;'>", unsafe_allow_html=True)
-        st.markdown("### 🔗 Sentiment ↔ Stock Price Correlations")
+        section_header("Sentiment ↔ Stock Price Correlations")
         st.markdown(
             "<p style='color: #94a3b8;'>Pearson correlation between daily news sentiment and stock returns</p>",
             unsafe_allow_html=True,
@@ -278,11 +291,11 @@ if cross_results_path.exists():
 
 # ── Interactive Sentiment Trends Chart ──────────────────────────────────────────
 st.markdown("<hr style='border-color: rgba(255,255,255,0.05); margin: 30px 0;'>", unsafe_allow_html=True)
-st.markdown("### 📉 Interactive Sentiment & Price Chart")
+section_header("Interactive Sentiment & Price Chart")
 
 ticker_choice = st.selectbox("Select Ticker", ["AAPL", "TSLA", "AMZN"], key="trend_ticker")
 
-if st.button("📊 Generate Trend Chart", type="primary", use_container_width=True):
+if st.button("Generate trend chart", type="primary", use_container_width=True):
     try:
         with st.spinner("Computing sentiment trends..."):
             # Determine which model to use for predictions
@@ -383,7 +396,7 @@ if st.button("📊 Generate Trend Chart", type="primary", use_container_width=Tr
 
 # ── SHAP Results Section ────────────────────────────────────────────────────────
 st.markdown("<hr style='border-color: rgba(255,255,255,0.05); margin: 30px 0;'>", unsafe_allow_html=True)
-st.markdown("### 🧠 SHAP Feature Importance")
+section_header("SHAP Feature Importance")
 
 # Check for pre-computed SHAP results
 shap_files = list(results_dir.glob("shap_*.json")) if results_dir.exists() else []
@@ -457,7 +470,7 @@ cv_results_path = results_dir / "cv_results.json" if results_dir.exists() else N
 
 if cv_results_path and cv_results_path.exists():
     st.markdown("<hr style='border-color: rgba(255,255,255,0.05); margin: 30px 0;'>", unsafe_allow_html=True)
-    st.markdown("### 📋 5-Fold Cross-Validation Results")
+    section_header("5-Fold Cross-Validation Results")
 
     with open(cv_results_path) as f:
         cv_data = json.load(f)

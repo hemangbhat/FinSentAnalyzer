@@ -20,20 +20,17 @@ from llm_explain import generate_market_outlook  # pyre-ignore
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from shared import (  # pyre-ignore
     COLORS,
+    active_model,
     empty_state,
-    inject_css,
     kpi_strip,
     page_header,
     render_chart,
     section_header,
-    setup_sidebar,
     status_banner,
     style_fig,
 )
 
-st.set_page_config(page_title="Batch Processing", page_icon="📁", layout="wide")
-inject_css()
-selected_model, predictor = setup_sidebar()
+selected_model, predictor = active_model()
 
 if predictor is None:
     st.stop()

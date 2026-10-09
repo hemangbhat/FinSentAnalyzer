@@ -24,17 +24,15 @@ except ImportError:
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from shared import (  # pyre-ignore
+    active_model,
     create_probability_chart,
     get_sentiment_color,
-    inject_css,
     page_header,
-    setup_sidebar,
+    section_header,
 )
 
 # ── Page config ─────────────────────────────────────────────────────────────────
-st.set_page_config(page_title="Explainability", page_icon="🔍", layout="wide")
-inject_css()
-selected_model, predictor = setup_sidebar()
+selected_model, predictor = active_model()
 
 if predictor is None:
     st.stop()
@@ -60,7 +58,7 @@ explain_text = st.text_area(
     key="explain_text",
 )
 
-if st.button("🔍 Explain Prediction", type="primary", use_container_width=True):
+if st.button("Explain prediction", type="primary", use_container_width=True):
     if explain_text.strip():
         try:
             with st.spinner("Analyzing..."):
@@ -71,7 +69,7 @@ if st.button("🔍 Explain Prediction", type="primary", use_container_width=True
 
         # Show prediction
         st.markdown("<hr style='margin: 30px 0;'>", unsafe_allow_html=True)
-        st.markdown("### 🎯 Prediction Results")
+        section_header("Prediction Results")
 
         col1, col2 = st.columns([1, 1.2])
 
@@ -99,7 +97,7 @@ if st.button("🔍 Explain Prediction", type="primary", use_container_width=True
 
         # Highlighted text
         st.markdown("<hr style='border-color: rgba(255,255,255,0.02); margin: 20px 0;'>", unsafe_allow_html=True)
-        st.markdown("### 📝 Text Analysis")
+        section_header("Text Analysis")
         st.markdown(
             "<p style='color: #94a3b8;'>Words highlighted by their sentiment contribution magnitude:</p>",
             unsafe_allow_html=True,
@@ -125,7 +123,7 @@ if st.button("🔍 Explain Prediction", type="primary", use_container_width=True
 
         # Word importance
         st.markdown("<hr style='border-color: rgba(255,255,255,0.02); margin: 30px 0;'>", unsafe_allow_html=True)
-        st.markdown("### 🧩 Extracted Features")
+        section_header("Extracted Features")
         col1, col2, col3 = st.columns(3)
 
         with col1:
@@ -232,7 +230,7 @@ if st.button("🔍 Explain Prediction", type="primary", use_container_width=True
 
         # Top words chart
         if explanation["word_importance"]:
-            st.markdown("### Word Importance Scores")
+            section_header("Word Importance Scores")
             top_words = explanation["word_importance"][:10]
             words = [w for w, s, d in top_words]
             scores = [s for w, s, d in top_words]
@@ -263,16 +261,7 @@ if st.button("🔍 Explain Prediction", type="primary", use_container_width=True
         st.warning("Please enter text to explain.")
 
 # ── SHAP Global Explainability Section ──────────────────────────────────────────
-st.markdown("<hr style='border-color: rgba(255,255,255,0.05); margin: 40px 0;'>", unsafe_allow_html=True)
-st.markdown(
-    """
-<div style='margin-bottom: 20px;'>
-    <h2 style='font-size: 1.8em; font-weight: 700; margin-bottom: 5px;'>🧠 SHAP Global Explainability</h2>
-    <p style='color: #94a3b8; font-size: 1em;'>Understand which features matter most <i>across the entire dataset</i>, not just one prediction.</p>
-</div>
-""",
-    unsafe_allow_html=True,
-)
+section_header("SHAP Global Explainability", "Which features matter across the whole dataset, not just one prediction")
 
 # Check for pre-computed SHAP results
 results_dir = Path(__file__).parent.parent.parent / "results"
@@ -286,7 +275,7 @@ if shap_results_path.exists():
     st.success(f"✅ Loaded pre-computed SHAP results for **{classifier_name}**")
 elif SHAP_AVAILABLE:
     st.info(f"No pre-computed SHAP results for **{classifier_name}**. Click below to generate them (may take ~30s).")
-    if st.button("🧠 Run SHAP Analysis", type="primary", use_container_width=True):
+    if st.button("Run SHAP analysis", type="primary", use_container_width=True):
         with st.spinner("Computing SHAP values... this may take 30-60 seconds"):
             try:
                 shap_data = get_shap_explanation(classifier_name, max_samples=100)
@@ -336,7 +325,7 @@ if shap_data:
     # Per-class drivers
     class_features = shap_data.get("class_features", {})
     if class_features:
-        st.markdown("#### Per-Class Feature Drivers")
+        section_header("Per-Class Feature Drivers")
         ccols = st.columns(3)
         class_colors = {"negative": "#ef4444", "neutral": "#64748b", "positive": "#10b981"}
         for i, (cls_name, cls_feats) in enumerate(class_features.items()):

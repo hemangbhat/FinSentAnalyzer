@@ -14,12 +14,10 @@ from predict import get_available_models  # pyre-ignore
 from utils import get_model_info  # pyre-ignore
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from shared import inject_css, page_header, setup_sidebar  # pyre-ignore
+from shared import active_model, page_header, section_header  # pyre-ignore
 
 # ── Page config ─────────────────────────────────────────────────────────────────
-st.set_page_config(page_title="Model Info", page_icon="📊", layout="wide")
-inject_css()
-selected_model, predictor = setup_sidebar()
+selected_model, predictor = active_model()
 
 if predictor is None:
     st.stop()
@@ -50,7 +48,7 @@ st.markdown(
 )
 
 # Metrics in columns
-st.markdown("### 🏆 Performance Benchmarks")
+section_header("Performance Benchmarks")
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
@@ -97,21 +95,16 @@ with col4:
     )
 
 # Features
-st.markdown("<hr style='border-color: rgba(255, 255, 255, 0.05); margin: 30px 0;'>", unsafe_allow_html=True)
-st.markdown("### 🧬 Key Capabilities")
-st.markdown("<div class='insight-card'>", unsafe_allow_html=True)
-for feature in info.get("features", []):
-    st.markdown(
-        f"<div style='margin-bottom: 10px; display: flex; align-items: start; gap: 10px;'><span style='color: #3b82f6;'>✓</span> <span style='color: #cbd5e1;'>{feature}</span></div>",
-        unsafe_allow_html=True,
-    )
-st.markdown("</div>", unsafe_allow_html=True)
-
-st.markdown("---")
+section_header("Key Capabilities")
+_items = "".join(
+    "<div style='display:flex;align-items:flex-start;gap:10px;padding:6px 0;'>"
+    f"<span style='color:#60a5fa;'>✓</span><span style='color:#cbd5e1;'>{feature}</span></div>"
+    for feature in info.get("features", [])
+)
+st.markdown(f"<div class='insight-card'>{_items}</div>", unsafe_allow_html=True)
 
 # All models comparison table
-st.markdown("<hr style='border-color: rgba(255, 255, 255, 0.05); margin: 30px 0;'>", unsafe_allow_html=True)
-st.markdown("### 🗄️ Model Comparison Matrix")
+section_header("Model Comparison Matrix")
 
 try:
     available_models = get_available_models()
@@ -137,7 +130,7 @@ except Exception as e:
 
 # Dataset info
 st.markdown("<hr style='border-color: rgba(255, 255, 255, 0.05); margin: 30px 0;'>", unsafe_allow_html=True)
-st.markdown("### 📚 Foundational Dataset")
+section_header("Foundational Dataset")
 
 st.markdown(
     """
@@ -155,9 +148,9 @@ st.markdown(
         <div style='flex: 1; min-width: 250px; display: flex; flex-direction: column; justify-content: center; background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px; text-align: center;'>
             <div style='color: #94a3b8; font-size: 0.85em; text-transform: uppercase; margin-bottom: 10px;'>Dataset Training Split</div>
             <div style='display: flex; border-radius: 8px; overflow: hidden; height: 30px; margin-bottom: 10px;'>
-                <div style='flex: 70; background: #3b82f6; display: flex; align-items: center; justify-content: center; font-size: 0.8em; font-weight: 600; color: white;'>70% Train</div>
-                <div style='flex: 15; background: #f59e0b; display: flex; align-items: center; justify-content: center; font-size: 0.8em; font-weight: 600; color: white;'>15% Val</div>
-                <div style='flex: 15; background: #10b981; display: flex; align-items: center; justify-content: center; font-size: 0.8em; font-weight: 600; color: white;'>15% Test</div>
+                <div style='flex: 80; background: #3b82f6; display: flex; align-items: center; justify-content: center; font-size: 0.8em; font-weight: 600; color: white;'>80% Train · 1,807</div>
+                <div style='flex: 10; background: #f59e0b; display: flex; align-items: center; justify-content: center; font-size: 0.8em; font-weight: 600; color: white;'>10% Val</div>
+                <div style='flex: 10; background: #10b981; display: flex; align-items: center; justify-content: center; font-size: 0.8em; font-weight: 600; color: white;'>10% Test</div>
             </div>
         </div>
     </div>

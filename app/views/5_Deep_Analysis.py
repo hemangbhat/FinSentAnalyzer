@@ -19,12 +19,10 @@ except ImportError:
     ADVANCED_NLP_AVAILABLE = False
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from shared import get_sentiment_color, inject_css, page_header, setup_sidebar  # pyre-ignore
+from shared import active_model, get_sentiment_color, page_header, section_header  # pyre-ignore
 
 # ── Page config ─────────────────────────────────────────────────────────────────
-st.set_page_config(page_title="Deep Analysis", page_icon="🧠", layout="wide")
-inject_css()
-selected_model, predictor = setup_sidebar()
+selected_model, predictor = active_model()
 
 if predictor is None:
     st.stop()
@@ -72,7 +70,7 @@ if st.button("🔬 Run Deep Analysis", type="primary", use_container_width=True)
 
         # ── Summary Card ────────────────────────────────────────────────────
         st.markdown("<hr style='margin: 30px 0;'>", unsafe_allow_html=True)
-        st.markdown("### 📋 Executive Summary")
+        section_header("Executive Summary")
 
         sentiment = cot_result.final_sentiment
         confidence = cot_result.final_confidence
@@ -103,7 +101,7 @@ if st.button("🔬 Run Deep Analysis", type="primary", use_container_width=True)
         )
 
         # ── Key metrics ─────────────────────────────────────────────────────
-        st.markdown("### 📈 Linguistic Metrics")
+        section_header("Linguistic Metrics")
         col1, col2, col3 = st.columns(3)
 
         with col1:
@@ -147,7 +145,7 @@ if st.button("🔬 Run Deep Analysis", type="primary", use_container_width=True)
 
         # ── Detected words ──────────────────────────────────────────────────
         st.markdown("<hr style='border-color: rgba(255, 255, 255, 0.05); margin: 30px 0;'>", unsafe_allow_html=True)
-        st.markdown("### 🔤 Detected Sentiment Tokens")
+        section_header("Detected Sentiment Tokens")
         word_col1, word_col2, word_col3 = st.columns(3)
 
         with word_col1:
@@ -225,7 +223,7 @@ if st.button("🔬 Run Deep Analysis", type="primary", use_container_width=True)
         st.markdown("<hr style='border-color: rgba(255, 255, 255, 0.05); margin: 30px 0;'>", unsafe_allow_html=True)
 
         # ── Entities ────────────────────────────────────────────────────────
-        st.markdown("### 🏢 Named Entities & Variables")
+        section_header("Named Entities & Variables")
         entity_col1, entity_col2, entity_col3 = st.columns(3)
 
         with entity_col1:
@@ -284,7 +282,7 @@ if st.button("🔬 Run Deep Analysis", type="primary", use_container_width=True)
 
         # ── Chain of Thought Reasoning ──────────────────────────────────────
         st.markdown("<hr style='border-color: rgba(255, 255, 255, 0.05); margin: 30px 0;'>", unsafe_allow_html=True)
-        st.markdown("### 🔗 Chain-of-Thought AI Processor")
+        section_header("Rule-based Reasoning Steps")
         st.markdown(
             "<p style='color: #94a3b8;'>Step-by-step reasoning algorithm breakdown:</p>", unsafe_allow_html=True
         )
@@ -337,7 +335,7 @@ if st.button("🔬 Run Deep Analysis", type="primary", use_container_width=True)
         colA, colB = st.columns([1, 1])
         with colA:
             # Key Factors
-            st.markdown("### 🔑 Driving Factors")
+            section_header("Driving Factors")
             st.markdown("<div class='insight-card'>", unsafe_allow_html=True)
             if cot_result.key_factors:
                 for factor in cot_result.key_factors:
@@ -354,7 +352,7 @@ if st.button("🔬 Run Deep Analysis", type="primary", use_container_width=True)
 
         with colB:
             # Final Explanation
-            st.markdown("### 💬 Final Executive Synthesis")
+            section_header("Final Executive Synthesis")
             st.markdown(
                 f"""
             <div class='insight-card' style='border-top: 4px solid #3b82f6; background: rgba(30, 41, 59, 0.4); height: 100%;'>

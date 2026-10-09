@@ -15,12 +15,10 @@ from explain import get_feature_importance_summary  # pyre-ignore
 from utils import LABEL_MAP_INV  # pyre-ignore
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from shared import inject_css, page_header, setup_sidebar  # pyre-ignore
+from shared import active_model, page_header, section_header  # pyre-ignore
 
 # ── Page config ─────────────────────────────────────────────────────────────────
-st.set_page_config(page_title="Word Insights", page_icon="💡", layout="wide")
-inject_css()
-selected_model, predictor = setup_sidebar()
+selected_model, predictor = active_model()
 
 if predictor is None:
     st.stop()
@@ -91,7 +89,7 @@ with st.spinner("Loading word insights..."):
 
         # Visualization
         st.markdown("<hr style='border-color: rgba(255, 255, 255, 0.05); margin: 30px 0;'>", unsafe_allow_html=True)
-        st.markdown("### 📊 Cross-Sentiment Comparison")
+        section_header("Cross-Sentiment Comparison")
 
         chart_data = []
         for sentiment in classes:

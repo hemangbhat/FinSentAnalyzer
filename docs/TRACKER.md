@@ -38,7 +38,7 @@
 - [x] Add rate limiting if exposed beyond a private demo
 
 ## Backlog
-- [ ] Fine-tune FinBERT instead of only using the pre-trained checkpoint
+- [x] Fine-tune FinBERT instead of only using the pre-trained checkpoint (0.87 acc / 0.84 macro-F1 on held-out news)
 - [x] Add a small API layer for programmatic inference
 - [x] Add model registry / versioning
 - [ ] Add persistent storage for user sessions and audit logs
@@ -52,6 +52,13 @@
 - [x] Retraining orchestrator (`scripts/retrain.py`) + checklist (`docs/RETRAINING.md`)
 - [x] Scheduled retraining CI (`.github/workflows/retrain.yml`)
 - [x] Repo cleanup: removed Code Runner scratch artifact, hardened `.gitignore`
+
+## Epic 7 — UX and reliability
+- [x] `st.navigation` router: grouped sidebar, model selection persists across pages
+- [x] Home page built around the evaluation story, numbers read from `results/`
+- [x] Pinned CI dependencies; fixed scheduled retraining (missing matplotlib)
+- [ ] Re-run FinBERT fine-tuning with a separate dev split for early stopping
+- [ ] Add stopword handling / re-tune TF-IDF (SHAP shows stopwords among top SVM features)
 
 > Note: public deployment URL and demo GIF are owner-action items — the app is
 > deploy-ready (Dockerfile + `requirements-deploy.txt`), but the live URL and

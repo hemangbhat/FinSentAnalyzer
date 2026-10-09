@@ -18,7 +18,7 @@ import streamlit as st  # pyre-ignore
 from plotly.subplots import make_subplots  # pyre-ignore
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from shared import inject_css, page_header, setup_sidebar  # pyre-ignore
+from shared import active_model, page_header, section_header  # pyre-ignore
 
 from stock_extension import (  # pyre-ignore
     get_stock_project_root,
@@ -26,9 +26,7 @@ from stock_extension import (  # pyre-ignore
     run_stock_prediction_extension,
 )
 
-st.set_page_config(page_title="Stock Prediction Extension", page_icon="📉", layout="wide")
-inject_css()
-selected_model, predictor = setup_sidebar()
+selected_model, predictor = active_model()
 
 if predictor is None:
     st.stop()
@@ -260,7 +258,7 @@ if st.button("Run Full Extension Pipeline", type="primary", use_container_width=
                 f"Note: {zero_rows} of {total_rows} days have 0 sentiment because no headline matched those dates."
             )
 
-        st.markdown("### Price and Sentiment Timeline")
+        section_header("Price and Sentiment Timeline")
 
         trend_data = result.supervised.copy()
         trend_data = trend_data.sort_values("date")
@@ -318,7 +316,7 @@ if st.button("Run Full Extension Pipeline", type="primary", use_container_width=
 
         st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
-        st.markdown("### Latest Headlines Used")
+        section_header("Latest Headlines Used")
         if result.headlines.empty:
             st.info("No headlines were available for this run. Neutral sentiment fallback was used.")
         else:
