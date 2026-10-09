@@ -178,7 +178,7 @@ else:
                     "Predicted ▶ neutral",
                     "Predicted ▲ positive",
                 ],
-                color=["#A3322B", "#5E6E6A", "#1D7451", "#A3322B", "#5E6E6A", "#1D7451"],
+                color=["#A3322B", "#4F6470", "#1D7451", "#A3322B", "#4F6470", "#1D7451"],
             ),
             link=dict(
                 source=[],
@@ -271,8 +271,8 @@ else:
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
         font={"color": "#2E3F3C", "family": "Public Sans, system-ui, sans-serif"},
-        xaxis={"showgrid": True, "gridcolor": "#D5DEDC"},
-        yaxis={"showgrid": True, "gridcolor": "#D5DEDC"},
+        xaxis={"showgrid": True, "gridcolor": "#E6ECEA"},
+        yaxis={"showgrid": True, "gridcolor": "#E6ECEA"},
         legend={"orientation": "h", "yanchor": "bottom", "y": 1.02, "xanchor": "right", "x": 1},
     )
     st.plotly_chart(fig2, use_container_width=True, theme=None, config={"displayModeBar": False})

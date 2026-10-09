@@ -1,0 +1,688 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-09T20:34:47.593214+00:00",
+  "title": "Design System: FinSight",
+  "extensions": {
+    "colorMeta": {
+      "report-white": {
+        "role": "neutral",
+        "displayName": "Report White",
+        "canonical": "#FFFFFF",
+        "tonalRamp": [
+          "#262626",
+          "#424242",
+          "#5E5E5E",
+          "#7A7A7A",
+          "#999999",
+          "#B8B8B8",
+          "#D6D6D6",
+          "#F2F2F2"
+        ]
+      },
+      "panel-mist": {
+        "role": "neutral",
+        "displayName": "Panel Mist",
+        "canonical": "#F2F5F4",
+        "tonalRamp": [
+          "#212B28",
+          "#3A4B45",
+          "#526B62",
+          "#6A8A80",
+          "#8CA69D",
+          "#AEC1BB",
+          "#D1DCD8",
+          "#F1F4F3"
+        ]
+      },
+      "panel-soft": {
+        "role": "neutral",
+        "displayName": "Panel Soft",
+        "canonical": "#F7F9F8",
+        "tonalRamp": [
+          "#212C26",
+          "#394C42",
+          "#516C5E",
+          "#698C7A",
+          "#8AA899",
+          "#ADC2B8",
+          "#D0DCD6",
+          "#F0F4F2"
+        ]
+      },
+      "hairline": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "#D5DEDC",
+        "tonalRamp": [
+          "#222B29",
+          "#3A4A47",
+          "#536A65",
+          "#6C8983",
+          "#8DA5A0",
+          "#AFC0BC",
+          "#D1DBD9",
+          "#F1F4F3"
+        ]
+      },
+      "hairline-strong": {
+        "role": "neutral",
+        "displayName": "Hairline Strong",
+        "canonical": "#B9C6C3",
+        "tonalRamp": [
+          "#222A28",
+          "#3C4946",
+          "#556864",
+          "#6E8781",
+          "#8FA39F",
+          "#B0BFBC",
+          "#D2DAD8",
+          "#F1F4F3"
+        ]
+      },
+      "chart-grid": {
+        "role": "neutral",
+        "displayName": "Chart Grid",
+        "canonical": "#E6ECEA",
+        "tonalRamp": [
+          "#212B28",
+          "#394B45",
+          "#516B63",
+          "#6A8B80",
+          "#8BA79E",
+          "#AEC1BB",
+          "#D1DCD8",
+          "#F1F4F3"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#12211F",
+        "tonalRamp": [
+          "#1B322E",
+          "#2F5651",
+          "#437A73",
+          "#569E95",
+          "#7BB7AF",
+          "#A3CDC7",
+          "#CAE2DF",
+          "#EEF6F5"
+        ]
+      },
+      "ink-body": {
+        "role": "neutral",
+        "displayName": "Ink Body",
+        "canonical": "#2E3F3C",
+        "tonalRamp": [
+          "#202C2A",
+          "#384D49",
+          "#506D68",
+          "#678D87",
+          "#89A9A3",
+          "#ACC3BF",
+          "#D0DDDA",
+          "#F0F4F4"
+        ]
+      },
+      "ink-muted": {
+        "role": "neutral",
+        "displayName": "Ink Muted",
+        "canonical": "#4B5D5A",
+        "tonalRamp": [
+          "#222A29",
+          "#3B4947",
+          "#546865",
+          "#6D8883",
+          "#8EA4A0",
+          "#B0BFBD",
+          "#D2DBD9",
+          "#F1F4F3"
+        ]
+      },
+      "ink-faint": {
+        "role": "neutral",
+        "displayName": "Ink Faint",
+        "canonical": "#5E6E6A",
+        "tonalRamp": [
+          "#232928",
+          "#3D4845",
+          "#576662",
+          "#71847F",
+          "#91A19D",
+          "#B2BDBA",
+          "#D3D9D8",
+          "#F1F3F3"
+        ]
+      },
+      "report-teal": {
+        "role": "primary",
+        "displayName": "Report Teal",
+        "canonical": "#0E6E6A",
+        "tonalRamp": [
+          "#052B29",
+          "#08403E",
+          "#0B5754",
+          "#0E6E6A",
+          "#2F857B",
+          "#4F9E93",
+          "#A9D0C9",
+          "#D3E6E2"
+        ],
+        "note": "Ramp from .streamlit/config.toml chartSequentialColors."
+      },
+      "teal-tint": {
+        "role": "primary",
+        "displayName": "Teal Tint",
+        "canonical": "#E3F0EE",
+        "tonalRamp": [
+          "#1B322E",
+          "#2E5650",
+          "#427B72",
+          "#559F94",
+          "#7AB8AE",
+          "#A2CDC7",
+          "#CAE3DF",
+          "#EEF6F5"
+        ]
+      },
+      "teal-mist": {
+        "role": "primary",
+        "displayName": "Teal Mist",
+        "canonical": "#8FB8B2",
+        "tonalRamp": [
+          "#1E2F2C",
+          "#33514D",
+          "#49736D",
+          "#5F968E",
+          "#82B0A9",
+          "#A8C8C3",
+          "#CDDFDD",
+          "#EFF5F4"
+        ]
+      },
+      "shell-teal": {
+        "role": "secondary",
+        "displayName": "Shell Teal",
+        "canonical": "#0B3A3C",
+        "tonalRamp": [
+          "#0C3E41",
+          "#156C70",
+          "#1D9A9F",
+          "#26C8CF",
+          "#53DADF",
+          "#86E5E9",
+          "#BAF0F2",
+          "#E9FAFB"
+        ]
+      },
+      "shell-raised": {
+        "role": "secondary",
+        "displayName": "Shell Raised",
+        "canonical": "#124749",
+        "tonalRamp": [
+          "#0F3C3D",
+          "#1A676A",
+          "#259397",
+          "#30BFC4",
+          "#5BD2D7",
+          "#8CE0E3",
+          "#BEEDEF",
+          "#EBF9FA"
+        ]
+      },
+      "shell-rule": {
+        "role": "secondary",
+        "displayName": "Shell Rule",
+        "canonical": "#24595A",
+        "tonalRamp": [
+          "#163637",
+          "#265E5F",
+          "#368587",
+          "#46ADAF",
+          "#6DC3C5",
+          "#99D5D6",
+          "#C5E7E8",
+          "#EDF8F8"
+        ]
+      },
+      "shell-text": {
+        "role": "secondary",
+        "displayName": "Shell Text",
+        "canonical": "#E3EEEC",
+        "tonalRamp": [
+          "#1D302C",
+          "#32534D",
+          "#47756D",
+          "#5C988D",
+          "#80B2A9",
+          "#A6C9C3",
+          "#CCE0DD",
+          "#EFF5F4"
+        ]
+      },
+      "shell-label": {
+        "role": "secondary",
+        "displayName": "Shell Label",
+        "canonical": "#A9C4C0",
+        "tonalRamp": [
+          "#1F2D2B",
+          "#364F4B",
+          "#4D706B",
+          "#64918A",
+          "#86ACA6",
+          "#AAC5C1",
+          "#CFDEDC",
+          "#F0F5F4"
+        ]
+      },
+      "shell-accent": {
+        "role": "secondary",
+        "displayName": "Shell Accent",
+        "canonical": "#8FD6C9",
+        "tonalRamp": [
+          "#143831",
+          "#246156",
+          "#338A7A",
+          "#42B39E",
+          "#6AC8B7",
+          "#96D9CD",
+          "#C3E9E2",
+          "#ECF8F6"
+        ]
+      },
+      "slate-accent": {
+        "role": "secondary",
+        "displayName": "Slate Accent",
+        "canonical": "#45627A",
+        "tonalRamp": [
+          "#1C2731",
+          "#304455",
+          "#446179",
+          "#587E9C",
+          "#7D9CB5",
+          "#A4B9CB",
+          "#CBD7E2",
+          "#EFF3F6"
+        ]
+      },
+      "ochre": {
+        "role": "tertiary",
+        "displayName": "Ochre",
+        "canonical": "#9A5B16",
+        "tonalRamp": [
+          "#43280A",
+          "#744511",
+          "#A56218",
+          "#D67F1F",
+          "#E59C4D",
+          "#EDBA82",
+          "#F5D8B8",
+          "#FCF3E9"
+        ]
+      },
+      "ochre-tint": {
+        "role": "tertiary",
+        "displayName": "Ochre Tint",
+        "canonical": "#FBF3E8",
+        "tonalRamp": [
+          "#412A0B",
+          "#714A14",
+          "#A1691C",
+          "#D18824",
+          "#E1A451",
+          "#EAC085",
+          "#F3DBB9",
+          "#FBF4E9"
+        ]
+      },
+      "ochre-rule": {
+        "role": "tertiary",
+        "displayName": "Ochre Rule",
+        "canonical": "#E8CFA8",
+        "tonalRamp": [
+          "#3D2B10",
+          "#694B1C",
+          "#956A27",
+          "#C28A33",
+          "#D4A65E",
+          "#E1C18E",
+          "#EEDBBE",
+          "#FAF4EB"
+        ]
+      },
+      "positive-green": {
+        "role": "sentiment",
+        "displayName": "Positive Green",
+        "canonical": "#1D7451",
+        "tonalRamp": [
+          "#0F3D2B",
+          "#1B6A4A",
+          "#269769",
+          "#31C489",
+          "#5CD6A5",
+          "#8DE2C0",
+          "#BEEFDB",
+          "#EBFAF4"
+        ]
+      },
+      "positive-tint": {
+        "role": "sentiment",
+        "displayName": "Positive Tint",
+        "canonical": "#E2F0E9",
+        "tonalRamp": [
+          "#1A3226",
+          "#2D5742",
+          "#407C5E",
+          "#53A17A",
+          "#79B999",
+          "#A1CEB8",
+          "#C9E3D6",
+          "#EEF6F2"
+        ]
+      },
+      "positive-rule": {
+        "role": "sentiment",
+        "displayName": "Positive Rule",
+        "canonical": "#BFDCCD",
+        "tonalRamp": [
+          "#1B3126",
+          "#2F5642",
+          "#437A5D",
+          "#579E79",
+          "#7BB798",
+          "#A3CDB7",
+          "#CAE2D6",
+          "#EFF6F2"
+        ]
+      },
+      "negative-oxblood": {
+        "role": "sentiment",
+        "displayName": "Negative Oxblood",
+        "canonical": "#A3322B",
+        "tonalRamp": [
+          "#3D1310",
+          "#69201C",
+          "#952E27",
+          "#C23B33",
+          "#D4655E",
+          "#E1938E",
+          "#EEC1BE",
+          "#FAECEB"
+        ]
+      },
+      "negative-tint": {
+        "role": "sentiment",
+        "displayName": "Negative Tint",
+        "canonical": "#F6E4E2",
+        "tonalRamp": [
+          "#3A1612",
+          "#65261F",
+          "#90372D",
+          "#BB473A",
+          "#CF6E63",
+          "#DD9A92",
+          "#ECC5C1",
+          "#F9EDEC"
+        ]
+      },
+      "negative-rule": {
+        "role": "sentiment",
+        "displayName": "Negative Rule",
+        "canonical": "#E6C3BF",
+        "tonalRamp": [
+          "#371915",
+          "#5F2B25",
+          "#883D35",
+          "#B05045",
+          "#C6756C",
+          "#D79F98",
+          "#E8C8C4",
+          "#F8EEED"
+        ]
+      },
+      "neutral-slate": {
+        "role": "sentiment",
+        "displayName": "Neutral Slate",
+        "canonical": "#4F6470",
+        "tonalRamp": [
+          "#20282D",
+          "#37454E",
+          "#4E636F",
+          "#658090",
+          "#879EAB",
+          "#ABBBC4",
+          "#CFD8DD",
+          "#F0F3F4"
+        ]
+      },
+      "neutral-tint": {
+        "role": "sentiment",
+        "displayName": "Neutral Tint",
+        "canonical": "#E6EBEE",
+        "tonalRamp": [
+          "#1F282E",
+          "#36454F",
+          "#4C6370",
+          "#638092",
+          "#869EAC",
+          "#AABBC5",
+          "#CED8DE",
+          "#F0F3F5"
+        ]
+      },
+      "neutral-rule": {
+        "role": "sentiment",
+        "displayName": "Neutral Rule",
+        "canonical": "#CBD5DB",
+        "tonalRamp": [
+          "#1F282D",
+          "#36454E",
+          "#4D6370",
+          "#648091",
+          "#869EAC",
+          "#ABBBC5",
+          "#CFD8DE",
+          "#F0F3F5"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Verdict",
+        "purpose": "The verdict word only."
+      },
+      "headline": {
+        "displayName": "Masthead",
+        "purpose": "Page masthead title."
+      },
+      "title": {
+        "displayName": "Exhibit title",
+        "purpose": "Section and exhibit headings."
+      },
+      "figure": {
+        "displayName": "Key figure",
+        "purpose": "Key-figure values, tabular."
+      },
+      "standfirst": {
+        "displayName": "Standfirst",
+        "purpose": "One-line summary under the masthead, max 68ch."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Running text."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Figure, verdict and table labels; sentence case."
+      },
+      "source": {
+        "displayName": "Source line",
+        "purpose": "Source lines and metadata."
+      }
+    },
+    "shadows": [
+      {
+        "name": "primary-hover-lift",
+        "value": "0 2px 8px rgba(14,110,106,0.28)",
+        "purpose": "Primary button hover only; nothing is shadowed at rest."
+      },
+      {
+        "name": "nav-active-tick",
+        "value": "inset 2px 0 0 #8FD6C9",
+        "purpose": "Current page marker on the shell."
+      }
+    ],
+    "motion": [
+      {
+        "name": "control-transition",
+        "value": "0.15s ease",
+        "purpose": "Button background, border and shadow changes."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "phone",
+        "value": "760px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one primary action on a page, sentence case.",
+      "html": "<button class=\"ds-btn-primary\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14\"/><path d=\"m13 6 6 6-6 6\"/></svg>Analyze a sentence</button>",
+      "css": ".ds-btn-primary{font-family:'Public Sans',system-ui,sans-serif;display:inline-flex;align-items:center;gap:8px;background:#0E6E6A;color:#FFFFFF;border:1px solid #0E6E6A;border-radius:6px;padding:8px 16px;font-size:1rem;font-weight:600;cursor:pointer;transition:background-color .15s ease,border-color .15s ease,box-shadow .15s ease}.ds-btn-primary:hover{background:#0B5754;box-shadow:0 2px 8px rgba(14,110,106,0.28)}.ds-btn-primary:focus-visible{outline:2px solid #0E6E6A;outline-offset:2px}"
+    },
+    {
+      "name": "Page Link",
+      "kind": "button",
+      "refersTo": "page-link",
+      "description": "Quiet secondary action and contents-list entry.",
+      "html": "<a class=\"ds-page-link\" href=\"#\">Read the evaluation</a>",
+      "css": ".ds-page-link{font-family:'Public Sans',system-ui,sans-serif;display:inline-block;color:#0E6E6A;font-weight:600;text-decoration:none;border-radius:5px;padding:0.3rem 0.4rem}.ds-page-link:hover{background:#E3F0EE}.ds-page-link:focus-visible{outline:2px solid #0E6E6A;outline-offset:2px}"
+    },
+    {
+      "name": "Sentiment Tags",
+      "kind": "chip",
+      "refersTo": "sentiment-tag-positive",
+      "description": "Colour + glyph + word; never colour alone.",
+      "html": "<span class=\"ds-tag ds-pos\"><span aria-hidden=\"true\">▲</span> Positive</span> <span class=\"ds-tag ds-neu\"><span aria-hidden=\"true\">▶</span> Neutral</span> <span class=\"ds-tag ds-neg\"><span aria-hidden=\"true\">▼</span> Negative</span> <span class=\"ds-tag ds-muted\">guidance</span>",
+      "css": ".ds-tag{font-family:'Public Sans',system-ui,sans-serif;display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:4px;font-size:0.84em;font-weight:600;margin:2px;border:1px solid transparent;white-space:nowrap}.ds-pos{background:#E2F0E9;color:#1D7451;border-color:#BFDCCD}.ds-neg{background:#F6E4E2;color:#A3322B;border-color:#E6C3BF}.ds-neu{background:#E6EBEE;color:#4F6470;border-color:#CBD5DB}.ds-muted{background:#F2F5F4;color:#2E3F3C;border-color:#D5DEDC}"
+    },
+    {
+      "name": "Sidebar Shell",
+      "kind": "nav",
+      "refersTo": "sidebar-shell",
+      "description": "Deep-teal rail: grouped navigation, model engine, status.",
+      "html": "<nav class=\"ds-shell\"><div class=\"ds-shell-group\">Analyze</div><a class=\"ds-shell-link ds-active\" href=\"#\">Single Analysis</a><a class=\"ds-shell-link\" href=\"#\">Batch Processing</a><div class=\"ds-shell-status\"><div><span class=\"ds-dot\" style=\"background:#6FD6A8\"></span>Engine ready</div><div><span class=\"ds-dot\" style=\"background:#8FD6C9\"></span>TF-IDF · classical ML</div></div></nav>",
+      "css": ".ds-shell{font-family:'Public Sans',system-ui,sans-serif;background:#0B3A3C;color:#E3EEEC;padding:16px;width:220px}.ds-shell-group{color:#A9C4C0;font-size:0.7rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;margin:12px 0 6px}.ds-shell-link{display:block;color:#E3EEEC;text-decoration:none;border-radius:5px;padding:5px 8px;font-size:0.9rem}.ds-shell-link:hover{background:rgba(143,214,201,0.08)}.ds-shell-link:focus-visible{outline:2px solid #8FD6C9;outline-offset:2px}.ds-active{background:rgba(143,214,201,0.14);box-shadow:inset 2px 0 0 #8FD6C9;color:#FFFFFF;font-weight:600}.ds-shell-status{border-top:1px solid #24595A;border-bottom:1px solid #24595A;padding:10px 2px;margin-top:12px;font-size:0.84rem}.ds-shell-status div{display:flex;align-items:center;gap:8px}.ds-shell-status div+div{margin-top:5px}.ds-dot{width:7px;height:7px;border-radius:50%}"
+    },
+    {
+      "name": "Masthead and Exhibit",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Page masthead, then a numbered exhibit with its source line.",
+      "html": "<div class=\"ds-mast\"><h1>Financial sentiment, measured honestly</h1><p class=\"ds-stand\">Every result with its source and its uncertainty band.</p><div class=\"ds-meta\"><b>9</b> models · <b>116</b> automated tests</div></div><div class=\"ds-sec\"><h3><span class=\"ds-ex\">Exhibit 1</span>Macro-F1 by evaluation set</h3><p class=\"ds-cap\">A 0.90 test score did not survive real news.</p></div><div class=\"ds-src\">Source: results/bootstrap_ci.json</div>",
+      "css": ".ds-mast,.ds-sec,.ds-src{font-family:'Public Sans',system-ui,sans-serif;}.ds-mast{border-top:3px solid #0E6E6A;padding-top:18px;margin-bottom:18px}.ds-mast h1{font-size:2.05rem;font-weight:700;line-height:1.15;letter-spacing:-0.015em;color:#12211F;margin:0 0 6px}.ds-stand{color:#4B5D5A;font-size:1.04rem;line-height:1.55;max-width:68ch;margin:0}.ds-meta{color:#5E6E6A;font-size:0.82rem;margin-top:12px}.ds-meta b{color:#2E3F3C;font-weight:600}.ds-sec{border-top:1px solid #D5DEDC;padding-top:14px;margin:34px 0 12px}.ds-sec h3{margin:0;font-size:1.14rem;font-weight:650;line-height:1.3;color:#12211F}.ds-ex{color:#0E6E6A;font-weight:700;margin-right:8px}.ds-cap{color:#4B5D5A;font-size:0.9rem;margin:4px 0 0;max-width:75ch}.ds-src{color:#5E6E6A;font-size:0.78rem}"
+    },
+    {
+      "name": "Key-figure Row",
+      "kind": "custom",
+      "refersTo": "key-figure",
+      "description": "Key figures as one ruled table row, not cards.",
+      "html": "<div class=\"ds-figs\"><div class=\"ds-fig\"><div class=\"ds-l\">Fine-tuned FinBERT, real news</div><div class=\"ds-v\">0.84</div><div class=\"ds-s\">macro-F1, 95% CI 0.82–0.86</div></div><div class=\"ds-fig\"><div class=\"ds-l\">TF-IDF + SVM, real news</div><div class=\"ds-v\">0.46</div><div class=\"ds-s\">macro-F1</div></div><div class=\"ds-fig\"><div class=\"ds-l\">Held-out headlines</div><div class=\"ds-v\">2,388</div><div class=\"ds-s\">human-labelled</div></div></div>",
+      "css": ".ds-figs{font-family:'Public Sans',system-ui,sans-serif;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));border-top:1px solid #12211F;border-bottom:1px solid #D5DEDC}.ds-fig{padding:12px 16px;border-left:1px solid #D5DEDC}.ds-fig:first-child{border-left:none;padding-left:0}.ds-l{color:#4B5D5A;font-size:0.8rem;font-weight:600}.ds-v{color:#12211F;font-size:1.65rem;font-weight:700;line-height:1.25;margin-top:2px;font-variant-numeric:tabular-nums lining-nums}.ds-s{color:#5E6E6A;font-size:0.8rem;margin-top:2px;line-height:1.4}"
+    },
+    {
+      "name": "Verdict with Probability Band",
+      "kind": "custom",
+      "refersTo": "probability-band",
+      "description": "Signature: verdict word plus the spread of the model's belief.",
+      "html": "<div class=\"ds-verdict\"><div class=\"ds-vl\">Predicted sentiment</div><div class=\"ds-word\"><span aria-hidden=\"true\">▲</span> Positive</div><div class=\"ds-conf\">Model confidence <b>81.0%</b></div><div class=\"ds-band\" role=\"img\" aria-label=\"Class probabilities\"><div style=\"width:6%;background:#F6E4E2\"></div><div style=\"width:13%;background:#E6EBEE\"></div><div style=\"width:81%;background:#1D7451\"></div></div><div class=\"ds-leg\"><div><div class=\"k\">▼ Negative</div><div class=\"v\">6.0%</div></div><div><div class=\"k\">▶ Neutral</div><div class=\"v\">13.0%</div></div><div><div class=\"k\">▲ Positive</div><div class=\"v\" style=\"color:#1D7451;font-weight:700\">81.0%</div></div></div></div>",
+      "css": ".ds-verdict{font-family:'Public Sans',system-ui,sans-serif;border-top:1px solid #12211F;padding-top:14px;max-width:520px}.ds-vl{color:#4B5D5A;font-size:0.82rem;font-weight:600}.ds-word{color:#1D7451;font-size:2.6rem;font-weight:700;line-height:1.1;letter-spacing:-0.02em;margin:4px 0 2px}.ds-conf{color:#4B5D5A;font-size:0.95rem}.ds-conf b{color:#12211F;font-variant-numeric:tabular-nums}.ds-band{display:flex;height:26px;border-radius:3px;overflow:hidden;margin-top:16px;gap:2px}.ds-band>div{height:100%;min-width:2px}.ds-leg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}.ds-leg .k{font-size:0.82rem;color:#4B5D5A}.ds-leg .v{font-size:1.02rem;font-weight:650;color:#12211F;font-variant-numeric:tabular-nums}"
+    },
+    {
+      "name": "Interval Row",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Signature: dot, 95% band and end caps (HTML approximation of the Plotly interval chart).",
+      "html": "<div class=\"ds-int\"><div class=\"ds-il\">FinBERT fine-tuned · real news (n=2,388)</div><div class=\"ds-track\"><div class=\"ds-iband\" style=\"left:82.3%;width:3.5%\"></div><div class=\"ds-dotm\" style=\"left:84.1%\"></div><span class=\"ds-iv\" style=\"left:87%\">0.84</span></div></div>",
+      "css": ".ds-int{font-family:'Public Sans',system-ui,sans-serif;max-width:560px;padding:6px 0}.ds-il{font-size:12px;color:#2E3F3C;margin-bottom:6px}.ds-track{position:relative;height:16px;border-bottom:1px solid #E6ECEA}.ds-iband{position:absolute;top:4px;height:9px;background:rgba(14,110,106,0.25);border-left:2px solid #0E6E6A;border-right:2px solid #0E6E6A}.ds-dotm{position:absolute;top:3px;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:#0E6E6A;box-shadow:0 0 0 1.5px #FFFFFF}.ds-iv{position:absolute;top:0;font-size:13px;font-weight:700;color:#12211F}"
+    },
+    {
+      "name": "Term Table",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Vocabulary as a ruled table with class-coloured weight bars.",
+      "html": "<table class=\"ds-terms\"><thead><tr><th class=\"t\">Term</th><th>Weight</th><th></th><th class=\"c\">Pushes toward</th></tr></thead><tbody><tr><td class=\"t\">rose</td><td class=\"b\"><div style=\"height:6px;width:100%;background:#1D7451;border-radius:2px\"></div></td><td class=\"n\">1.842</td><td class=\"c\"><span style=\"color:#1D7451;font-weight:600\">▲ Positive</span></td></tr><tr><td class=\"t\">loss</td><td class=\"b\"><div style=\"height:6px;width:72%;background:#A3322B;border-radius:2px\"></div></td><td class=\"n\">1.327</td><td class=\"c\"><span style=\"color:#A3322B;font-weight:600\">▼ Negative</span></td></tr></tbody></table>",
+      "css": ".ds-terms{font-family:'Public Sans',system-ui,sans-serif;width:100%;border-collapse:collapse;font-size:0.92rem}.ds-terms th,.ds-terms td{border-bottom:1px solid #D5DEDC;padding:7px 8px}.ds-terms thead th{color:#4B5D5A;font-size:0.78rem;font-weight:600;text-align:left;border-bottom:1px solid #12211F}.ds-terms .t{font-weight:600;color:#12211F;padding-left:0}.ds-terms .b{width:40%}.ds-terms .n{text-align:right;color:#2E3F3C;font-variant-numeric:tabular-nums}.ds-terms .c{text-align:right;padding-right:0}"
+    },
+    {
+      "name": "Warning Banner",
+      "kind": "card",
+      "refersTo": "banner-warning",
+      "description": "Status banner with an authored SVG icon.",
+      "html": "<div class=\"ds-banner\" role=\"status\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 4 21 19.5H3L12 4z\"/><path d=\"M12 10v4\"/><path d=\"M12 17h.01\"/></svg><div>Experimental: the forecast is chance-level.</div></div>",
+      "css": ".ds-banner{font-family:'Public Sans',system-ui,sans-serif;display:flex;gap:10px;align-items:flex-start;border-radius:6px;padding:12px 16px;border:1px solid #E8CFA8;background:#FBF3E8;color:#2E3F3C;font-size:0.93rem;line-height:1.55}.ds-banner svg{color:#9A5B16;flex:none;margin-top:2px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Inflation Report",
+    "overview": "FinSight reads as a central bank's quarterly report on its own models. The page is a white report ground framed by a deep-teal shell; results are set as numbered exhibits, each followed by a source line, and every estimate that has a spread is drawn with its uncertainty band. Structure comes from hairline rules, not from boxes or shadows: a thick teal rule opens a page, an ink rule opens a table of figures, a pale rule opens each section.\n\nDensity is that of a publication, not a dashboard: one workhorse sans with tabular figures, a reading measure held under 75ch for standfirsts and captions, and colour reserved for meaning (teal for the house, the three sentiment hues for verdicts, ochre for the one thing that needs attention). The world refuses the dark, glowing KPI-card dashboard: no gradient fills, no card shadows, no glow.",
+    "keyCharacteristics": [
+      "White report ground, cool mist panels, deep-teal sidebar shell.",
+      "Hairline rules carry all structure; shadows are absent at rest.",
+      "Numbered exhibits with a \"Source:\" line beneath.",
+      "Uncertainty drawn as bands: dot-and-interval charts, segmented probability bands.",
+      "Sentiment always triple-coded: colour, glyph (▲ ▶ ▼) and word.",
+      "One sans (Public Sans, self-hosted 400/500/600/700), tabular lining figures wherever numbers appear.",
+      "Sentence case for every heading, label and action in the report body."
+    ],
+    "rules": [
+      {
+        "name": "The Meaning-Only Colour Rule",
+        "body": "Outside the shell and the house teal, colour encodes a class or a state. A key figure takes a sentiment colour only when its value is that sentiment; otherwise it is ink.",
+        "section": "colors"
+      },
+      {
+        "name": "The Triple-Code Rule",
+        "body": "Sentiment is never colour alone: positive is green ▲, neutral is slate ▶, negative is oxblood ▼, and the word is always written beside the glyph.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tabular Figures Rule",
+        "body": "Every number on screen (figures, metrics, dataframes, tables, band legends) uses `tabular-nums lining-nums`.",
+        "section": "typography"
+      },
+      {
+        "name": "The Sentence Case Rule",
+        "body": "Headings, labels, buttons and table heads in the report body are sentence case. The only uppercase, tracked text in the system is the sidebar's navigation group labels (0.7-0.72rem, 700, 0.12em), which belong to the shell, not the report.",
+        "section": "typography"
+      },
+      {
+        "name": "The Hairline Rule",
+        "body": "Structure is drawn with 1px rules (3px for the masthead). If a container needs separating, give it a rule or a mist fill, never a shadow.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** open every page with the masthead and number its results as exhibits, each followed by a \"Source:\" line naming the results file.",
+      "**Do** draw any estimate with a spread as a band (interval chart or probability band) rather than a bare number.",
+      "**Do** pair every sentiment colour with its glyph (▲ positive, ▶ neutral, ▼ negative) and its word.",
+      "**Do** set key figures as one ruled row with an ink top rule and hairline dividers.",
+      "**Do** use tabular lining figures for every number and keep every text colour at 4.5:1 or better.",
+      "**Do** use Material Symbols for native widgets and the authored 1.75-stroke SVG set inside custom HTML.",
+      "**Do** take chart colours from the template sequence and sentiment hues from the sentiment tokens, never ad hoc hexes."
+    ],
+    "donts": [
+      "**Don't** put shadows, gradients or glows on containers; separate with hairlines or a mist fill.",
+      "**Don't** return to the dark, glowing KPI-card dashboard or rounded metric cards.",
+      "**Don't** encode sentiment by colour alone, or colour a figure that is not a sentiment value.",
+      "**Don't** add eyebrows or kickers above headings, gradient text, or emoji icons.",
+      "**Don't** use title case or uppercase in the report body; uppercase tracking belongs to the shell's nav group labels only.",
+      "**Don't** load a second typeface; Public Sans carries every role."
+    ]
+  }
+}

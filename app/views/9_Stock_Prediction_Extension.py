@@ -286,7 +286,7 @@ if st.button("Run full extension pipeline", type="primary"):
         )
 
         sentiment_colors = [
-            "#1D7451" if value > 0 else "#A3322B" if value < 0 else "#5E6E6A" for value in trend_data["daily_sentiment"]
+            "#1D7451" if value > 0 else "#A3322B" if value < 0 else "#4F6470" for value in trend_data["daily_sentiment"]
         ]
 
         fig.add_trace(
@@ -308,9 +308,9 @@ if st.button("Run full extension pipeline", type="primary"):
             plot_bgcolor="rgba(0,0,0,0)",
             font={"color": "#2E3F3C", "family": "Public Sans, system-ui, sans-serif"},
             legend={"orientation": "h", "yanchor": "bottom", "y": 1.02, "xanchor": "right", "x": 1},
-            xaxis2={"showgrid": True, "gridcolor": "#D5DEDC"},
-            yaxis={"title": "Price ($)", "showgrid": True, "gridcolor": "#D5DEDC"},
-            yaxis2={"title": "Sentiment", "showgrid": True, "gridcolor": "#D5DEDC"},
+            xaxis2={"showgrid": True, "gridcolor": "#E6ECEA"},
+            yaxis={"title": "Price ($)", "showgrid": True, "gridcolor": "#E6ECEA"},
+            yaxis2={"title": "Sentiment", "showgrid": True, "gridcolor": "#E6ECEA"},
         )
 
         st.plotly_chart(fig, use_container_width=True, theme=None, config={"displayModeBar": False})

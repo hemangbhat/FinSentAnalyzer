@@ -274,7 +274,7 @@ if st.button("Generate trend chart", type="primary"):
                 height=600,
                 paper_bgcolor="rgba(0,0,0,0)",
                 plot_bgcolor="rgba(0,0,0,0)",
-                font=dict(color="#2E3F3C", family="Inter, sans-serif"),
+                font=dict(color="#2E3F3C", family="Public Sans, system-ui, sans-serif"),
                 showlegend=True,
                 legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
                 xaxis2=dict(
@@ -353,7 +353,7 @@ if shap_files:
                     plot_bgcolor="rgba(0,0,0,0)",
                     font={"color": "#2E3F3C", "family": "Public Sans, system-ui, sans-serif"},
                     yaxis={"autorange": "reversed"},
-                    xaxis={"showgrid": True, "gridcolor": "#D5DEDC"},
+                    xaxis={"showgrid": True, "gridcolor": "#E6ECEA"},
                     yaxis_tickfont={"size": 12},
                     margin=dict(l=150),
                 )
@@ -363,20 +363,22 @@ if shap_files:
                 class_features = shap_data.get("class_features", {})
                 if class_features:
                     ccols = st.columns(3)
-                    class_colors = {"negative": "#A3322B", "neutral": "#5E6E6A", "positive": "#1D7451"}
-                    for i, (cls_name, cls_feats) in enumerate(class_features.items()):
-                        with ccols[i]:
-                            color = class_colors.get(cls_name, "#4B5D5A")
+                    for col, cls in zip(ccols, ("negative", "neutral", "positive")):
+                        rows = "".join(
+                            f"<tr><td class='t'>{feat['feature']}</td>"
+                            f"<td class='n fs-num' style='color:{'#0E6E6A' if feat['shap_value'] >= 0 else '#A3322B'};'>"
+                            f"{feat['shap_value']:+.3f}</td></tr>"
+                            for feat in class_features.get(cls, [])[:5]
+                        )
+                        glyph = {"negative": "▼", "neutral": "▶", "positive": "▲"}[cls]
+                        color = {"negative": "#A3322B", "neutral": "#4F6470", "positive": "#1D7451"}[cls]
+                        with col:
                             st.markdown(
-                                f"<div style='color: {color}; font-weight: 600; text-transform: capitalize; margin-bottom: 10px;'>{cls_name} Class Drivers</div>",
+                                f"<table class='fs-terms'><thead><tr><th class='t' style='color:{color};'>{glyph} "
+                                f"{cls.capitalize()}</th><th style='text-align:right;'>SHAP</th></tr></thead>"
+                                f"<tbody>{rows}</tbody></table>",
                                 unsafe_allow_html=True,
                             )
-                            for feat in cls_feats[:5]:
-                                direction_icon = "↑" if feat["direction"] == "positive" else "↓"
-                                st.markdown(
-                                    f"<div style='display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid #D5DEDC; font-size: 0.9em;'><span style='font-variant-numeric: tabular-nums; color: #2E3F3C;'>{feat['feature']}</span><span style='color: {color};'>{direction_icon} {feat['shap_value']:.3f}</span></div>",
-                                    unsafe_allow_html=True,
-                                )
 else:
     st.info(
         "No SHAP results found. Run SHAP analysis to see feature importance:\n\n"
