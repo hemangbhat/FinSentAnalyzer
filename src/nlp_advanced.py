@@ -193,9 +193,54 @@ class AdvancedTextProcessor:
         "percentage": r"[-+]?\d+(?:\.\d+)?%",
         "currency": r"(?:USD|EUR|GBP|JPY|CNY|INR|\$|€|£|¥|₹)\s*[-+]?\d+(?:,\d{3})*(?:\.\d+)?(?:\s*(?:million|billion|trillion|[MBTmbt]))?",
         "number": r"[-+]?\d+(?:,\d{3})*(?:\.\d+)?(?:\s*(?:million|billion|trillion|[MBTmbt]))?",
-        "company": r"(?:[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\s+(?:Inc|Corp|Ltd|LLC|Group|Holdings|Co|Company|Industries|Technologies|Systems|Solutions|Services)\.?)|(?:[A-Z]{2,5})",
+        # Matched case-sensitively (see CASE_SENSITIVE): capitalised name + corporate suffix, or an all-caps ticker.
+        "company": r"\b(?:[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\s+(?:Inc|Corp|Ltd|LLC|Group|Holdings|Co|Company|Industries|Technologies|Systems|Solutions|Services)\b\.?)|\b[A-Z]{2,5}\b",
         "fiscal_term": r"(?:Q[1-4]|FY\d{2,4}|H[12]|fiscal\s+(?:year|quarter))",
         "date": r"(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2}(?:,?\s+\d{4})?|\d{1,2}/\d{1,2}/\d{2,4}",
+    }
+
+    # Capitalisation carries the meaning for these patterns (a ticker is upper case).
+    CASE_SENSITIVE = {"company"}
+    # All-caps tokens that look like tickers but are currencies or finance abbreviations.
+    NOT_COMPANIES = {
+        "EUR",
+        "USD",
+        "GBP",
+        "JPY",
+        "CHF",
+        "SEK",
+        "NOK",
+        "DKK",
+        "CNY",
+        "INR",
+        "MN",
+        "BN",
+        "CEO",
+        "CFO",
+        "COO",
+        "CTO",
+        "EPS",
+        "EBIT",
+        "EBITDA",
+        "GDP",
+        "IPO",
+        "ROI",
+        "ROE",
+        "YOY",
+        "QOQ",
+        "FY",
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4",
+        "H1",
+        "H2",
+        "AGM",
+        "ESG",
+        "AI",
+        "US",
+        "UK",
+        "EU",
     }
 
     def __init__(
@@ -220,7 +265,10 @@ class AdvancedTextProcessor:
         self.handle_negations = handle_negations
 
         # Compile regex patterns
-        self.compiled_patterns = {name: re.compile(pattern, re.IGNORECASE) for name, pattern in self.PATTERNS.items()}
+        self.compiled_patterns = {
+            name: re.compile(pattern, 0 if name in self.CASE_SENSITIVE else re.IGNORECASE)
+            for name, pattern in self.PATTERNS.items()
+        }
 
     def process(self, text: str) -> ProcessedText:
         """
@@ -337,7 +385,9 @@ class AdvancedTextProcessor:
         features.percentages = self.compiled_patterns["percentage"].findall(original)
         features.currencies = self.compiled_patterns["currency"].findall(original)
         features.numbers = self.compiled_patterns["number"].findall(original)
-        features.companies = self.compiled_patterns["company"].findall(original)
+        features.companies = [
+            c for c in self.compiled_patterns["company"].findall(original) if c.strip() not in self.NOT_COMPANIES
+        ]
 
         # Lexicon-based analysis
         # Strip punctuation from tokens before matching against lexicon

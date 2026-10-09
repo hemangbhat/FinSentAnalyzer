@@ -315,7 +315,10 @@ if st.button("Generate trend chart", type="primary"):
         st.error(f"Error generating trends: {e}")
 
 # ── SHAP Results Section ────────────────────────────────────────────────────────
-section_header("SHAP feature importance", "Pre-computed global importance for the TF-IDF models.")
+exhibit(
+    "SHAP feature importance by model",
+    "Mean absolute SHAP value, pre-computed for the TF-IDF models (results/shap_*.json).",
+)
 
 # Check for pre-computed SHAP results
 shap_files = list(results_dir.glob("shap_*.json")) if results_dir.exists() else []
@@ -344,11 +347,7 @@ if shap_files:
                     )
                 )
                 fig.update_layout(
-                    title={
-                        "text": f"SHAP Feature Importance — {model_label}",
-                        "font": {"color": "#12211F", "size": 14},
-                    },
-                    xaxis_title="Mean |SHAP Value|",
+                    xaxis_title="Mean |SHAP value|",
                     height=450,
                     paper_bgcolor="rgba(0,0,0,0)",
                     plot_bgcolor="rgba(0,0,0,0)",

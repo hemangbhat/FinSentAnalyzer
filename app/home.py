@@ -63,7 +63,8 @@ def headline_numbers() -> dict:
 
 n = headline_numbers()
 
-head, action = st.columns([3.3, 1], vertical_alignment="bottom")
+st.markdown("<div class='fs-rule-top'></div>", unsafe_allow_html=True)
+head, action = st.columns([3.3, 1], vertical_alignment="top")
 with head:
     page_header(
         "Financial sentiment, measured honestly",
@@ -73,8 +74,10 @@ with head:
             "<b>9</b> models · <b>116</b> automated tests · FastAPI service · "
             "Data: Financial PhraseBank and Twitter Financial News (MIT)"
         ),
+        ruled=False,
     )
 with action:
+    st.markdown("<div style='height:22px'></div>", unsafe_allow_html=True)
     if st.button("Analyze a sentence", type="primary", icon=":material/arrow_forward:", use_container_width=True):
         st.switch_page("views/1_Single_Analysis.py")
     st.page_link("views/7_Sentiment_Trends.py", label="Read the evaluation", icon=":material/insights:")

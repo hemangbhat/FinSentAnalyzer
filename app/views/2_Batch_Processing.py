@@ -125,9 +125,9 @@ if len(texts) > MAX_ROWS:
 # Validation KPIs + preview
 kpi_strip(
     [
-        {"label": "Rows Detected", "value": f"{len(df):,}", "accent": COLORS["primary"]},
-        {"label": "Valid Texts", "value": f"{len(texts):,}", "accent": COLORS["positive"]},
-        {"label": "Text Column", "value": text_column, "accent": COLORS["accent"]},
+        {"label": "Rows detected", "value": f"{len(df):,}", "accent": COLORS["primary"]},
+        {"label": "Valid texts", "value": f"{len(texts):,}", "accent": COLORS["positive"]},
+        {"label": "Text column", "value": text_column, "accent": COLORS["accent"]},
         {"label": "Source", "value": uploaded_file.name.split(".")[-1].upper() if uploaded_file else "Sample"},
     ]
 )
@@ -189,26 +189,27 @@ kpi_strip(
             "sub": f"{neg_count / total * 100:.1f}%",
             "accent": COLORS["negative"],
         },
-        {"label": "Avg Confidence", "value": f"{avg_confidence:.1%}", "accent": COLORS["accent"]},
+        {"label": "Mean confidence", "value": f"{avg_confidence:.1%}", "accent": COLORS["accent"]},
     ]
 )
 
 pos_pct = pos_count / total * 100
 neg_pct = neg_count / total * 100
-if pos_pct > neg_pct + 10:
-    trend, trend_key = "Positive tilt", "positive"
-elif neg_pct > pos_pct + 10:
-    trend, trend_key = "Negative tilt", "negative"
-else:
-    trend, trend_key = "Balanced", "neutral"
 mix = {k: float(sentiment_counts.get(k, 0)) / total for k in ("negative", "neutral", "positive")}
+majority = max(mix, key=mix.get)
+lean = "positive" if pos_pct > neg_pct + 10 else "negative" if neg_pct > pos_pct + 10 else None
+if majority == "neutral":
+    trend = f"Mostly neutral, leaning {lean}" if lean else "Mostly neutral, balanced"
+else:
+    trend = f"Mostly {majority}"
+trend_key = lean if (majority == "neutral" and lean) else majority
 st.markdown(
     f"<div class='fs-verdict' style='margin-top:18px;'><div class='label'>Batch sentiment mix</div>"
-    f"<div class='word' style='font-size:1.9rem;color:{get_sentiment_color(trend_key)};'>"
+    f"<div class='word' style='font-size:1.7rem;color:{get_sentiment_color(trend_key)};'>"
     f"{SENTIMENT_GLYPHS[trend_key]} {trend}</div>"
     f"<div class='conf'>{total:,} texts · mean model confidence <b class='fs-num'>{avg_confidence:.1%}</b> · "
-    "tilt means one side leads the other by more than 10 points</div>"
-    f"{probability_band(mix, max(mix, key=mix.get))}</div>",
+    "'leaning' means one side leads the other by more than 10 points</div>"
+    f"{probability_band(mix, majority)}</div>",
     unsafe_allow_html=True,
 )
 
@@ -217,7 +218,7 @@ section_header("Detailed results")
 st.dataframe(clean_df[[text_column, "Sentiment", "Confidence"]].head(200), use_container_width=True)
 
 st.download_button(
-    label="Download Results (CSV)",
+    label="Download results (CSV)",
     data=clean_df.to_csv(index=False),
     file_name="sentiment_results.csv",
     mime="text/csv",

@@ -77,6 +77,21 @@ class TestFinancialTextAnalyzer:
         assert agg["total_texts"] == 3
         assert "overall_trend" in agg
 
+    def test_company_extraction_does_not_fragment_ordinary_words(self):
+        result = self.analyzer.analyze("The company lowered its full-year outlook, and shares fell 8%.")
+        assert result["entities"]["companies"] == []
+
+    def test_company_extraction_finds_tickers_and_suffixed_names(self):
+        result = self.analyzer.analyze("AAPL rose while Nokia Group and Acme Corp. cut guidance.")
+        companies = result["entities"]["companies"]
+        assert "AAPL" in companies
+        assert "Nokia Group" in companies
+        assert any(c.startswith("Acme Corp") for c in companies)
+
+    def test_company_extraction_skips_currency_codes(self):
+        result = self.analyzer.analyze("Operating profit rose to EUR 13.1 mn, the CEO said.")
+        assert result["entities"]["companies"] == []
+
 
 class TestConvenienceFunctions:
     def test_analyze_financial_text(self):

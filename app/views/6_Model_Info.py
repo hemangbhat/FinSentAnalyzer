@@ -93,7 +93,7 @@ try:
             {
                 "Model": m_info.get("name", model_key),
                 "Type": m_info.get("type", "Unknown"),
-                "Macro-F1": f1 if isinstance(f1, (int, float)) else float("nan"),
+                "Macro-F1": f"{f1:.3f}" if isinstance(f1, (int, float)) else "— not scored on PhraseBank",
                 "95% interval": f"{ci['ci_low']:.3f} – {ci['ci_high']:.3f}" if ci else "—",
                 "Inference cost": str(m_info.get("speed", "—")).split(" / ")[0],
                 "Active": "●" if model_key == selected_model else "",

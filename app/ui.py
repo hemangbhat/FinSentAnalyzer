@@ -205,6 +205,8 @@ h1, h2, h3, h4 { letter-spacing: -0.015em; color: var(--fs-ink); }
 
 /* ── Report masthead (page header) ──────────────────────────────────── */
 .fs-masthead { border-top: 3px solid var(--fs-teal); padding-top: 18px; margin-bottom: 18px; }
+.fs-masthead.bare { border-top: none; padding-top: 0; }
+.fs-rule-top { border-top: 3px solid var(--fs-teal); margin-bottom: 18px; }
 .fs-masthead .row { display: flex; gap: 24px; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; }
 .fs-masthead h1 { font-size: 2.05rem; font-weight: 700; margin: 0 0 6px 0; line-height: 1.15; padding: 0; }
 .fs-masthead .standfirst { color: var(--fs-muted); font-size: 1.04rem; max-width: 68ch; margin: 0; line-height: 1.55; }
@@ -393,7 +395,7 @@ def render_chart(fig: go.Figure) -> None:
 _EXHIBIT_KEY = "_fs_exhibit_no"
 
 
-def page_header(title: str, subtitle: str = "", eyebrow: str | None = None, meta: str = "") -> None:
+def page_header(title: str, subtitle: str = "", eyebrow: str | None = None, meta: str = "", ruled: bool = True) -> None:
     """
     Render the page masthead: title, standfirst and an optional metadata line.
 
@@ -404,7 +406,7 @@ def page_header(title: str, subtitle: str = "", eyebrow: str | None = None, meta
     sub_html = f"<p class='standfirst'>{subtitle}</p>" if subtitle else ""
     meta_html = f"<div class='meta'>{meta}</div>" if meta else ""
     st.markdown(
-        f"<div class='fs-masthead'><h1>{title}</h1>{sub_html}{meta_html}</div>",
+        f"<div class='fs-masthead{'' if ruled else ' bare'}'><h1>{title}</h1>{sub_html}{meta_html}</div>",
         unsafe_allow_html=True,
     )
 
@@ -642,10 +644,20 @@ def interval_chart(
         )
         fig.add_trace(
             go.Scatter(
+                x=[r["low"], r["high"]],
+                y=[y, y],
+                mode="markers",
+                marker={"symbol": "line-ns-open", "size": 16, "color": c, "line": {"width": 2}},
+                hoverinfo="skip",
+                showlegend=False,
+            )
+        )
+        fig.add_trace(
+            go.Scatter(
                 x=[r["value"]],
                 y=[y],
                 mode="markers",
-                marker={"color": c, "size": 12, "line": {"color": "#FFFFFF", "width": 2}},
+                marker={"color": c, "size": 10, "line": {"color": "#FFFFFF", "width": 1.5}},
                 hovertemplate=f"{r['label']}<br>%{{x:.3f}}<br>{band_name} {r['low']:.3f}–{r['high']:.3f}<extra></extra>",
                 showlegend=False,
             )
