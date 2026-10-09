@@ -12,7 +12,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 from io import StringIO
 
 import pandas as pd  # pyre-ignore
-import plotly.express as px  # pyre-ignore
 import streamlit as st  # pyre-ignore
 
 from llm_explain import generate_market_outlook  # pyre-ignore
@@ -20,14 +19,14 @@ from llm_explain import generate_market_outlook  # pyre-ignore
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from shared import (  # pyre-ignore
     COLORS,
+    SENTIMENT_GLYPHS,
     active_model,
-    empty_state,
+    get_sentiment_color,
     kpi_strip,
     page_header,
-    render_chart,
+    probability_band,
     section_header,
     status_banner,
-    style_fig,
 )
 
 selected_model, predictor = active_model()
@@ -41,18 +40,17 @@ page_header(
 )
 
 uploaded_file = st.file_uploader(
-    "Upload a dataset",
+    "Upload a CSV (with a text column) or a TXT file (one text per line)",
     type=["csv", "txt"],
-    help="CSV: include a text column. TXT: one text per line.",
+)
+use_sample = st.toggle(
+    "Or try 50 sentences from the PhraseBank test split",
+    key="batch_sample",
+    disabled=uploaded_file is not None,
 )
 
-if not uploaded_file:
-    empty_state(
-        "No file uploaded yet",
-        "Drop a CSV (with a text column) or a TXT file (one text per line) to begin. "
-        "You'll be able to preview and validate before running analysis.",
-        icon="upload",
-    )
+if not uploaded_file and not use_sample:
+    st.caption("You can preview and choose the text column before anything is scored.")
     st.stop()
 
 # ── Read + validate ──────────────────────────────────────────────────────────
@@ -61,7 +59,14 @@ df = pd.DataFrame()
 text_column = ""
 clean_df = pd.DataFrame()
 try:
-    if uploaded_file.name.endswith(".csv"):
+    if uploaded_file is None:
+        from preprocess import load_processed_data  # pyre-ignore
+
+        df = load_processed_data("test").head(50).rename(columns={"sentence": "text"})[["text"]]
+        text_column = "text"
+        clean_df = df.copy()
+        texts = df["text"].tolist()
+    elif uploaded_file.name.endswith(".csv"):
         csv_decoded = False
         for encoding in ["utf-8", "latin-1", "cp1252"]:
             try:
@@ -123,14 +128,14 @@ kpi_strip(
         {"label": "Rows Detected", "value": f"{len(df):,}", "accent": COLORS["primary"]},
         {"label": "Valid Texts", "value": f"{len(texts):,}", "accent": COLORS["positive"]},
         {"label": "Text Column", "value": text_column, "accent": COLORS["accent"]},
-        {"label": "Source", "value": uploaded_file.name.split(".")[-1].upper(), "accent": COLORS["warning"]},
+        {"label": "Source", "value": uploaded_file.name.split(".")[-1].upper() if uploaded_file else "Sample"},
     ]
 )
 
 with st.expander("Preview first rows", expanded=True):
     st.dataframe(clean_df[[text_column]].head(8), use_container_width=True)
 
-run = st.button("Analyze All", type="primary", use_container_width=True)
+run = st.button("Analyze all", type="primary")
 if not run:
     st.stop()
 
@@ -188,44 +193,27 @@ kpi_strip(
     ]
 )
 
-chart_col, trend_col = st.columns([1.1, 1])
-with chart_col:
-    fig = px.pie(
-        values=sentiment_counts.values,
-        names=sentiment_counts.index,
-        color=sentiment_counts.index,
-        color_discrete_map={"positive": "#1D7451", "negative": "#A3322B", "neutral": "#0E6E6A", "error": "#9A5B16"},
-        hole=0.55,
-    )
-    fig.update_traces(textinfo="percent", textfont_size=13)
-    style_fig(fig, height=320, title="Sentiment Distribution")
-    render_chart(fig)
-
-with trend_col:
-    pos_pct = pos_count / total * 100
-    neg_pct = neg_count / total * 100
-    if pos_pct > neg_pct + 10:
-        trend, trend_color, trend_icon = "Bullish", "#1D7451", "▲"
-    elif neg_pct > pos_pct + 10:
-        trend, trend_color, trend_icon = "Bearish", "#A3322B", "▼"
-    else:
-        trend, trend_color, trend_icon = "Mixed / Sideways", "#0E6E6A", "≈"
-    st.markdown(
-        f"""
-        <div class='insight-card' style='height:100%;display:flex;flex-direction:column;justify-content:center;'>
-            <div style='color:#4B5D5A;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.08em;'>Aggregate Signal</div>
-            <div style='color:{trend_color};font-size:2.1rem;font-weight:800;margin:6px 0;'>{trend_icon} {trend}</div>
-            <div style='color:#4B5D5A;font-size:0.92rem;line-height:1.5;'>
-                Based on {total:,} scored texts, with mean model confidence of
-                <b style='color:#12211F;'>{avg_confidence:.1%}</b>.
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+pos_pct = pos_count / total * 100
+neg_pct = neg_count / total * 100
+if pos_pct > neg_pct + 10:
+    trend, trend_key = "Positive tilt", "positive"
+elif neg_pct > pos_pct + 10:
+    trend, trend_key = "Negative tilt", "negative"
+else:
+    trend, trend_key = "Balanced", "neutral"
+mix = {k: float(sentiment_counts.get(k, 0)) / total for k in ("negative", "neutral", "positive")}
+st.markdown(
+    f"<div class='fs-verdict' style='margin-top:18px;'><div class='label'>Batch sentiment mix</div>"
+    f"<div class='word' style='font-size:1.9rem;color:{get_sentiment_color(trend_key)};'>"
+    f"{SENTIMENT_GLYPHS[trend_key]} {trend}</div>"
+    f"<div class='conf'>{total:,} texts · mean model confidence <b class='fs-num'>{avg_confidence:.1%}</b> · "
+    "tilt means one side leads the other by more than 10 points</div>"
+    f"{probability_band(mix, max(mix, key=mix.get))}</div>",
+    unsafe_allow_html=True,
+)
 
 # ── Results + export ─────────────────────────────────────────────────────────
-section_header("Detailed Results")
+section_header("Detailed results")
 st.dataframe(clean_df[[text_column, "Sentiment", "Confidence"]].head(200), use_container_width=True)
 
 st.download_button(
@@ -238,7 +226,7 @@ st.download_button(
 # ── Market outlook (template-based) ──────────────────────────────────────────
 with st.expander("Generate market outlook report", expanded=False):
     st.caption("Template-based summary derived from the batch sentiment distribution.")
-    if st.button("Generate Outlook", key="generate_outlook"):
+    if st.button("Generate outlook", key="generate_outlook"):
         with st.spinner("Generating outlook…"):
             try:
                 outlook = generate_market_outlook(

@@ -19,6 +19,7 @@ from shared import (  # pyre-ignore
     active_model,
     exhibit,
     interval_chart,
+    kpi_strip,
     load_result,
     model_label,
     page_header,
@@ -46,64 +47,38 @@ page_header(
     meta=f"Active engine <b>{info.get('name', selected_model)}</b> · Architecture <b>{info.get('type', 'Unknown')}</b>",
 )
 
-# Metrics in columns
-section_header("Performance Benchmarks")
-col1, col2, col3, col4 = st.columns(4)
+# Active model: key figures with their uncertainty
+_ci = (load_result("bootstrap_ci.json") or {}).get("phrasebank_test", {})
+_cv = (load_result("cv_results.json") or {}).get(selected_model.replace("baseline_", ""))
+_mine = _ci.get(selected_model.replace("baseline_", ""))
+section_header(model_label(selected_model), "PhraseBank test split (n=226) and 5-fold cross-validation.")
+figures = [
+    {"label": "Test accuracy", "value": info.get("accuracy", "—")},
+    {
+        "label": "Test macro-F1",
+        "value": f"{_mine['f1_macro']:.3f}" if _mine else info.get("f1_macro", "—"),
+        "sub": f"95% interval {_mine['ci_low']:.2f}–{_mine['ci_high']:.2f}" if _mine else "not scored on PhraseBank",
+    },
+]
+if _cv:
+    figures.append(
+        {
+            "label": "5-fold CV macro-F1",
+            "value": f"{_cv['f1_macro_mean']:.3f}",
+            "sub": f"± {_cv['f1_macro_std']:.3f} across folds",
+        }
+    )
+figures.append({"label": "Inference cost", "value": info.get("speed", "—"), "sub": "relative, on CPU"})
+kpi_strip(figures)
 
-with col1:
+features = info.get("features", [])
+if features:
     st.markdown(
-        f"""
-    <div class='metric-card'>
-        <div style='color: #4B5D5A; font-size: 0.85em; text-transform: uppercase;'>Accuracy Rating</div>
-        <div style='font-size: 2em; font-weight: 700; color: #12211F; margin-top: 5px;'>{info.get("accuracy", "N/A")}</div>
-    </div>
-    """,
+        "<p style='max-width:75ch;margin-top:10px;'><b>How it works:</b> " + "; ".join(features) + ".</p>",
         unsafe_allow_html=True,
     )
-with col2:
-    st.markdown(
-        f"""
-    <div class='metric-card'>
-        <div style='color: #4B5D5A; font-size: 0.85em; text-transform: uppercase;'>F1 Score (Macro)</div>
-        <div style='font-size: 2em; font-weight: 700; color: #12211F; margin-top: 5px;'>{info.get("f1_macro", "N/A")}</div>
-    </div>
-    """,
-        unsafe_allow_html=True,
-    )
-with col3:
-    st.markdown(
-        f"""
-    <div class='metric-card'>
-        <div style='color: #4B5D5A; font-size: 0.85em; text-transform: uppercase;'>F1 Score (Weighted)</div>
-        <div style='font-size: 2em; font-weight: 700; color: #12211F; margin-top: 5px;'>{info.get("f1_weighted", "N/A")}</div>
-    </div>
-    """,
-        unsafe_allow_html=True,
-    )
-with col4:
-    speed = info.get("speed", "N/A")
-    speed_color = "#1D7451" if "fast" in speed.lower() else "#9A5B16" if "medium" in speed.lower() else "#A3322B"
-    st.markdown(
-        f"""
-    <div class='metric-card'>
-        <div style='color: #4B5D5A; font-size: 0.85em; text-transform: uppercase;'>Processing Speed</div>
-        <div style='font-size: 2em; font-weight: 700; color: {speed_color}; margin-top: 5px; text-transform: capitalize;'>{speed}</div>
-    </div>
-    """,
-        unsafe_allow_html=True,
-    )
-
-# Features
-section_header("Key Capabilities")
-_items = "".join(
-    "<div style='display:flex;align-items:flex-start;gap:10px;padding:6px 0;'>"
-    f"<span style='color:#0E6E6A;'>✓</span><span style='color:#2E3F3C;'>{feature}</span></div>"
-    for feature in info.get("features", [])
-)
-st.markdown(f"<div class='insight-card'>{_items}</div>", unsafe_allow_html=True)
 
 # All models comparison table
-_ci = (load_result("bootstrap_ci.json") or {}).get("phrasebank_test", {})
 section_header(
     "Model comparison",
     "PhraseBank test split (n=226). The interval is a 95% bootstrap range for macro-F1.",
@@ -119,8 +94,8 @@ try:
                 "Model": m_info.get("name", model_key),
                 "Type": m_info.get("type", "Unknown"),
                 "Macro-F1": f1 if isinstance(f1, (int, float)) else float("nan"),
-                "95% interval": f"{ci['ci_low']:.3f} – {ci['ci_high']:.3f}" if ci else "not scored on PhraseBank",
-                "Speed": m_info.get("speed", "—"),
+                "95% interval": f"{ci['ci_low']:.3f} – {ci['ci_high']:.3f}" if ci else "—",
+                "Inference cost": str(m_info.get("speed", "—")).split(" / ")[0],
                 "Active": "●" if model_key == selected_model else "",
             }
         )
@@ -152,7 +127,8 @@ if _ci:
                     "color": COLORS["primary"] if f"baseline_{k}" == selected_model else COLORS["accent"],
                 }
                 for k, v in ordered
-            ]
+            ],
+            x_range=(0.7, 1.0),
         )
     )
     source_note("results/bootstrap_ci.json (2,000 resamples of the test split; scripts/bootstrap_ci.py).")

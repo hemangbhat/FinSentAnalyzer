@@ -19,7 +19,14 @@ except ImportError:
     ADVANCED_NLP_AVAILABLE = False
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from shared import active_model, get_sentiment_color, page_header, section_header  # pyre-ignore
+from shared import (  # pyre-ignore
+    active_model,
+    empty_state,
+    get_sentiment_color,
+    page_header,
+    section_header,
+    status_banner,
+)
 
 # ── Page config ─────────────────────────────────────────────────────────────────
 selected_model, predictor = active_model()
@@ -29,24 +36,45 @@ if predictor is None:
 
 page_header(
     "Deep Analysis",
-    "Rule-based chain-of-thought reasoning, named-entity extraction, and Loughran-McDonald lexicon decomposition.",
+    "Entities, figures and Loughran-McDonald lexicon hits extracted from one sentence, with a step-by-step "
+    "rule-based reasoning trace (deterministic rules, not a language model).",
 )
 
 if not ADVANCED_NLP_AVAILABLE:
-    st.warning(
-        "Advanced NLP modules not available. "
-        "Please ensure `nlp_advanced.py` and `llm_enhanced.py` are in the `src/` folder."
-    )
+    status_banner("The NLP modules (src/nlp_advanced.py, src/llm_enhanced.py) are not available.", kind="warning")
     st.stop()
 
+DEEP_EXAMPLES = {
+    "Earnings beat, EUR figures": "Nokia reported Q3 operating profit of EUR 1.2 billion, up 25% year on year, beating analyst expectations.",
+    "Guidance cut": "The company lowered its full-year outlook after weak demand in Europe, and shares fell 8%.",
+    "Routine update": "The board will hold its annual general meeting in Helsinki on 15 March.",
+}
+
+
+def _use_deep_example() -> None:
+    choice = st.session_state.get("deep_example")
+    if choice:
+        st.session_state.deep_analysis_input = DEEP_EXAMPLES[choice]
+        st.session_state.deep_run = True
+
+
+st.pills("Try an example", list(DEEP_EXAMPLES), key="deep_example", on_change=_use_deep_example)
 deep_text = st.text_area(
-    "Enter financial text for deep analysis:",
+    "Financial text",
     height=120,
     placeholder="e.g., The company reported strong earnings growth of 25%, beating analyst expectations significantly...",
     key="deep_analysis_input",
 )
 
-if st.button("Run Deep Analysis", type="primary", use_container_width=True):
+run_deep = st.button("Run deep analysis", type="primary") or st.session_state.pop("deep_run", False)
+if not run_deep:
+    empty_state(
+        "Pick an example or paste a sentence",
+        "You'll get the companies, amounts, percentages and dates it mentions, the finance-specific sentiment words "
+        "it contains, and each reasoning step with its confidence.",
+        icon="search",
+    )
+if run_deep:
     if deep_text.strip():
         nlp_result = {}
         cot_result = None
@@ -68,7 +96,7 @@ if st.button("Run Deep Analysis", type="primary", use_container_width=True):
         assert nlp_result is not None
 
         # ── Summary Card ────────────────────────────────────────────────────
-        section_header("Executive Summary")
+        section_header("Executive summary")
 
         sentiment = cot_result.final_sentiment
         confidence = cot_result.final_confidence
@@ -99,7 +127,7 @@ if st.button("Run Deep Analysis", type="primary", use_container_width=True):
         )
 
         # ── Key metrics ─────────────────────────────────────────────────────
-        section_header("Linguistic Metrics")
+        section_header("Linguistic metrics")
         col1, col2, col3 = st.columns(3)
 
         with col1:
@@ -142,7 +170,7 @@ if st.button("Run Deep Analysis", type="primary", use_container_width=True):
             )
 
         # ── Detected words ──────────────────────────────────────────────────
-        section_header("Detected Sentiment Tokens")
+        section_header("Detected sentiment tokens")
         word_col1, word_col2, word_col3 = st.columns(3)
 
         with word_col1:
@@ -203,7 +231,7 @@ if st.button("Run Deep Analysis", type="primary", use_container_width=True):
                 )
 
         # ── Entities ────────────────────────────────────────────────────────
-        section_header("Named Entities & Variables")
+        section_header("Named entities & variables")
         entity_col1, entity_col2, entity_col3 = st.columns(3)
 
         with entity_col1:
@@ -255,7 +283,7 @@ if st.button("Run Deep Analysis", type="primary", use_container_width=True):
                 )
 
         # ── Chain of Thought Reasoning ──────────────────────────────────────
-        section_header("Rule-based Reasoning Steps")
+        section_header("Rule-based reasoning steps")
         st.markdown(
             "<p style='color: #4B5D5A;'>Step-by-step reasoning algorithm breakdown:</p>", unsafe_allow_html=True
         )
@@ -303,7 +331,7 @@ if st.button("Run Deep Analysis", type="primary", use_container_width=True):
         colA, colB = st.columns([1, 1])
         with colA:
             # Key Factors
-            section_header("Driving Factors")
+            section_header("Driving factors")
             if cot_result.key_factors:
                 for factor in cot_result.key_factors:
                     st.markdown(
@@ -318,7 +346,7 @@ if st.button("Run Deep Analysis", type="primary", use_container_width=True):
 
         with colB:
             # Final Explanation
-            section_header("Final Executive Synthesis")
+            section_header("Final executive synthesis")
             st.markdown(
                 f"""
             <div class='insight-card' style='background: #F7F9F8; height: 100%;'>

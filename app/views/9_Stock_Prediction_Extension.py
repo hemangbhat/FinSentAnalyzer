@@ -18,7 +18,7 @@ import streamlit as st  # pyre-ignore
 from plotly.subplots import make_subplots  # pyre-ignore
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from shared import active_model, page_header, section_header  # pyre-ignore
+from shared import active_model, page_header, section_header, status_banner  # pyre-ignore
 
 from stock_extension import (  # pyre-ignore
     get_stock_project_root,
@@ -32,15 +32,16 @@ if predictor is None:
     st.stop()
 
 page_header(
-    "Stock Prediction Extension",
+    "Stock Prediction",
     "End-to-end pipeline executed in-app: stock download, live news, FinBERT "
     "sentiment, feature engineering, and an LSTM next-day direction forecast.",
 )
 
-st.warning(
-    "**Experimental engineering demo — not a trading signal.** On this small/synthetic data "
-    "the LSTM performs at roughly chance level. It exists to show the full pipeline "
-    "(download → sentiment → features → train → predict), not to forecast prices."
+status_banner(
+    "<b>Experimental engineering demo, not a trading signal.</b> On this small, partly synthetic data the LSTM "
+    "performs at roughly chance level. It exists to show the whole pipeline (download → sentiment → features → "
+    "train → predict), not to forecast prices.",
+    kind="warning",
 )
 
 HEAVY_DISABLED = os.getenv("FINSIGHT_DISABLE_HEAVY", "false").lower() in {"1", "true", "yes"}
@@ -53,7 +54,6 @@ if HEAVY_DISABLED:
 
 try:
     stock_project = get_stock_project_root()
-    st.caption(f"Extension source: {stock_project}")
 except FileNotFoundError as exc:
     st.error(str(exc))
     st.stop()
@@ -140,11 +140,11 @@ with ctrl1:
     else:
         ticker = selected_symbol
 with ctrl2:
-    days_back = st.slider("Days Back", min_value=30, max_value=365, value=90, step=5)
+    days_back = st.slider("Days back", min_value=30, max_value=365, value=90, step=5)
 with ctrl3:
-    epochs = st.slider("LSTM Epochs", min_value=2, max_value=30, value=8, step=1)
+    epochs = st.slider("LSTM epochs", min_value=2, max_value=30, value=8, step=1)
 with ctrl4:
-    seq_len = st.slider("Sequence Length", min_value=3, max_value=15, value=5, step=1)
+    seq_len = st.slider("Sequence length", min_value=3, max_value=15, value=5, step=1)
 
 opt1, opt2 = st.columns(2)
 with opt1:
@@ -160,7 +160,7 @@ with opt3:
         help="Persist weights to models/lstm_{TICKER}.pt (parity with the standalone train_model.py)",
     )
 
-if st.button("Run Full Extension Pipeline", type="primary", use_container_width=True):
+if st.button("Run full extension pipeline", type="primary"):
     try:
         if not ticker:
             st.error("Please enter a ticker symbol.")
@@ -257,7 +257,7 @@ if st.button("Run Full Extension Pipeline", type="primary", use_container_width=
                 f"Note: {zero_rows} of {total_rows} days have 0 sentiment because no headline matched those dates."
             )
 
-        section_header("Price and Sentiment Timeline")
+        section_header("Price and sentiment timeline")
 
         trend_data = result.supervised.copy()
         trend_data = trend_data.sort_values("date")
@@ -315,7 +315,7 @@ if st.button("Run Full Extension Pipeline", type="primary", use_container_width=
 
         st.plotly_chart(fig, use_container_width=True, theme=None, config={"displayModeBar": False})
 
-        section_header("Latest Headlines Used")
+        section_header("Latest headlines used")
         if result.headlines.empty:
             st.info("No headlines were available for this run. Neutral sentiment fallback was used.")
         else:

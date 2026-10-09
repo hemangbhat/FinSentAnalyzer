@@ -3,6 +3,7 @@ Financial Sentiment Analyzer — Error Analysis Page.
 Displays misclassified examples, confusion patterns, and model weakness insights.
 """
 
+import html
 import sys
 from pathlib import Path
 
@@ -18,7 +19,18 @@ from preprocess import load_processed_data  # pyre-ignore
 from utils import LABEL_MAP_INV, get_model_dir  # pyre-ignore
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from shared import active_model, exhibit, page_header, section_header  # pyre-ignore
+from shared import (  # pyre-ignore
+    SENTIMENT_COLORS,
+    active_model,
+    empty_state,
+    exhibit,
+    kpi_strip,
+    page_header,
+    section_header,
+    sentiment_tag,
+    source_note,
+    status_banner,
+)
 
 # ── Page config ─────────────────────────────────────────────────────────────────
 selected_model, predictor = active_model()
@@ -46,7 +58,14 @@ if not model_path.exists():
     st.error(f"Model not found: `{model_path}`. Please train the model first.")
     st.stop()
 
-split = st.selectbox("Data Split", ["test", "val"], key="error_split")
+_split_col, _ = st.columns([1, 3])
+with _split_col:
+    split = st.selectbox(
+        "Evaluation split",
+        ["test", "val"],
+        format_func=lambda v: {"test": "Test (n=226)", "val": "Validation (n=226)"}[v],
+        key="error_split",
+    )
 
 
 @st.cache_data(show_spinner=False)
@@ -120,47 +139,14 @@ correct = results_df["correct"].sum()
 errors = total - correct
 accuracy = correct / total
 
-col1, col2, col3, col4 = st.columns(4)
-with col1:
-    st.markdown(
-        f"""
-    <div class='metric-card'>
-        <div style='color: #4B5D5A; font-size: 0.85em; text-transform: uppercase;'>Total Samples</div>
-        <div style='font-size: 2.2em; font-weight: 800; color: #12211F;'>{total}</div>
-    </div>
-    """,
-        unsafe_allow_html=True,
-    )
-with col2:
-    st.markdown(
-        f"""
-    <div class='metric-card'>
-        <div style='color: #4B5D5A; font-size: 0.85em; text-transform: uppercase;'>Correct</div>
-        <div style='font-size: 2.2em; font-weight: 800; color: #1D7451;'>{correct}</div>
-    </div>
-    """,
-        unsafe_allow_html=True,
-    )
-with col3:
-    st.markdown(
-        f"""
-    <div class='metric-card'>
-        <div style='color: #4B5D5A; font-size: 0.85em; text-transform: uppercase;'>Errors</div>
-        <div style='font-size: 2.2em; font-weight: 800; color: #A3322B;'>{errors}</div>
-    </div>
-    """,
-        unsafe_allow_html=True,
-    )
-with col4:
-    st.markdown(
-        f"""
-    <div class='metric-card'>
-        <div style='color: #4B5D5A; font-size: 0.85em; text-transform: uppercase;'>Accuracy</div>
-        <div style='font-size: 2.2em; font-weight: 800; color: #12211F;'>{accuracy:.1%}</div>
-    </div>
-    """,
-        unsafe_allow_html=True,
-    )
+kpi_strip(
+    [
+        {"label": f"Sentences ({split} split)", "value": f"{total:,}"},
+        {"label": "Correct", "value": f"{correct:,}"},
+        {"label": "Errors", "value": f"{errors:,}", "accent": SENTIMENT_COLORS["negative"]},
+        {"label": "Accuracy", "value": f"{accuracy:.1%}"},
+    ]
+)
 
 # ── Confusion Pattern Analysis ──────────────────────────────────────────────────
 exhibit(
@@ -171,7 +157,7 @@ exhibit(
 errors_df = results_df[~results_df["correct"]].copy()
 
 if len(errors_df) == 0:
-    st.success("Perfect accuracy! No misclassifications found on this split.")
+    status_banner("No misclassifications on this split.", kind="success")
 else:
     # Confusion pattern breakdown
     confusion_patterns = errors_df.groupby(["true_label", "pred_label"]).size().reset_index(name="count")
@@ -226,7 +212,8 @@ else:
     fig.data[0].link.color = colors
 
     fig.update_layout(
-        height=350,
+        height=300,
+        margin={"t": 10, "l": 8, "r": 8, "b": 8},
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
         font={"color": "#2E3F3C", "family": "Public Sans, system-ui, sans-serif"},
@@ -234,23 +221,22 @@ else:
     st.plotly_chart(fig, use_container_width=True, theme=None, config={"displayModeBar": False})
 
     # Top confusion pairs
-    section_header("Most Common Confusion Pairs")
+    section_header("Most common confusion pairs")
+    rows_html = []
     for _, row in confusion_patterns.head(5).iterrows():
-        true_color = {"negative": "#A3322B", "neutral": "#5E6E6A", "positive": "#1D7451"}[row["true_label"]]
-        pred_color = {"negative": "#A3322B", "neutral": "#5E6E6A", "positive": "#1D7451"}[row["pred_label"]]
         pct = row["count"] / len(errors_df) * 100
-        st.markdown(
-            f"""
-        <div style='display: flex; align-items: center; padding: 10px 15px; margin: 5px 0;
-                    background: #F7F9F8; border-radius: 8px; border: 1px solid #D5DEDC;'>
-            <span style='color: {true_color}; font-weight: 600; min-width: 90px; text-transform: capitalize;'>{row["true_label"]}</span>
-            <span style='color: #4F6470; margin: 0 12px;'>→</span>
-            <span style='color: {pred_color}; font-weight: 600; min-width: 90px; text-transform: capitalize;'>{row["pred_label"]}</span>
-            <span style='color: #4B5D5A; margin-left: auto; font-variant-numeric: tabular-nums;'>{row["count"]} errors ({pct:.1f}%)</span>
-        </div>
-        """,
-            unsafe_allow_html=True,
+        noun = "error" if row["count"] == 1 else "errors"
+        rows_html.append(
+            f"<tr><td class='t'>{sentiment_tag(row['true_label'])}</td><td>read as</td>"
+            f"<td>{sentiment_tag(row['pred_label'])}</td>"
+            f"<td class='n fs-num'>{row['count']} {noun}</td><td class='n fs-num'>{pct:.0f}%</td></tr>"
         )
+    st.markdown(
+        "<table class='fs-terms'><thead><tr><th class='t'>True label</th><th></th><th>Predicted</th>"
+        "<th style='text-align:right;'>Count</th><th style='text-align:right;'>Share of errors</th></tr></thead>"
+        f"<tbody>{''.join(rows_html)}</tbody></table>",
+        unsafe_allow_html=True,
+    )
 
     # ── Confidence distribution for errors vs correct ────────────────────────────
     exhibit(
@@ -263,7 +249,7 @@ else:
         go.Histogram(
             x=results_df[results_df["correct"]]["confidence"],
             name="Correct",
-            marker_color="#1D7451",
+            marker_color="#45627A",
             opacity=0.7,
             nbinsx=20,
         )
@@ -279,7 +265,6 @@ else:
     )
     fig2.update_layout(
         barmode="overlay",
-        title={"text": "Model Confidence: Correct Predictions vs Errors", "font": {"color": "#12211F", "size": 14}},
         xaxis_title="Confidence",
         yaxis_title="Count",
         height=350,
@@ -292,76 +277,54 @@ else:
     )
     st.plotly_chart(fig2, use_container_width=True, theme=None, config={"displayModeBar": False})
 
-    # Key insight
     avg_conf_correct = results_df[results_df["correct"]]["confidence"].mean()
     avg_conf_error = results_df[~results_df["correct"]]["confidence"].mean()
+    direction = "lower" if avg_conf_error < avg_conf_correct else "higher"
     st.markdown(
-        f"""
-    <div class='insight-card' style='padding: 15px 20px;'>
-        <span style='color: #9A5B16; font-weight: 700;'>Insight:</span>
-        Average confidence on <span style='color: #1D7451; font-weight: 600;'>correct</span> predictions:
-        <span style='font-variant-numeric: tabular-nums; color: #12211F;'>{avg_conf_correct:.3f}</span> |
-        Average confidence on <span style='color: #A3322B; font-weight: 600;'>errors</span>:
-        <span style='font-variant-numeric: tabular-nums; color: #12211F;'>{avg_conf_error:.3f}</span>
-        {"— The model is well-calibrated (lower confidence on errors)." if avg_conf_error < avg_conf_correct else "— The model is overconfident on errors (calibration needed)."}
-    </div>
-    """,
+        f"<p style='max-width:75ch;'>Mean confidence is <b class='fs-num'>{avg_conf_correct:.2f}</b> on correct "
+        f"predictions and <b class='fs-num'>{avg_conf_error:.2f}</b> on errors: {direction} when the model is wrong. "
+        "Mean confidence alone does not establish calibration; a reliability diagram would.</p>",
         unsafe_allow_html=True,
     )
+    source_note(f"{classifier_name} predictions on the {split} split.")
 
     # ── Misclassified Examples Table ─────────────────────────────────────────────
-    section_header("Misclassified Examples")
+    section_header("Misclassified sentences", "The sentences behind the numbers above.")
 
-    # Filter controls
     filter_col1, filter_col2 = st.columns(2)
     with filter_col1:
         true_filter = st.multiselect(
-            "Filter by True Label",
+            "True label",
             options=["negative", "neutral", "positive"],
             default=["negative", "neutral", "positive"],
             key="err_true_filter",
         )
     with filter_col2:
-        sort_by = st.selectbox(
-            "Sort by",
-            ["Lowest Confidence", "Highest Confidence"],
-            key="err_sort",
-        )
+        sort_by = st.selectbox("Sort by", ["Lowest confidence", "Highest confidence"], key="err_sort")
 
     filtered = errors_df[errors_df["true_label"].isin(true_filter)].copy()
-    if sort_by == "Lowest Confidence":
-        filtered = filtered.sort_values("confidence", ascending=True)
-    else:
-        filtered = filtered.sort_values("confidence", ascending=False)
+    filtered = filtered.sort_values("confidence", ascending=sort_by == "Lowest confidence")
 
-    # Display errors
     display_count = min(20, len(filtered))
-    for idx, (_, row) in enumerate(filtered.head(display_count).iterrows()):
-        true_color = {"negative": "#A3322B", "neutral": "#5E6E6A", "positive": "#1D7451"}[row["true_label"]]
-        pred_color = {"negative": "#A3322B", "neutral": "#5E6E6A", "positive": "#1D7451"}[row["pred_label"]]
-
+    if display_count == 0:
+        empty_state(
+            "No errors match these labels", "Add a label above to see its misclassified sentences.", icon="search"
+        )
+    else:
+        body = []
+        for _, row in filtered.head(display_count).iterrows():
+            text = html.escape(row["sentence"][:220]) + ("…" if len(row["sentence"]) > 220 else "")
+            body.append(
+                f"<tr><td class='t' style='font-weight:400;line-height:1.5;'>{text}</td>"
+                f"<td class='c'>{sentiment_tag(row['true_label'])}</td><td class='c'>{sentiment_tag(row['pred_label'])}</td>"
+                f"<td class='n fs-num'>{row['confidence']:.2f}</td></tr>"
+            )
         st.markdown(
-            f"""
-        <div style='padding: 15px 20px; margin: 8px 0; background: #F7F9F8;
-                    border-radius: 10px; border: 1px solid #D5DEDC;'>
-            <div style='color: #12211F; font-size: 0.95em; line-height: 1.5; margin-bottom: 10px;'>
-                "{row["sentence"][:200]}{"..." if len(row["sentence"]) > 200 else ""}"
-            </div>
-            <div style='display: flex; gap: 20px; align-items: center;'>
-                <span style='font-size: 0.8em; color: #4B5D5A;'>True:
-                    <span style='color: {true_color}; font-weight: 700; text-transform: capitalize;'>{row["true_label"]}</span>
-                </span>
-                <span style='font-size: 0.8em; color: #4B5D5A;'>Predicted:
-                    <span style='color: {pred_color}; font-weight: 700; text-transform: capitalize;'>{row["pred_label"]}</span>
-                </span>
-                <span style='font-size: 0.8em; color: #4B5D5A; margin-left: auto;'>Confidence:
-                    <span style='font-variant-numeric: tabular-nums; color: #12211F;'>{row["confidence"]:.3f}</span>
-                </span>
-            </div>
-        </div>
-        """,
+            "<table class='fs-terms'><thead><tr><th class='t'>Sentence</th><th class='c'>True</th>"
+            "<th class='c'>Predicted</th><th style='text-align:right;'>Confidence</th></tr></thead>"
+            f"<tbody>{''.join(body)}</tbody></table>",
             unsafe_allow_html=True,
         )
 
     if len(filtered) > display_count:
-        st.info(f"Showing {display_count} of {len(filtered)} misclassified examples.")
+        st.caption(f"Showing {display_count} of {len(filtered)} misclassified sentences.")

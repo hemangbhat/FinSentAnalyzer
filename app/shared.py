@@ -19,6 +19,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 from ui import (  # noqa: F401  (re-exported for pages)
     CHART_SEQUENCE,
     COLORS,
+    MODEL_LABELS,
     SENTIMENT_COLORS,
     SENTIMENT_GLYPHS,
     SENTIMENT_TINTS,
@@ -54,6 +55,7 @@ from ui import (  # noqa: F401  (re-exported for pages)
 __all__ = [
     "CHART_SEQUENCE",
     "COLORS",
+    "MODEL_LABELS",
     "SENTIMENT_COLORS",
     "SENTIMENT_TINTS",
     "SENTIMENT_GLYPHS",

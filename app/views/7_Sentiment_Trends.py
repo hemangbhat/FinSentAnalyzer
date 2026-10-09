@@ -16,11 +16,18 @@ from plotly.subplots import make_subplots  # pyre-ignore
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from shared import (  # pyre-ignore
+    MODEL_LABELS,
     active_model,
+    exhibit,
+    interval_chart,
     kpi_strip,
+    load_result,
     page_header,
+    render_chart,
     section_header,
+    source_note,
     status_banner,
+    style_fig,
 )
 
 # ── Page config ─────────────────────────────────────────────────────────────────
@@ -31,267 +38,184 @@ if predictor is None:
 
 page_header(
     "Generalization",
-    "Real out-of-distribution generalization plus a synthetic sentiment↔price pipeline demo.",
+    "How the models hold up on real financial news they were not trained on, and a pipeline demo on "
+    "synthetic headlines kept clearly apart from it.",
+    meta="Real-news set <b>zeroshot/twitter-financial-news-sentiment</b> · validation split · MIT licence",
 )
 
-# ── Real generalization (if evaluated) ───────────────────────────────────────
-_gen_path = Path(__file__).parent.parent.parent / "results" / "generalization_results.json"
-if _gen_path.exists():
-    import json as _json
+_gen = load_result("generalization_results.json")
+_cmp = load_result("model_comparison_ood.json")
+_ci = (load_result("bootstrap_ci.json") or {}).get("real_news", {})
 
-    with open(_gen_path) as _f:
-        _gen = _json.load(_f)
-    section_header("Generalization on real, labeled data", _gen.get("dataset", ""))
+if _gen:
     kpi_strip(
         [
             {
-                "label": "OOD Accuracy",
+                "label": "SVM accuracy, real news",
                 "value": f"{_gen['accuracy']:.2f}",
-                "sub": f"majority {_gen['majority_class_accuracy']:.2f}",
-                "accent": "#0E6E6A",
+                "sub": f"always 'neutral' scores {_gen['majority_class_accuracy']:.2f}",
             },
-            {"label": "OOD Macro-F1", "value": f"{_gen['f1_macro']:.2f}", "sub": "in-domain 0.84", "accent": "#A3322B"},
             {
-                "label": "Samples",
-                "value": f"{_gen['n_samples']:,}",
-                "sub": "real labeled headlines",
-                "accent": "#45627A",
+                "label": "SVM macro-F1, real news",
+                "value": f"{_gen['f1_macro']:.2f}",
+                "sub": "0.84 ± 0.02 in-domain (5-fold CV)",
             },
-            {"label": "Model", "value": _gen["model"].upper(), "accent": "#1D7451"},
+            {
+                "label": "FinBERT macro-F1, held-out news",
+                "value": f"{_ci['finbert']['f1_macro']:.2f}" if "finbert" in _ci else "0.84",
+                "sub": "fine-tuned on the news training split",
+            },
+            {"label": "Headlines", "value": f"{_gen['n_samples']:,}", "sub": "human-labelled"},
         ]
     )
-    status_banner(
-        "Honest result: the TF-IDF baseline generalizes poorly across this domain shift "
-        "(macro-F1 0.84 in-domain → 0.46 on real news). Fine-tuning on in-domain news "
-        "closes the gap — FinBERT fine-tuned on the news training split (4 epochs, GPU, class weights) "
-        "reaches 0.87 accuracy / 0.84 macro-F1 on the held-out validation split. See the README.",
-        kind="warning",
+
+if _cmp and _ci:
+    maj = _cmp.get("majority_class_accuracy", 0.656)
+    exhibit(
+        "Macro-F1 on real financial news",
+        "The PhraseBank-trained SVM barely beats always answering 'neutral'. "
+        "FinBERT fine-tuned on in-domain news closes the gap.",
+    )
+    rows = []
+    if "svm" in _ci:
+        r = _ci["svm"]
+        rows.append(
+            {
+                "label": "TF-IDF + SVM · trained on PhraseBank (out-of-domain)",
+                "value": r["f1_macro"],
+                "low": r["ci_low"],
+                "high": r["ci_high"],
+                "color": "#A3322B",
+            }
+        )
+    if "finbert" in _ci:
+        r = _ci["finbert"]
+        rows.append(
+            {
+                "label": "FinBERT · fine-tuned on the news training split (in-domain)",
+                "value": r["f1_macro"],
+                "low": r["ci_low"],
+                "high": r["ci_high"],
+                "color": "#0E6E6A",
+            }
+        )
+    render_chart(interval_chart(rows, reference=(2 * maj / (1 + maj)) / 3, reference_label="always 'neutral'"))
+    source_note(
+        "results/bootstrap_ci.json (2,000 resamples of the 2,388 validation headlines). "
+        "FinBERT selected its best epoch on 500 of these rows, so its score carries a small optimistic bias."
     )
 
-# ── Model comparison on the real OOD benchmark ──────────────────────────────
-_cmp_path = Path(__file__).parent.parent.parent / "results" / "model_comparison_ood.json"
-if _cmp_path.exists():
-    cmp = json.loads(_cmp_path.read_text())
-    section_header("Model comparison on real news", cmp.get("dataset", ""))
-    _pretty = {
-        "svm": "TF-IDF + SVM<br><sup>trained on PhraseBank (out-of-domain)</sup>",
-        "finbert": "FinBERT<br><sup>fine-tuned on news train split</sup>",
-    }
-    names = [_pretty.get(m["model"], m["model"]) for m in cmp["models"]]
-    fig_cmp = go.Figure()
-    for metric, label, color in (("accuracy", "Accuracy", "#0E6E6A"), ("f1_macro", "Macro-F1", "#45627A")):
-        vals = [m[metric] for m in cmp["models"]]
-        fig_cmp.add_trace(
-            go.Bar(
-                name=label,
-                x=names,
-                y=vals,
-                marker_color=color,
-                width=0.32,
-                text=[f"{v:.2f}" for v in vals],
-                textposition="outside",
-                textfont={"color": "#12211F"},
-            )
-        )
-    maj = cmp.get("majority_class_accuracy")
-    if maj:
-        fig_cmp.add_hline(y=maj, line_dash="dash", line_color="#A3322B", annotation_text=f"majority acc {maj:.2f}")
-    fig_cmp.update_layout(
-        barmode="group",
-        height=380,
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        font={"color": "#2E3F3C", "family": "Public Sans, system-ui, sans-serif"},
-        yaxis={"range": [0, 1.08], "gridcolor": "#D5DEDC", "title": "Score"},
-        legend={"orientation": "h", "yanchor": "bottom", "y": 1.02, "xanchor": "right", "x": 1},
+_fb = load_result("generalization_finbert.json")
+if _fb and _fb.get("confusion_matrix"):
+    cm = _fb["confusion_matrix"]
+    cm_labels = _fb.get("labels", ["negative", "neutral", "positive"])
+    exhibit(
+        "Where fine-tuned FinBERT still errs",
+        "Most remaining errors are neutral headlines read as negative or positive.",
     )
-    st.plotly_chart(fig_cmp, use_container_width=True, theme=None, config={"displayModeBar": False})
-
-# ── Fine-tuned FinBERT confusion matrix on real OOD data ────────────────────
-_finbert_gen = Path(__file__).parent.parent.parent / "results" / "generalization_finbert.json"
-if _finbert_gen.exists():
-    fb = json.loads(_finbert_gen.read_text())
-    cm = fb.get("confusion_matrix")
-    cm_labels = fb.get("labels", ["negative", "neutral", "positive"])
-    if cm:
-        section_header("Fine-tuned FinBERT — confusion matrix (held-out news)", f"n={fb.get('n_samples')}")
-        fig_cm = go.Figure(
-            data=go.Heatmap(
-                z=cm,
-                x=[f"pred {lab}" for lab in cm_labels],
-                y=[f"true {lab}" for lab in cm_labels],
-                colorscale=[[0, "#F7F9F8"], [0.5, "#A9D0C9"], [1, "#4F9E93"]],
-                text=cm,
-                texttemplate="%{text}",
-                textfont={"color": "#12211F", "size": 14},
-                xgap=3,
-                ygap=3,
-                showscale=False,
-            )
+    glyph = {"negative": "▼", "neutral": "▶", "positive": "▲"}
+    fig_cm = go.Figure(
+        data=go.Heatmap(
+            z=cm,
+            x=[f"Predicted {glyph.get(lab, '')} {lab}" for lab in cm_labels],
+            y=[f"True {glyph.get(lab, '')} {lab}" for lab in cm_labels],
+            colorscale=[[0, "#F7F9F8"], [0.5, "#A9D0C9"], [1, "#4F9E93"]],
+            text=cm,
+            texttemplate="%{text:,}",
+            textfont={"color": "#12211F", "size": 14},
+            xgap=3,
+            ygap=3,
+            showscale=False,
+            hovertemplate="%{y} → %{x}: %{z:,}<extra></extra>",
         )
-        fig_cm.update_layout(
-            height=360,
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
-            font={"color": "#2E3F3C", "family": "Public Sans, system-ui, sans-serif"},
-            yaxis={"autorange": "reversed"},
-        )
-        st.plotly_chart(fig_cm, use_container_width=True, theme=None, config={"displayModeBar": False})
+    )
+    style_fig(fig_cm, height=300, legend=False)
+    fig_cm.update_layout(yaxis={"autorange": "reversed"}, margin={"t": 8, "l": 8, "r": 8, "b": 8})
+    fig_cm.update_xaxes(showgrid=False, side="bottom")
+    fig_cm.update_yaxes(showgrid=False)
+    render_chart(fig_cm)
+    source_note(f"results/generalization_finbert.json (n={_fb.get('n_samples', 0):,}).")
 
 # Check if the news dataset integration module is available
 try:
-    from integrate_news import (  # pyre-ignore
-        get_sentiment_trends,
-    )
+    from integrate_news import get_sentiment_trends  # pyre-ignore
 
     INTEGRATION_AVAILABLE = True
 except ImportError:
     INTEGRATION_AVAILABLE = False
 
 if not INTEGRATION_AVAILABLE:
-    st.warning(
-        "Cross-dataset integration module not available. Please ensure `integrate_news.py` is in the `src/` folder."
-    )
+    status_banner("The pipeline-demo module (src/integrate_news.py) is not available.", kind="warning")
     st.stop()
 
-# ── Cross-Dataset Results Section ───────────────────────────────────────────────
-
-# Load pre-computed results if available
 results_dir = Path(__file__).parent.parent.parent / "results"
-cross_results_path = results_dir / "cross_dataset_results.json"
 
-if cross_results_path.exists():
-    with open(cross_results_path) as f:
-        cross_results = json.load(f)
 
-    def _to_int(value, default=0):
-        try:
-            return int(value)
-        except (TypeError, ValueError):
-            try:
-                return int(float(value))
-            except (TypeError, ValueError):
-                return default
+def model_label_for(key: str) -> str:
+    return MODEL_LABELS.get(f"baseline_{key}", key.replace("_", " ").capitalize())
 
-    def _to_float(value, default=0.0):
-        try:
-            return float(value)
-        except (TypeError, ValueError):
-            return default
 
-    section_header("Cross-Dataset Validation Results")
+# ── Pipeline demo on synthetic headlines ─────────────────────────────────────
+cross_results = load_result("cross_dataset_results.json")
+if cross_results:
+    section_header(
+        "Pipeline demo on synthetic headlines",
+        "Everything below runs on ~2,700 template-generated headlines and synthetic prices. It exercises the "
+        "sentiment → aggregation → correlation code; it is not evidence about markets.",
+    )
+    pred = cross_results.get("target_predictions", {})
+    total = int(float(pred.get("total_headlines", 0) or 0))
+    dist = pred.get("distribution", {})
+    pos = int(float(dist.get("positive", 0) or 0))
+    neg = int(float(dist.get("negative", 0) or 0))
     st.markdown(
-        """
-    <p style='color: #4B5D5A;'>Model trained on <b>Financial PhraseBank</b> (expert-annotated),
-    then run over <b>~2,700 synthetic headlines</b> bundled for pipeline demonstration.
-    <br><span style='color:#9A5B16;'>Note:</span> these headlines are template-generated (not real news),
-    so this section demonstrates the pipeline — it is not a real generalization benchmark.</p>
-    """,
+        f"<p style='max-width:75ch;'>Scored <b class='fs-num'>{total:,}</b> synthetic headlines with mean confidence "
+        f"<b class='fs-num'>{float(pred.get('avg_confidence', 0) or 0):.1%}</b>: "
+        f"{pos / total:.1%} positive and {neg / total:.1%} negative.</p>"
+        if total
+        else "",
         unsafe_allow_html=True,
     )
 
-    # Metrics cards
-    pred = cross_results.get("target_predictions", {})
-    total_headlines = _to_int(pred.get("total_headlines", 0), 0)
-    avg_confidence = _to_float(pred.get("avg_confidence", 0.0), 0.0)
-    dist = pred.get("distribution", {})
-    pos_count = _to_int(dist.get("positive", 0), 0)
-    neg_count = _to_int(dist.get("negative", 0), 0)
-
-    col1, col2, col3, col4 = st.columns(4)
-
-    with col1:
-        st.markdown(
-            f"""
-        <div class='metric-card'>
-            <div style='color: #4B5D5A; font-size: 0.85em; text-transform: uppercase;'>Headlines Analyzed</div>
-            <div style='font-size: 2.2em; font-weight: 800; color: #12211F;'>{total_headlines:,}</div>
-        </div>
-        """,
-            unsafe_allow_html=True,
-        )
-
-    with col2:
-        st.markdown(
-            f"""
-        <div class='metric-card'>
-            <div style='color: #4B5D5A; font-size: 0.85em; text-transform: uppercase;'>Avg Confidence</div>
-            <div style='font-size: 2.2em; font-weight: 800; color: #12211F;'>{avg_confidence:.1%}</div>
-        </div>
-        """,
-            unsafe_allow_html=True,
-        )
-
-    with col3:
-        pos_pct = (pos_count / total_headlines * 100) if total_headlines > 0 else 0
-        st.markdown(
-            f"""
-        <div class='metric-card'>
-            <div style='color: #4B5D5A; font-size: 0.85em; text-transform: uppercase;'>Positive Ratio</div>
-            <div style='font-size: 2.2em; font-weight: 800; color: #1D7451;'>{pos_pct:.1f}%</div>
-        </div>
-        """,
-            unsafe_allow_html=True,
-        )
-
-    with col4:
-        neg_pct = (neg_count / total_headlines * 100) if total_headlines > 0 else 0
-        st.markdown(
-            f"""
-        <div class='metric-card'>
-            <div style='color: #4B5D5A; font-size: 0.85em; text-transform: uppercase;'>Negative Ratio</div>
-            <div style='font-size: 2.2em; font-weight: 800; color: #A3322B;'>{neg_pct:.1f}%</div>
-        </div>
-        """,
-            unsafe_allow_html=True,
-        )
-
-    # Correlation results
     correlations = cross_results.get("correlations", {})
     if correlations:
-        section_header("Sentiment ↔ Stock Price Correlations")
+        from scipy import stats  # pyre-ignore
+
+        def _p(r: float, n: int) -> float:
+            if n < 3 or abs(r) >= 1:
+                return float("nan")
+            t = r * ((n - 2) / (1 - r * r)) ** 0.5
+            return float(2 * stats.t.sf(abs(t), n - 2))
+
+        body, n_sig, n_tests = [], 0, 0
+        for ticker, d in correlations.items():
+            n = int(d.get("num_data_points", 0) or 0)
+            cells = []
+            for key in ("pearson_same_day", "pearson_next_day"):
+                r = float(d.get(key, 0) or 0)
+                n_tests += 1
+                n_sig += int(_p(r, n) < 0.05)
+                cells.append(f"<td class='n fs-num'>{r:+.3f}</td><td class='n fs-num'>{_p(r, n):.2f}</td>")
+            body.append(f"<tr><td class='t'>{ticker}</td>{''.join(cells)}<td class='n fs-num'>{n}</td></tr>")
         st.markdown(
-            "<p style='color: #4B5D5A;'>Pearson correlation between daily news sentiment and stock returns</p>",
+            "<table class='fs-terms'><thead><tr><th class='t'>Ticker</th>"
+            "<th style='text-align:right;'>Same-day r</th><th style='text-align:right;'>p</th>"
+            "<th style='text-align:right;'>Next-day r</th><th style='text-align:right;'>p</th>"
+            "<th style='text-align:right;'>Days</th></tr></thead>"
+            f"<tbody>{''.join(body)}</tbody></table>",
             unsafe_allow_html=True,
         )
-
-        corr_cols = st.columns(len(correlations))
-        for i, (ticker, data) in enumerate(correlations.items()):
-            with corr_cols[i]:
-                same_day = data.get("pearson_same_day", 0)
-                next_day = data.get("pearson_next_day", 0)
-                n_points = data.get("num_data_points", 0)
-
-                same_color = "#1D7451" if same_day > 0 else "#A3322B"
-                next_color = "#1D7451" if next_day > 0 else "#A3322B"
-
-                st.markdown(
-                    f"""
-                <div class='insight-card' style='text-align: center; border-top: 3px solid #45627A;'>
-                    <div style='font-size: 1.4em; font-weight: 700; color: #12211F; margin-bottom: 15px;'>{ticker}</div>
-                    <div style='display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #D5DEDC;'>
-                        <span style='color: #4B5D5A;'>Same-day</span>
-                        <span style='color: {same_color}; font-weight: 700; font-variant-numeric: tabular-nums;'>{same_day:+.4f}</span>
-                    </div>
-                    <div style='display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #D5DEDC;'>
-                        <span style='color: #4B5D5A;'>Next-day</span>
-                        <span style='color: {next_color}; font-weight: 700; font-variant-numeric: tabular-nums;'>{next_day:+.4f}</span>
-                    </div>
-                    <div style='display: flex; justify-content: space-between; padding: 8px 0;'>
-                        <span style='color: #4B5D5A;'>Data points</span>
-                        <span style='color: #12211F; font-weight: 600;'>{n_points}</span>
-                    </div>
-                </div>
-                """,
-                    unsafe_allow_html=True,
-                )
+        st.caption(
+            f"Pearson correlation between daily mean sentiment and returns. {n_sig} of {n_tests} coefficients "
+            "are significant at p < 0.05 (two-sided t-test), which is what synthetic data should produce."
+        )
 
 # ── Interactive Sentiment Trends Chart ──────────────────────────────────────────
-section_header("Interactive Sentiment & Price Chart")
+section_header("Sentiment and price over time", "Synthetic pipeline demo.")
 
-ticker_choice = st.selectbox("Select Ticker", ["AAPL", "TSLA", "AMZN"], key="trend_ticker")
+ticker_choice = st.selectbox("Ticker", ["AAPL", "TSLA", "AMZN"], key="trend_ticker")
 
-if st.button("Generate trend chart", type="primary", use_container_width=True):
+if st.button("Generate trend chart", type="primary"):
     try:
         with st.spinner("Computing sentiment trends..."):
             # Determine which model to use for predictions
@@ -391,21 +315,21 @@ if st.button("Generate trend chart", type="primary", use_container_width=True):
         st.error(f"Error generating trends: {e}")
 
 # ── SHAP Results Section ────────────────────────────────────────────────────────
-section_header("SHAP Feature Importance")
+section_header("SHAP feature importance", "Pre-computed global importance for the TF-IDF models.")
 
 # Check for pre-computed SHAP results
 shap_files = list(results_dir.glob("shap_*.json")) if results_dir.exists() else []
 
 if shap_files:
     for shap_file in shap_files:
-        model_label = shap_file.stem.replace("shap_", "").replace("_", " ").title()
+        model_label = model_label_for(shap_file.stem.replace("shap_", ""))
 
         with open(shap_file) as f:
             shap_data = json.load(f)
 
         top_features = shap_data.get("top_features", [])[:15]
         if top_features:
-            with st.expander(f"{model_label} — Top SHAP Features", expanded=True):
+            with st.expander(f"{model_label}: top SHAP features", expanded=True):
                 features = [f["feature"] for f in top_features]
                 importances = [f["importance"] for f in top_features]
 
@@ -464,63 +388,31 @@ else:
 cv_results_path = results_dir / "cv_results.json" if results_dir.exists() else None
 
 if cv_results_path and cv_results_path.exists():
-    section_header("5-Fold Cross-Validation Results")
-
     with open(cv_results_path) as f:
         cv_data = json.load(f)
 
     if cv_data:
-        # Create comparison bar chart
-        models = list(cv_data.keys())
-        acc_means = [cv_data[m]["accuracy_mean"] for m in models]
-        acc_stds = [cv_data[m]["accuracy_std"] for m in models]
-        f1_means = [cv_data[m]["f1_macro_mean"] for m in models]
-        f1_stds = [cv_data[m]["f1_macro_std"] for m in models]
-
-        fig = go.Figure()
-        fig.add_trace(
-            go.Bar(
-                name="Accuracy",
-                x=[m.replace("_", " ").title() for m in models],
-                y=acc_means,
-                error_y=dict(type="data", array=acc_stds, visible=True),
-                marker_color="#0E6E6A",
+        exhibit(
+            "Five-fold cross-validation on PhraseBank",
+            "Mean macro-F1 across stratified folds. SVM and Gradient Boosting overlap: the data cannot separate them.",
+        )
+        ranked = sorted(cv_data.items(), key=lambda kv: kv[1]["f1_macro_mean"], reverse=True)
+        best = ranked[0][0]
+        render_chart(
+            interval_chart(
+                [
+                    {
+                        "label": model_label_for(k),
+                        "value": v["f1_macro_mean"],
+                        "low": v["f1_macro_mean"] - v["f1_macro_std"],
+                        "high": v["f1_macro_mean"] + v["f1_macro_std"],
+                        "color": "#0E6E6A" if k == best else "#45627A",
+                    }
+                    for k, v in ranked
+                ],
+                axis_title="Mean macro-F1 (dot) ± 1 standard deviation across 5 folds (band)",
+                x_range=(0.6, 1.0),
+                band_name="± 1 s.d.",
             )
         )
-        fig.add_trace(
-            go.Bar(
-                name="F1 (Macro)",
-                x=[m.replace("_", " ").title() for m in models],
-                y=f1_means,
-                error_y=dict(type="data", array=f1_stds, visible=True),
-                marker_color="#45627A",
-            )
-        )
-        fig.update_layout(
-            barmode="group",
-            title={"text": "Model Comparison — 5-Fold Stratified CV", "font": {"color": "#12211F", "size": 16}},
-            yaxis_title="Score",
-            height=400,
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
-            font={"color": "#2E3F3C", "family": "Public Sans, system-ui, sans-serif"},
-            yaxis={"showgrid": True, "gridcolor": "#D5DEDC", "range": [0.7, 1.0]},
-            xaxis={"showgrid": False},
-            legend={"orientation": "h", "yanchor": "bottom", "y": 1.02, "xanchor": "right", "x": 1},
-        )
-        st.plotly_chart(fig, use_container_width=True, theme=None, config={"displayModeBar": False})
-
-        # Best model highlight
-        best_model = max(cv_data, key=lambda m: cv_data[m]["f1_macro_mean"])
-        best_f1 = cv_data[best_model]["f1_macro_mean"]
-        best_std = cv_data[best_model]["f1_macro_std"]
-        st.markdown(
-            f"""
-        <div class='insight-card' style='padding: 20px;'>
-            <span style='color: #1D7451; font-weight: 700;'>Best Model (by F1 Macro):</span>
-            <span style='color: #12211F; font-weight: 600;'>{best_model.replace("_", " ").title()}</span>
-            — <span style='color: #12211F; font-variant-numeric: tabular-nums;'>{best_f1:.4f} ± {best_std:.4f}</span>
-        </div>
-        """,
-            unsafe_allow_html=True,
-        )
+        source_note("results/cv_results.json (stratified 5-fold CV on train + validation, n=2,033).")

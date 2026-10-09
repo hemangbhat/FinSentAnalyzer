@@ -63,21 +63,21 @@ def headline_numbers() -> dict:
 
 n = headline_numbers()
 
-page_header(
-    "Financial sentiment, measured honestly",
-    "FinSight classifies financial text as positive, neutral or negative, shows the words behind "
-    "every verdict, and reports how each model holds up on real news it never saw, failures included.",
-    meta=(
-        "<b>9</b> models · <b>116</b> automated tests · FastAPI service · "
-        "Data: Financial PhraseBank and Twitter Financial News (MIT)"
-    ),
-)
-
-c1, c2, _ = st.columns([1.15, 1.1, 3])
-with c1:
-    st.page_link("views/1_Single_Analysis.py", label="Analyze a sentence", icon=":material/arrow_forward:")
-with c2:
-    st.page_link("views/7_Sentiment_Trends.py", label="Read the evaluation", icon=":material/public:")
+head, action = st.columns([3.3, 1], vertical_alignment="bottom")
+with head:
+    page_header(
+        "Financial sentiment, measured honestly",
+        "FinSight classifies financial text as positive, neutral or negative, shows the words behind "
+        "every verdict, and reports how each model holds up on real news it never saw, failures included.",
+        meta=(
+            "<b>9</b> models · <b>116</b> automated tests · FastAPI service · "
+            "Data: Financial PhraseBank and Twitter Financial News (MIT)"
+        ),
+    )
+with action:
+    if st.button("Analyze a sentence", type="primary", icon=":material/arrow_forward:", use_container_width=True):
+        st.switch_page("views/1_Single_Analysis.py")
+    st.page_link("views/7_Sentiment_Trends.py", label="Read the evaluation", icon=":material/insights:")
 
 kpi_strip(
     [

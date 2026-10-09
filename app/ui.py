@@ -204,7 +204,7 @@ h1, h2, h3, h4 { letter-spacing: -0.015em; color: var(--fs-ink); }
 [data-testid="stFileUploaderDropzone"] { border-style: dashed; }
 
 /* ── Report masthead (page header) ──────────────────────────────────── */
-.fs-masthead { border-top: 3px solid var(--fs-teal); padding-top: 18px; margin-bottom: 26px; }
+.fs-masthead { border-top: 3px solid var(--fs-teal); padding-top: 18px; margin-bottom: 18px; }
 .fs-masthead .row { display: flex; gap: 24px; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; }
 .fs-masthead h1 { font-size: 2.05rem; font-weight: 700; margin: 0 0 6px 0; line-height: 1.15; padding: 0; }
 .fs-masthead .standfirst { color: var(--fs-muted); font-size: 1.04rem; max-width: 68ch; margin: 0; line-height: 1.55; }
@@ -295,7 +295,7 @@ table.fs-terms .c { text-align: right; padding-right: 0; }
 
 /* ── Contents list (home) ───────────────────────────────────────────── */
 .fs-contents-row { border-top: 1px solid var(--fs-rule); padding: 10px 0 4px 0; }
-.fs-contents-desc { color: var(--fs-muted); font-size: 0.88rem; margin: 2px 0 0 0; line-height: 1.5; }
+.fs-contents-desc { color: var(--fs-muted); font-size: 0.88rem; margin: 2px 0 18px 0; line-height: 1.5; }
 .fs-tagline-exp { display: inline-block; font-size: 0.72rem; font-weight: 700; color: var(--fs-ochre);
     border: 1px solid #E8CFA8; background: #FBF3E8; padding: 0 6px; border-radius: 3px; margin-left: 6px; vertical-align: 2px; }
 
@@ -610,7 +610,14 @@ def create_gauge_chart(probabilities: dict, prediction: str) -> go.Figure:
     return fig
 
 
-def interval_chart(rows: list[dict], reference: float | None = None, reference_label: str = "") -> go.Figure:
+def interval_chart(
+    rows: list[dict],
+    reference: float | None = None,
+    reference_label: str = "",
+    axis_title: str = "Macro-F1 (dot) with 95% bootstrap interval (band)",
+    x_range: tuple[float, float] = (0.0, 1.0),
+    band_name: str = "95% interval",
+) -> go.Figure:
     """
     Dot-and-interval chart: one row per estimate, the point with its 95% band.
 
@@ -639,12 +646,12 @@ def interval_chart(rows: list[dict], reference: float | None = None, reference_l
                 y=[y],
                 mode="markers",
                 marker={"color": c, "size": 12, "line": {"color": "#FFFFFF", "width": 2}},
-                hovertemplate=f"{r['label']}<br>macro-F1 %{{x:.3f}}<br>95% interval {r['low']:.3f}–{r['high']:.3f}<extra></extra>",
+                hovertemplate=f"{r['label']}<br>%{{x:.3f}}<br>{band_name} {r['low']:.3f}–{r['high']:.3f}<extra></extra>",
                 showlegend=False,
             )
         )
         fig.add_annotation(
-            x=0,
+            x=x_range[0],
             y=y + 0.38,
             xref="x",
             yref="y",
@@ -652,6 +659,8 @@ def interval_chart(rows: list[dict], reference: float | None = None, reference_l
             showarrow=False,
             text=f"{html.escape(r['label'])}",
             font={"size": 12, "color": COLORS["text_body"]},
+            bgcolor="rgba(255,255,255,0.92)",
+            borderpad=1,
         )
         fig.add_annotation(
             x=r["high"],
@@ -679,9 +688,8 @@ def interval_chart(rows: list[dict], reference: float | None = None, reference_l
         )
     style_fig(fig, height=max(220, 62 * n + 70), legend=False)
     fig.update_layout(margin={"t": 10, "l": 8, "r": 40, "b": 8})
-    fig.update_xaxes(
-        range=[0, 1.04], showgrid=True, gridcolor=_GRID, title="Macro-F1 (dot) with 95% bootstrap interval (band)"
-    )
+    pad = (x_range[1] - x_range[0]) * 0.06
+    fig.update_xaxes(range=[x_range[0], x_range[1] + pad], showgrid=True, gridcolor=_GRID, title=axis_title)
     fig.update_yaxes(
         range=[0.2, n + 0.75], showticklabels=False, showgrid=False, zeroline=False, ticks="", showline=False
     )
