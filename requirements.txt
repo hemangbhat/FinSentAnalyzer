@@ -1,3 +1,7 @@
+# CPU-only PyTorch: the default PyPI wheel bundles CUDA (~2 GB) and can exceed
+# free-tier build limits. This index serves the ~200 MB CPU build.
+--extra-index-url https://download.pytorch.org/whl/cpu
+
 # Core ML
 scikit-learn>=1.7.2
 numpy==2.2.3

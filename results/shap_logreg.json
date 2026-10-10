@@ -1,3 +1,361 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:b852dff42ff4d258ed42605a46f2efeccd262f91cb1935ebacd76f8310a518d7
-size 8303
+{
+  "model": "logreg",
+  "split": "test",
+  "num_samples": 100,
+  "num_features": 5883,
+  "top_features": [
+    {
+      "feature": "is",
+      "importance": 0.05869904017131342
+    },
+    {
+      "feature": "the",
+      "importance": 0.04735153479929114
+    },
+    {
+      "feature": "to",
+      "importance": 0.04618198626675312
+    },
+    {
+      "feature": "from",
+      "importance": 0.03650551241806917
+    },
+    {
+      "feature": "eur",
+      "importance": 0.03447776556427356
+    },
+    {
+      "feature": "and",
+      "importance": 0.03342355668442328
+    },
+    {
+      "feature": "in",
+      "importance": 0.0326951530891494
+    },
+    {
+      "feature": "year",
+      "importance": 0.022252450271286004
+    },
+    {
+      "feature": "sales",
+      "importance": 0.018816586498368693
+    },
+    {
+      "feature": "profit",
+      "importance": 0.01815574102602303
+    },
+    {
+      "feature": "mn",
+      "importance": 0.017920801508463282
+    },
+    {
+      "feature": "increased",
+      "importance": 0.01527323735222644
+    },
+    {
+      "feature": "by",
+      "importance": 0.014468392413501853
+    },
+    {
+      "feature": "finnish",
+      "importance": 0.0138371197057441
+    },
+    {
+      "feature": "of",
+      "importance": 0.0129007051293721
+    },
+    {
+      "feature": "be",
+      "importance": 0.012343436338925151
+    },
+    {
+      "feature": "in the",
+      "importance": 0.0123237734476006
+    },
+    {
+      "feature": "net",
+      "importance": 0.01211672753565116
+    },
+    {
+      "feature": "down",
+      "importance": 0.011899296222685722
+    },
+    {
+      "feature": "to eur",
+      "importance": 0.0098650636432112
+    },
+    {
+      "feature": "rose",
+      "importance": 0.009727998824167604
+    },
+    {
+      "feature": "has",
+      "importance": 0.00955583380556699
+    },
+    {
+      "feature": "period",
+      "importance": 0.00938257497935269
+    },
+    {
+      "feature": "quarter",
+      "importance": 0.0092472106505544
+    },
+    {
+      "feature": "of the",
+      "importance": 0.008774036619663236
+    },
+    {
+      "feature": "million",
+      "importance": 0.008664544840422873
+    },
+    {
+      "feature": "said",
+      "importance": 0.008476926325045602
+    },
+    {
+      "feature": "percent",
+      "importance": 0.008305860410588976
+    },
+    {
+      "feature": "will",
+      "importance": 0.008247709608925307
+    },
+    {
+      "feature": "up",
+      "importance": 0.008135207182813983
+    }
+  ],
+  "class_features": {
+    "negative": [
+      {
+        "feature": "is",
+        "shap_value": -0.05249713449321233,
+        "direction": "negative"
+      },
+      {
+        "feature": "and",
+        "shap_value": -0.029358472978259897,
+        "direction": "negative"
+      },
+      {
+        "feature": "the",
+        "shap_value": -0.027347257439285958,
+        "direction": "negative"
+      },
+      {
+        "feature": "in",
+        "shap_value": 0.02707057067111448,
+        "direction": "positive"
+      },
+      {
+        "feature": "profit",
+        "shap_value": 0.02319383323367909,
+        "direction": "positive"
+      },
+      {
+        "feature": "to",
+        "shap_value": 0.021206215958018745,
+        "direction": "positive"
+      },
+      {
+        "feature": "of",
+        "shap_value": 0.019351057694058107,
+        "direction": "positive"
+      },
+      {
+        "feature": "from",
+        "shap_value": 0.019052318393567077,
+        "direction": "positive"
+      },
+      {
+        "feature": "eur",
+        "shap_value": 0.01849746483398623,
+        "direction": "positive"
+      },
+      {
+        "feature": "down",
+        "shap_value": 0.017848944334028595,
+        "direction": "positive"
+      },
+      {
+        "feature": "by",
+        "shap_value": 0.016908835004951172,
+        "direction": "positive"
+      },
+      {
+        "feature": "sales",
+        "shap_value": 0.01597535023076296,
+        "direction": "positive"
+      },
+      {
+        "feature": "mn",
+        "shap_value": 0.015561275525377621,
+        "direction": "positive"
+      },
+      {
+        "feature": "in the",
+        "shap_value": 0.013682652123462919,
+        "direction": "positive"
+      },
+      {
+        "feature": "of the",
+        "shap_value": -0.012847689989482079,
+        "direction": "negative"
+      }
+    ],
+    "neutral": [
+      {
+        "feature": "is",
+        "shap_value": 0.08804856025697014,
+        "direction": "positive"
+      },
+      {
+        "feature": "the",
+        "shap_value": 0.07102730219893683,
+        "direction": "positive"
+      },
+      {
+        "feature": "to",
+        "shap_value": -0.06927297940012953,
+        "direction": "negative"
+      },
+      {
+        "feature": "from",
+        "shap_value": -0.05475826862710378,
+        "direction": "negative"
+      },
+      {
+        "feature": "eur",
+        "shap_value": -0.051716648346410314,
+        "direction": "negative"
+      },
+      {
+        "feature": "and",
+        "shap_value": 0.05013533502663494,
+        "direction": "positive"
+      },
+      {
+        "feature": "in",
+        "shap_value": -0.0490427296337241,
+        "direction": "negative"
+      },
+      {
+        "feature": "year",
+        "shap_value": -0.033378675406929,
+        "direction": "negative"
+      },
+      {
+        "feature": "sales",
+        "shap_value": -0.028224879747553028,
+        "direction": "negative"
+      },
+      {
+        "feature": "profit",
+        "shap_value": -0.027233611539034572,
+        "direction": "negative"
+      },
+      {
+        "feature": "mn",
+        "shap_value": -0.026881202262694952,
+        "direction": "negative"
+      },
+      {
+        "feature": "by",
+        "shap_value": -0.02170258862025278,
+        "direction": "negative"
+      },
+      {
+        "feature": "finnish",
+        "shap_value": -0.020755679558616152,
+        "direction": "negative"
+      },
+      {
+        "feature": "be",
+        "shap_value": 0.018515154508387727,
+        "direction": "positive"
+      },
+      {
+        "feature": "in the",
+        "shap_value": -0.018485660171400898,
+        "direction": "negative"
+      }
+    ],
+    "positive": [
+      {
+        "feature": "to",
+        "shap_value": 0.04806676344211103,
+        "direction": "positive"
+      },
+      {
+        "feature": "the",
+        "shap_value": -0.04368004475965073,
+        "direction": "negative"
+      },
+      {
+        "feature": "from",
+        "shap_value": 0.035705950233536655,
+        "direction": "positive"
+      },
+      {
+        "feature": "is",
+        "shap_value": -0.0355514257637578,
+        "direction": "negative"
+      },
+      {
+        "feature": "eur",
+        "shap_value": 0.03321918351242412,
+        "direction": "positive"
+      },
+      {
+        "feature": "year",
+        "shap_value": 0.025429838446851424,
+        "direction": "positive"
+      },
+      {
+        "feature": "increased",
+        "shap_value": 0.02290985602833966,
+        "direction": "positive"
+      },
+      {
+        "feature": "in",
+        "shap_value": 0.021972158962609574,
+        "direction": "positive"
+      },
+      {
+        "feature": "and",
+        "shap_value": -0.020776862048375005,
+        "direction": "negative"
+      },
+      {
+        "feature": "of",
+        "shap_value": -0.018677255069646296,
+        "direction": "negative"
+      },
+      {
+        "feature": "rose",
+        "shap_value": 0.014591998236251407,
+        "direction": "positive"
+      },
+      {
+        "feature": "finnish",
+        "shap_value": 0.014261664060207124,
+        "direction": "positive"
+      },
+      {
+        "feature": "be",
+        "shap_value": -0.012998106021416107,
+        "direction": "negative"
+      },
+      {
+        "feature": "percent",
+        "shap_value": 0.012458790615883474,
+        "direction": "positive"
+      },
+      {
+        "feature": "net",
+        "shap_value": 0.012402321043864956,
+        "direction": "positive"
+      }
+    ]
+  }
+}

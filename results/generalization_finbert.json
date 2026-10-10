@@ -1,3 +1,51 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:3094c0333794ca444507d216ce9aacb79a80d16cfce5e43a507bbcd759b9bdcc
-size 1049
+{
+  "model": "finbert",
+  "dataset": "zeroshot/twitter-financial-news-sentiment (validation, MIT)",
+  "n_samples": 2388,
+  "accuracy": 0.8743718592964824,
+  "f1_macro": 0.8411731260642372,
+  "f1_weighted": 0.8765986300000691,
+  "majority_class_accuracy": 0.6557788944723618,
+  "labels": [
+    "negative",
+    "neutral",
+    "positive"
+  ],
+  "confusion_matrix": [
+    [
+      297,
+      41,
+      9
+    ],
+    [
+      92,
+      1386,
+      88
+    ],
+    [
+      23,
+      47,
+      405
+    ]
+  ],
+  "per_class": {
+    "negative": {
+      "precision": 0.720873786407767,
+      "recall": 0.8559077809798271,
+      "f1-score": 0.782608695652174,
+      "support": 347.0
+    },
+    "neutral": {
+      "precision": 0.9402985074626866,
+      "recall": 0.8850574712643678,
+      "f1-score": 0.9118421052631579,
+      "support": 1566.0
+    },
+    "positive": {
+      "precision": 0.8067729083665338,
+      "recall": 0.8526315789473684,
+      "f1-score": 0.8290685772773797,
+      "support": 475.0
+    }
+  }
+}

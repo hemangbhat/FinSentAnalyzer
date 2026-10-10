@@ -798,12 +798,28 @@ promotion criteria.
 
 ## Deployment
 
-### Option 1: Streamlit Cloud (Easiest)
+### Option 1: Streamlit Community Cloud (free, easiest)
 
-1. Push to GitHub
-2. Go to [share.streamlit.io](https://share.streamlit.io)
-3. Point to `app/app.py`
-4. Deploy
+1. Sign in at [share.streamlit.io](https://share.streamlit.io) with GitHub and click **Create app → Deploy a public app from GitHub**.
+2. Repository `hemangbhat/FinSentAnalyzer`, branch `main`, main file path `app/app.py`.
+3. Under **Advanced settings**, choose **Python 3.11**, and paste these secrets (TOML):
+
+   ```toml
+   FINSIGHT_DISABLE_HEAVY = "true"   # stock page: skip live LSTM training on the shared instance
+   # FINSIGHT_FINBERT_REPO = "your-hf-username/finbert-financial"   # optional, see below
+   ```
+
+4. Click **Deploy**. The first build takes 5–10 minutes (PyTorch CPU wheel + transformers).
+
+What to expect:
+
+- `requirements.txt` pulls the **CPU-only** PyTorch build, which keeps the install within free-tier limits.
+- `results/*.json` and the baseline models are plain git files, so every page has its data.
+- The fine-tuned FinBERT weights (438 MB) live in Git LFS. If the host doesn't fetch them, or the free 1 GB/month
+  LFS bandwidth runs out, the app hides that model and keeps working. To serve it reliably, upload the weights once
+  with `python scripts/upload_finetuned_to_hf.py --model finbert --repo your-hf-username/finbert-financial`
+  (after `huggingface-cli login`) and set `FINSIGHT_FINBERT_REPO` to that repo id.
+- Free apps sleep after a few days without traffic; the first visit after that wakes it in about a minute.
 
 ### Option 2: Docker
 
@@ -823,11 +839,12 @@ Python-stdlib health check hits the Streamlit `/_stcore/health` endpoint.
 > demand. The model revision is pinned for reproducibility. For faster cold starts,
 > bake the weights into the image or mount a `HF_HOME` cache volume.
 
-### Option 3: HuggingFace Spaces
+### Option 3: Hugging Face Spaces (Docker)
 
-1. Create a new Space (Streamlit SDK)
-2. Upload the `app/`, `src/`, `models/`, `data/`, and `external-datasets/` directories
-3. Add `requirements-deploy.txt` as `requirements.txt`
+1. Create a new Space with the **Docker** SDK (the free CPU tier has 16 GB RAM).
+2. Push this repository to the Space's git remote; Spaces fetches Git LFS files, so fine-tuned FinBERT loads.
+3. The existing `Dockerfile` builds and serves the app on port 8501. Add `app_port: 8501` to the Space's README
+   front-matter.
 
 ### Option 4: Scaled split architecture (UI + API + load balancer)
 

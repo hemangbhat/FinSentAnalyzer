@@ -1,3 +1,50 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:90b9663ff4212900674e547b828abe0ce60ee9edae957d01c1d475135d3387bc
-size 1516
+{
+  "model": "svm",
+  "source_dataset": "Financial PhraseBank (training)",
+  "target_dataset": "Financial News Headlines (evaluation)",
+  "target_predictions": {
+    "total_headlines": 2688,
+    "distribution": {
+      "neutral": "2018",
+      "positive": "388",
+      "negative": "282"
+    },
+    "distribution_pct": {
+      "neutral": "75.1%",
+      "positive": "14.4%",
+      "negative": "10.5%"
+    },
+    "avg_confidence": 0.5528551222775431
+  },
+  "correlations": {
+    "AAPL": {
+      "pearson_same_day": 0.056170511967423314,
+      "pearson_next_day": -0.08483772244551664,
+      "num_data_points": 448,
+      "mean_sentiment": 0.2734375,
+      "mean_return": 0.0011611752197700032,
+      "sentiment_std": 0.35944870244139276
+    },
+    "TSLA": {
+      "pearson_same_day": -0.025761877222734195,
+      "pearson_next_day": 0.016442435380142104,
+      "num_data_points": 448,
+      "mean_sentiment": 0.07366071428571429,
+      "mean_return": 0.001369287445165636,
+      "sentiment_std": 0.25719705982125207
+    },
+    "AMZN": {
+      "pearson_same_day": 0.028270836732439818,
+      "pearson_next_day": -0.035029426893004194,
+      "num_data_points": 448,
+      "mean_sentiment": -0.22879464285714285,
+      "mean_return": 0.0014423970934240285,
+      "sentiment_std": 0.3485301482250798
+    }
+  },
+  "daily_sentiment_stats": {
+    "mean_daily_sentiment": 0.03943452380952381,
+    "std_daily_sentiment": 0.3848489179904278,
+    "avg_headlines_per_day": 2.0
+  }
+}

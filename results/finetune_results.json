@@ -1,3 +1,9 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:f5263969fe04cfa2e82c59974e6de0029fb01f68af3b3fb93183cbd86c4aa44f
-size 233
+{
+  "model": "finbert",
+  "dataset": "zeroshot/twitter-financial-news-sentiment (in-domain train\u2192val, MIT)",
+  "n_train": 9543,
+  "n_val": 2388,
+  "epochs": 3,
+  "accuracy": 0.8827470686767169,
+  "f1_macro": 0.8444051918377339
+}

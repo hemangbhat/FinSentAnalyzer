@@ -1,4 +1,2 @@
-results/** filter=lfs diff=lfs merge=lfs -text
 financial-news-stock-prediction[[:space:]](1)/** filter=lfs diff=lfs merge=lfs -text
 models/finbert_finetuned/*.safetensors filter=lfs diff=lfs merge=lfs -text
-results/bootstrap_ci.json -filter -diff -merge text
