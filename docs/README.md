@@ -1,10 +1,16 @@
-\
-\# FinSentAnalyzer / Financial Sentiment Analyzer
+# FinSentAnalyzer / Financial Sentiment Analyzer
 
-End-to-end financial sentiment analysis platform for classifying financial text into **positive**, **neutral**, or **negative** sentiment. The project combines classical ML baselines, a pre-trained FinBERT transformer, SHAP-style explainability for baseline models, rule-based reasoning, and a 9-page Streamlit dashboard.
+End-to-end financial sentiment analysis platform for classifying financial text into **positive**, **neutral**, or **negative** sentiment. The project combines classical ML baselines, FinBERT (zero-shot and fine-tuned on real financial news), SHAP explainability, bootstrap confidence intervals on every headline metric, rule-based reasoning, a FastAPI inference service, and a 10-page Streamlit dashboard.
+
+## Documents in this folder
+- [INTERVIEW_GUIDE.md](INTERVIEW_GUIDE.md): how to present the project: pitch, demo script, limitations, Q&A, key numbers
+- [MODEL_CARD.md](MODEL_CARD.md): intended use, data, metrics and limitations
+- [DESIGN.md](DESIGN.md): the dashboard's design system
+- [TRACKER.md](TRACKER.md): what's done and what's next
+- [PRODUCTION_SETUP.md](PRODUCTION_SETUP.md), [RETRAINING.md](RETRAINING.md): operations
 
 ## What’s included
-- 8 model variants: Logistic Regression, Naive Bayes, SVM, Random Forest, Gradient Boosting, MLP, Voting Ensemble, and pre-trained FinBERT
+- 9 model variants: Logistic Regression, Naive Bayes, SVM, Random Forest, Gradient Boosting, MLP, Voting Ensemble, FinBERT (zero-shot) and FinBERT fine-tuned on real news
 - 5-fold stratified cross-validation and GridSearchCV tuning
 - Batch processing, sentiment trends, error analysis, explainability, and stock-direction extension
 - CI/CD, Docker, reusable model loading, and deployment-ready structure
