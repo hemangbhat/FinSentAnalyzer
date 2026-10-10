@@ -1,6 +1,6 @@
 # 📈 Financial Sentiment Analyzer
 
-> **An end-to-end ML pipeline for classifying financial text sentiment with 7 trained baseline models + pre-trained FinBERT, SHAP explainability, rigorous cross-validation, a FastAPI inference service, and a professional 9-page Streamlit dashboard.**
+> **An end-to-end ML pipeline for classifying financial text sentiment: 7 trained baselines plus FinBERT (zero-shot and fine-tuned on real news), honest out-of-domain evaluation with bootstrap confidence intervals, SHAP explainability, a FastAPI inference service, and a 10-page Streamlit dashboard.**
 
 [![Python 3.10](https://img.shields.io/badge/Python-3.10-blue.svg)](https://python.org)
 [![Streamlit](https://img.shields.io/badge/Streamlit-Dashboard-red.svg)](https://streamlit.io)
@@ -61,7 +61,7 @@ Financial sentiment analysis is a critical tool for quantitative finance, risk m
 | **Explainability** | SHAP feature importance + per-prediction word highlighting |
 | **Error Analysis** | Sankey misclassification diagrams + confidence calibration insights |
 | **Generalization** | Honest OOD test on a real, MIT-licensed news dataset: TF-IDF 0.46 macro-F1 → FinBERT fine-tuned **0.84** |
-| **Dashboard** | Professional 9-page Streamlit app with dark fintech theme |
+| **Dashboard** | 10-page Streamlit app designed as a report: every score shown with its uncertainty (see [docs/DESIGN.md](docs/DESIGN.md)) |
 | **CI/CD** | GitHub Actions (lint + format + type check + tests) |
 | **Deployment** | Docker + Streamlit Cloud + HuggingFace Spaces ready |
 
