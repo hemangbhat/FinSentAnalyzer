@@ -836,7 +836,7 @@ FinBERT and the LSTM Stock Prediction Extension — work in the container**. A
 Python-stdlib health check hits the Streamlit `/_stcore/health` endpoint.
 
 > First container start downloads the FinBERT weights (~500MB) from HuggingFace on
-> demand. The model revision is pinned for reproducibility. For faster cold starts,
+> demand. The revision comes from `MODEL_REVISION` in `src/finbert_pretrained.py` (currently `main`; set a commit hash for fully reproducible loads). For faster cold starts,
 > bake the weights into the image or mount a `HF_HOME` cache volume.
 
 ### Option 3: Hugging Face Spaces (Docker)
