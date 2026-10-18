@@ -1,0 +1,49 @@
+{
+  "provider": "openrouter",
+  "model": "anthropic/claude-haiku-5.5",
+  "prompt_version": "v1",
+  "dataset": "zeroshot/twitter-financial-news-sentiment (validation, MIT)",
+  "n": 2388,
+  "full_set": true,
+  "prices_usd_per_1m": {
+    "input": null,
+    "output": null
+  },
+  "run_at": "2026-10-18T09:32:02+00:00",
+  "runs": [
+    {
+      "mode": "zero_shot",
+      "accuracy": 0.8132328308207705,
+      "f1_macro": 0.791822744945796,
+      "ci_low": 0.7735103188242185,
+      "ci_high": 0.809540471252107,
+      "n": 2388,
+      "confusion_matrix": [
+        [
+          323,
+          19,
+          5
+        ],
+        [
+          167,
+          1200,
+          199
+        ],
+        [
+          7,
+          49,
+          419
+        ]
+      ],
+      "input_tokens": 1769254,
+      "output_tokens": 75296,
+      "cost_usd": null,
+      "cost_per_1k_usd": null,
+      "latency_ms_p50": null,
+      "latency_ms_p95": null,
+      "invalid": 0,
+      "errors": 0,
+      "cached": 2388
+    }
+  ]
+}
