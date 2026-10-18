@@ -554,6 +554,20 @@ python scripts/llm_benchmark.py --price-in <$/1M in> --price-out <$/1M out>   # 
 
 The result (`results/llm_benchmark.json`) appears on the **Generalization** page next to FinBERT and the SVM.
 
+**Result** (all 2,388 held-out headlines, Claude Haiku via OpenRouter, zero-shot, temperature 0, 0 invalid answers):
+
+| Model | Accuracy | Macro-F1 (95% CI) | Recall neg / neu / pos | Runs |
+|---|:--:|:--:|:--:|---|
+| FinBERT fine-tuned on 9.5k news labels | **0.874** | **0.841** (0.823–0.858) | 0.86 / **0.89** / 0.85 | locally, ms per headline, free |
+| Claude Haiku, zero-shot, no labels | 0.813 | 0.792 (0.774–0.810) | **0.93** / 0.77 / **0.88** | API, ~1.4 s per call, paid |
+| TF-IDF + SVM trained on PhraseBank | 0.67 | 0.46 (0.44–0.49) | | locally |
+
+The intervals don't overlap: the fine-tuned model is measurably better. The LLM catches more negative and positive
+headlines, but reads 366 of 1,566 neutral headlines as sentiment-bearing (FinBERT: 180), which is where it loses.
+With no training data at all it still beats the PhraseBank model by 0.33 macro-F1. The few-shot run is not reported:
+it was cut short by the API account running out of credit, and failed calls are scored as wrong, so its number
+would understate the model.
+
 ### Ask the News (retrieval-augmented generation)
 
 `src/rag_news.py` and the **Ask the News** page answer questions from the real headlines:

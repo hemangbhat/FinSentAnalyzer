@@ -70,7 +70,8 @@
 - [x] Generalization page shows the LLM comparison, or how to produce it
 - [x] Ask the News: RAG over the real headlines with validated citations and per-source sentiment (`src/rag_news.py`)
 - [x] Hugging Face Hub model card + label-map guard for the fine-tuned FinBERT
-- [ ] Owner: run the benchmark with an API key and commit `results/llm_benchmark.json`
+- [x] Owner: ran the benchmark (Claude Haiku zero-shot: macro-F1 0.792 vs FinBERT 0.841)
+- [ ] Optional: top up credit and finish the few-shot run
 - [ ] Owner: upload FinBERT to the Hub and set `FINSIGHT_FINBERT_REPO`
 - [x] Claude as the default provider (OpenAI optional); local TF-IDF/LSA embeddings, so one key is enough
 - [x] OpenRouter as a third provider (OpenAI-compatible client, tool-calling structured output)

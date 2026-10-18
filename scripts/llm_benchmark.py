@@ -76,7 +76,9 @@ def dry_run(df: pd.DataFrame, modes: list[str]) -> None:
         for role, content in msgs:
             print(f"[{role}] {content}")
         print(
-            f"\n≈ {est_tokens:,.0f} input tokens for {len(df):,} headlines (rough estimate; output is ~5 tokens each)"
+            f"\n≈ {est_tokens:,.0f} prompt tokens for {len(df):,} headlines. Providers add the output-schema "
+            "definition to every call (a few hundred tokens with tool calling, e.g. on OpenRouter), so the "
+            "billed total can be several times higher; the real count is in results/llm_benchmark.json."
         )
     print("\nDry run only: no API calls were made.")
 

@@ -528,6 +528,14 @@ Tell these as stories: situation, what you tried, what you found, the result.
 7. **Small test set, overconfident conclusions.** Bootstrap intervals showed
    the "best" baseline was statistically tied with three others, so I made
    model choice a CV decision and drew intervals everywhere in the UI.
+8. **A benchmark number that was really an outage.** The first full LLM run
+   scored few-shot at 0.72, far below the 0.83 trial. 357 of 2,388 answers
+   were "invalid". Rather than report it, I made the script print the most
+   common error per run: every one was HTTP 402, out of credit. I also made
+   it refuse to save a run where every call failed, and since only good
+   answers are cached, a re-run retries just the failures. Lesson: count
+   failures separately from wrong answers, or an outage looks like a weak
+   model.
 
 ---
 
@@ -764,7 +772,8 @@ Use the STAR format: situation, task, action, result.
 | Always-"neutral" macro-F1 | 0.25 (PhraseBank test) · 0.26 (news) |
 | API limits | 60/min single · 10/min batch · 5,000 chars · 256 texts |
 | Tests | 147 · ruff + mypy in CI |
-| LLM benchmark | your numbers from `results/llm_benchmark.json` (fill in after running) |
+| Claude Haiku zero-shot, real news (n=2,388) | 0.813 acc · **0.792** macro-F1 · CI 0.774–0.810 · 0 invalid · ~1.4 s/call |
+| LLM error pattern | 366 of 1,566 neutral headlines read as negative/positive (FinBERT: 180) |
 
 ---
 
@@ -855,8 +864,23 @@ The dry run estimates roughly 340k input tokens for a zero-shot pass over
 all 2,388 headlines (few-shot is about 2.5x that, because the examples ride
 along with every call).
 
-**What to say about the result.** Whichever way it comes out, the story
-works:
+**The result** (all 2,388 headlines, Claude Haiku via OpenRouter,
+zero-shot): accuracy 0.813, **macro-F1 0.792 (95% CI 0.774–0.810)**, zero
+invalid answers. FinBERT: 0.841 (0.823–0.858). The intervals don't overlap,
+so the fine-tuned model is measurably better. The LLM has *higher* recall on
+negative (0.93 vs 0.86) and positive (0.88 vs 0.85) headlines but calls 366
+of 1,566 neutral headlines sentiment-bearing, against FinBERT's 180: it
+over-reads tone into factual news. Few-shot was cut short when the account
+ran out of credit (357 calls returned HTTP 402); I report only the clean run
+rather than a number deflated by failed calls.
+
+Say it like this: "With zero labels Claude reaches 0.79, which beats my
+PhraseBank model by 0.33 and gets within 0.05 of a model fine-tuned on 9.5k
+in-domain labels. But fine-tuning still wins, and it's free and runs in
+milliseconds. So I'd use the LLM to bootstrap labels for a new domain, then
+distil into a small model."
+
+**What to say about the result.** For reference, both outcomes had a story:
 - *If FinBERT wins:* "A small model fine-tuned on 9.5k in-domain labels
   beats a general LLM, runs locally in milliseconds, and costs nothing per
   call. Fine-tuning still pays when you have labels."

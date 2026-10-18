@@ -104,6 +104,8 @@ def test_usage_summary_cost_only_with_prices():
     assert priced["cost_usd"] == pytest.approx(2000 / 1e6 * 1.0 + 20 / 1e6 * 2.0)
     assert priced["cost_per_1k_usd"] == pytest.approx(priced["cost_usd"] / 2 * 1000)
     assert priced["latency_ms_p50"] == pytest.approx(200.0)
+    cached = summarize_usage([{**r, "cached": True} for r in records])
+    assert cached["latency_ms_p50"] == pytest.approx(200.0) and cached["cached"] == 2
 
 
 def test_invalid_predictions_count_as_wrong_in_macro_f1():

@@ -180,14 +180,15 @@ def summarize_usage(records: list[dict], price_in: float | None = None, price_ou
 
     Prices are USD per 1M tokens, supplied by the caller from OpenAI's pricing
     page; without them ``cost_usd`` is None rather than a guess. Cached answers
-    are excluded from latency and from the cost actually spent this run.
+    keep the latency of their original call; ``cached`` counts how many were reused.
     """
     import numpy as np
 
     fresh = [r for r in records if not r.get("cached")]
     tokens_in = sum(r.get("input_tokens", 0) for r in records)
     tokens_out = sum(r.get("output_tokens", 0) for r in records)
-    lat = [r["latency_ms"] for r in fresh if r.get("latency_ms") is not None]
+    # Cached answers keep the latency of the call that produced them.
+    lat = [r["latency_ms"] for r in records if r.get("latency_ms") is not None]
     cost = None
     if price_in is not None and price_out is not None:
         cost = tokens_in / 1e6 * price_in + tokens_out / 1e6 * price_out
