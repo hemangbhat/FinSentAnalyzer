@@ -63,3 +63,13 @@
 > Note: public deployment URL and demo GIF are owner-action items — the app is
 > deploy-ready (Dockerfile + `requirements-deploy.txt`), but the live URL and
 > recorded GIF must be added by the repository owner.
+
+## Epic 8 — LLM layer (LangChain + OpenAI)
+- [x] LLM vs FinBERT benchmark on the 2,388 real headlines: zero-/few-shot, structured output, same bootstrap, cost and latency (`scripts/llm_benchmark.py`)
+- [x] Shared bootstrap in `src/stats.py` (baselines, FinBERT and LLM intervals computed identically)
+- [x] Generalization page shows the LLM comparison, or how to produce it
+- [x] Ask the News: RAG over the real headlines with validated citations and per-source sentiment (`src/rag_news.py`)
+- [x] Hugging Face Hub model card + label-map guard for the fine-tuned FinBERT
+- [ ] Owner: run the benchmark with an API key and commit `results/llm_benchmark.json`
+- [ ] Owner: upload FinBERT to the Hub and set `FINSIGHT_FINBERT_REPO`
+- [ ] Retrieval evaluation (labelled questions, recall@k) and hybrid BM25 + embedding search

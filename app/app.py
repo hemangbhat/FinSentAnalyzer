@@ -37,6 +37,7 @@ PAGES = {
     "Analyze": [
         _page("views/1_Single_Analysis.py", "Single Analysis", ":material/edit_note:", "Single_Analysis"),
         _page("views/2_Batch_Processing.py", "Batch Processing", ":material/upload_file:", "Batch_Processing"),
+        _page("views/10_Ask_the_News.py", "Ask the News", ":material/forum:", "Ask_the_News"),
     ],
     "Explain": [
         _page("views/3_Explainability.py", "Explainability", ":material/troubleshoot:", "Explainability"),

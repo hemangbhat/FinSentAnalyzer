@@ -37,6 +37,7 @@
 - [Model Card](docs/MODEL_CARD.md)
 - [ML Rigor: Cross-Validation & Hyperparameter Tuning](#ml-rigor-cross-validation--hyperparameter-tuning)
 - [Generalization (Real Data)](#generalization-real-licensed-data)
+- [LLM Benchmark & News Q&A (LangChain)](#llm-benchmark--news-qa-langchain--openai)
 - [Pipeline Demo (Synthetic)](#pipeline-demo-on-synthetic-headlines)
 - [Explainability](#explainability)
 - [Dashboard Pages](#dashboard-pages)
@@ -59,12 +60,13 @@ Financial sentiment analysis is a critical tool for quantitative finance, risk m
 
 | Dimension | What We Do |
 |-----------|------------|
-| **8 Models** | 7 trained baselines (incl. Voting Ensemble) + pre-trained FinBERT (zero-shot) |
+| **9 Models** | 7 trained baselines (incl. Voting Ensemble) + FinBERT zero-shot + FinBERT fine-tuned on real news |
+| **LLM engineering** | OpenAI via LangChain: structured-output benchmark against FinBERT (cost, latency, CI) and a RAG Q&A page with validated citations |
 | **ML Rigor** | 5-fold stratified cross-validation + GridSearchCV hyperparameter tuning |
 | **Explainability** | SHAP feature importance + per-prediction word highlighting |
 | **Error Analysis** | Sankey misclassification diagrams + confidence calibration insights |
 | **Generalization** | Honest OOD test on a real, MIT-licensed news dataset: TF-IDF 0.46 macro-F1 → FinBERT fine-tuned **0.84** |
-| **Dashboard** | 10-page Streamlit app designed as a report: every score shown with its uncertainty (see [docs/DESIGN.md](docs/DESIGN.md)) |
+| **Dashboard** | 11-page Streamlit app designed as a report: every score shown with its uncertainty (see [docs/DESIGN.md](docs/DESIGN.md)) |
 | **CI/CD** | GitHub Actions (lint + format + type check + tests) |
 | **Deployment** | Docker + Streamlit Cloud + HuggingFace Spaces ready |
 
@@ -81,6 +83,8 @@ Financial sentiment analysis is a critical tool for quantitative finance, risk m
 - **Pipeline demo (synthetic data)** — Runs the model over ~2,700 *template-generated* headlines to demonstrate the scoring/aggregation/correlation pipeline. This is **not** real news and **not** a generalization benchmark (see [Limitations](#limitations)).
 - **Real generalization test** — Honest out-of-distribution evaluation on a real, MIT-licensed dataset (`zeroshot/twitter-financial-news-sentiment`, n=2,388): the TF-IDF baseline drops to macro-F1 **0.46** OOD, and fine-tuning on in-domain news recovers it (DistilBERT **0.73**, FinBERT **0.84**) — all reported transparently.
 - **Stock Prediction Extension** — Experimental end-to-end flow (yfinance → FinBERT → LSTM). The LSTM is **chance-level** on this small/synthetic data — it's an engineering showcase, not a real forecast.
+- **LLM vs FinBERT benchmark** — An OpenAI chat model (zero-shot and few-shot, via LangChain structured output) scored on the same 2,388 real headlines with the same bootstrap, plus cost per 1k headlines and p50/p95 latency
+- **Ask the News (RAG)** — Question answering over the real headlines: embeddings + vector search, answers grounded in numbered sources with validated citations, each source scored by the active model
 - **Error Analysis** — Inspect misclassified examples with Sankey diagrams and confidence histograms
 - **Deep Linguistic Analysis** — Named Entity Recognition, rule-based Chain-of-Thought reasoning, Loughran-McDonald financial lexicon matching
 
@@ -210,7 +214,7 @@ financial-sentiment-analyzer/
 │   ├── shap_gradient_boosting.json # SHAP feature importance (GB)
 │   └── shap_svm.json              # SHAP feature importance (SVM)
 │
-├── tests/                          # Automated test suite (119 tests)
+├── tests/                          # Automated test suite (139 tests)
 │   ├── conftest.py                 # Shared fixtures
 │   ├── test_utils.py
 │   ├── test_preprocess.py
@@ -291,7 +295,7 @@ This creates `data/processed/train.csv`, `val.csv`, and `test.csv` with an **80/
 streamlit run app/app.py
 ```
 
-Open **http://localhost:8501** in your browser. Use the sidebar to navigate the 10 pages.
+Open **http://localhost:8501** in your browser. Use the sidebar to navigate the 11 pages.
 
 ### Train All Models
 
@@ -505,6 +509,52 @@ python src/integrate_news.py --action generalization --model svm   # baseline nu
 > `models/finbert_finetuned/` via Git LFS, with a Hugging Face Hub fallback when
 > only the LFS pointer is present.
 
+## LLM Benchmark & News Q&A (LangChain + OpenAI)
+
+Two features that need an OpenAI API key, so neither runs in CI (both are tested with stubs and fake
+embeddings instead). Keys are read from the environment or Streamlit secrets and are never committed.
+
+```bash
+export OPENAI_API_KEY=sk-...
+export FINSIGHT_LLM_MODEL=<a current, inexpensive OpenAI chat model>
+```
+
+### Does a general-purpose LLM beat the fine-tuned FinBERT?
+
+`scripts/llm_benchmark.py` classifies the same 2,388 held-out headlines FinBERT was scored on.
+
+- **Structured output**: a Pydantic schema with `Literal["negative", "neutral", "positive"]`, so the model can only
+  return a label. Anything else is recorded as invalid and scored as wrong.
+- **Zero-shot and few-shot**: few-shot adds 6 balanced examples from the PhraseBank *training* split, never from the
+  evaluation set (a test checks this).
+- **Same statistics**: macro-F1 with the same 2,000-resample bootstrap (`src/stats.py`) as every other number here.
+- **Cost and latency**: tokens from the API's usage metadata; dollars from the prices you pass (no hardcoded prices,
+  they change); p50/p95 wall-clock latency per call.
+- **Cached**: answers go to `data/cache/llm_answers.jsonl`, keyed by model, prompt version, mode and text, so a re-run
+  never pays twice.
+
+```bash
+python scripts/llm_benchmark.py --dry-run                     # prompts + token estimate, no API calls
+python scripts/llm_benchmark.py --limit 200                   # cheap stratified trial
+python scripts/llm_benchmark.py --price-in <$/1M in> --price-out <$/1M out>   # full run, prices from openai.com/api/pricing
+```
+
+The result (`results/llm_benchmark.json`) appears on the **Generalization** page next to FinBERT and the SVM.
+
+### Ask the News (retrieval-augmented generation)
+
+`src/rag_news.py` and the **Ask the News** page answer questions from the real headlines:
+
+1. Embed the 2,388 headlines once (`text-embedding-3-small` by default, `FINSIGHT_EMBEDDING_MODEL` to change) into a
+   LangChain `InMemoryVectorStore`, saved under `data/cache` so it is built once per embedding model.
+2. Retrieve the `k` most similar headlines for the question (cosine similarity).
+3. Score each retrieved headline with the active FinSight model and show the sentiment mix.
+4. Ask the chat model to answer **only** from the numbered headlines, with structured output listing the headlines
+   it used. Citations to headlines that were not retrieved are removed and flagged. The prompt treats headlines as
+   data and tells the model to ignore instructions inside them (prompt-injection guard).
+
+The headlines carry no dates, so answers describe the dataset, not today's market.
+
 ## Pipeline Demo on Synthetic Headlines
 
 > ⚠️ **Separate from the above.** The bundled `sample_news.csv` (~2,688 rows) is
@@ -634,7 +684,14 @@ Headline metrics (read live from `results/`), the three-step evaluation story (t
 - Predicts next-day direction (UP/DOWN) with confidence
 - Reports LSTM test accuracy and can persist trained weights to `models/lstm_{TICKER}.pt`
 
+### 💬 10. Ask the News
+- Question answering over the 2,388 real headlines (retrieval + grounded answer with citations)
+- Sentiment mix of the retrieved headlines, scored by the active model
+- Sources table: headline, model label, human label, similarity
+- Needs `OPENAI_API_KEY` and `FINSIGHT_LLM_MODEL`; explains the setup when they are missing
+
 ---
+
 
 ## CLI Reference
 
@@ -810,6 +867,8 @@ promotion criteria.
    ```toml
    FINSIGHT_DISABLE_HEAVY = "true"   # stock page: skip live LSTM training on the shared instance
    # FINSIGHT_FINBERT_REPO = "your-hf-username/finbert-financial"   # optional, see below
+   # OPENAI_API_KEY = "sk-..."              # optional: enables Ask the News
+   # FINSIGHT_LLM_MODEL = "<chat model>"    # optional: required with the key
    ```
 
 4. Click **Deploy**. The first build takes 5–10 minutes (PyTorch CPU wheel + transformers).
@@ -834,7 +893,7 @@ docker run -p 8501:8501 financial-sentiment
 The Dockerfile is a **full-featured build**: Python 3.10-slim base, CPU-only PyTorch
 (installed from the PyTorch CPU index to keep the image small), and the complete
 `requirements-deploy.txt`. It copies the core app plus the nested stock-prediction
-extension (`external-datasets/.../src` and `data`), so **all 10 pages — including
+extension (`external-datasets/.../src` and `data`), so **all 11 pages — including
 FinBERT and the LSTM Stock Prediction Extension — work in the container**. A
 Python-stdlib health check hits the Streamlit `/_stcore/health` endpoint.
 
@@ -893,6 +952,7 @@ the single-process bottleneck of a standalone Streamlit app.
 | **Data** | pandas, numpy |
 | **Visualization** | Plotly, matplotlib |
 | **Dashboard** | Streamlit (multipage app) |
+| **LLM / RAG** | LangChain (langchain-core, langchain-openai), OpenAI chat + embeddings, InMemoryVectorStore, Pydantic structured output |
 | **Serialization** | joblib (models), JSON (results) |
 | **Testing** | pytest |
 | **Linting** | ruff, mypy |
@@ -930,7 +990,7 @@ the single-process bottleneck of a standalone Streamlit app.
 
 ### Q: What's your CI/CD story?
 
-**A:** Every push triggers GitHub Actions: ruff lint/format checks, mypy static type analysis, and 119 pytest tests. The Docker image has a health check endpoint. I can deploy to Streamlit Cloud, HuggingFace Spaces, or any container platform.
+**A:** Every push triggers GitHub Actions: ruff lint/format checks, mypy static type analysis, and 139 pytest tests. The Docker image has a health check endpoint. I can deploy to Streamlit Cloud, HuggingFace Spaces, or any container platform.
 
 ### Q: What would you do with more time?
 

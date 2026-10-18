@@ -76,3 +76,6 @@ mlruns/
 
 # Cached LLM answers (re-runs are free; never commit)
 data/cache/
+
+# Local Streamlit secrets (API keys)
+.streamlit/secrets.toml

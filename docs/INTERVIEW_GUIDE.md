@@ -35,6 +35,7 @@ before the interview.
 20. [Numbers cheat sheet](#20-numbers-cheat-sheet)
 21. [Code walkthrough map](#21-code-walkthrough-map)
 22. [Delivery tips](#22-delivery-tips)
+23. [LLM layer: benchmark and RAG](#23-llm-layer-benchmark-and-rag)
 
 ---
 
@@ -42,8 +43,8 @@ before the interview.
 
 Done:
 
-- [x] ML pipeline, API, 10-page dashboard, Docker, and CI green on `main`
-- [x] 119 automated tests; ruff and mypy in CI
+- [x] ML pipeline, API, 11-page dashboard, Docker, and CI green on `main`
+- [x] 139 automated tests; ruff and mypy in CI
 - [x] Every headline number traces to a file in `results/`, with bootstrap
       confidence intervals (`scripts/bootstrap_ci.py`)
 - [x] Limitations documented in the README, `docs/MODEL_CARD.md` and `docs/TRACKER.md`
@@ -54,6 +55,8 @@ Do before sending the repo to anyone:
 - [ ] Record a 15-second GIF of Home → Single Analysis as `docs/demo.gif`
 - [ ] Open the live app an hour before the interview; free apps sleep and take
       about a minute to wake
+- [ ] Run the LLM benchmark once with your key (section 23) so the
+      Generalization page shows real LLM numbers, and commit `results/llm_benchmark.json`
 - [ ] Rehearse the 30-second pitch and the demo script out loud
 - [ ] Read sections 11 and 12 twice. Challenges and limitations are where
       interviews are won or lost.
@@ -100,6 +103,10 @@ explain every arrow.
 7. **Production.** FastAPI with Pydantic validation, an optional API key,
    Redis-backed rate limits, nginx load balancing across replicas, a model
    registry with SHA-256 hashes, monthly retraining in CI, and Docker.
+8. **LLM layer.** I benchmarked an OpenAI model against FinBERT on the same
+   headlines with the same bootstrap, including cost and latency, and built
+   a RAG page that answers questions from the headlines with validated
+   citations (section 23).
 
 ---
 
@@ -166,7 +173,8 @@ explanations a human can check, and a service that's safe to expose.
 | Explainability | `src/explain.py`, `src/shap_explain.py`, `src/nlp_advanced.py`, `src/llm_enhanced.py` | Term weights, SHAP, lexicon and entities, rule-based reasoning |
 | API | `api/main.py`, `app/api_client.py` | REST service; UI client for split mode |
 | Ops | `src/monitoring.py`, `src/registry.py`, `scripts/retrain.py`, `.github/workflows/` | Logging, metrics, registry, retraining, CI |
-| UI | `app/app.py` (router), `app/ui.py` (design system), `app/views/*` | 10 pages |
+| UI | `app/app.py` (router), `app/ui.py` (design system), `app/views/*` | 11 pages |
+| LLM layer | `src/llm_sentiment.py`, `scripts/llm_benchmark.py`, `src/rag_news.py`, `src/stats.py` | LangChain + OpenAI; optional, needs a key |
 
 **Path of a single prediction.** The UI page calls `active_model()` to get the
 cached predictor. `predictor.predict(text)` routes by model type:
@@ -447,7 +455,7 @@ themselves.
 
 ## 10. Testing and code quality
 
-119 tests (`tests/`). Number of tests per area:
+139 tests (`tests/`). Number of tests per area:
 
 | Area | Count |
 |---|---|
@@ -455,14 +463,17 @@ themselves.
 | Utilities | 19 |
 | Rule-based reasoning | 13 |
 | API | 10 |
+| LLM benchmark (stubbed API) | 10 |
 | Preprocessing | 10 |
+| RAG news Q&A (fake embeddings, stubbed LLM) | 8 |
 | News integration | 7 |
 | Prediction | 6 |
 | SHAP | 6 |
 | Stock extension | 6 |
 | API client | 5 |
 | Real-news generalization | 1 |
-| Page import smoke test | 1 test, run once per page file (12) |
+| Model artifact label map | 1 |
+| Page import smoke test | 1 test, run once per page file (13) |
 
 **Notable tests**
 - **API tests** use FastAPI's `TestClient`: validation errors, auth, batch
@@ -751,7 +762,8 @@ Use the STAR format: situation, task, action, result.
 | FinBERT's main error | 92 neutral headlines read as negative |
 | Always-"neutral" macro-F1 | 0.25 (PhraseBank test) · 0.26 (news) |
 | API limits | 60/min single · 10/min batch · 5,000 chars · 256 texts |
-| Tests | 119 · ruff + mypy in CI |
+| Tests | 139 · ruff + mypy in CI |
+| LLM benchmark | your numbers from `results/llm_benchmark.json` (fill in after running) |
 
 ---
 
@@ -783,3 +795,134 @@ If they say "show me the code", open these in order:
 - **Close with what you learned:** "A high test score on one dataset told me
   almost nothing about real-world performance. Out-of-domain evaluation is now
   the first thing I do."
+
+---
+
+## 23. LLM layer: benchmark and RAG
+
+This is where the AI-engineering course work shows: prompting, structured
+output, LangChain, embeddings and retrieval, applied to a question the
+project already asks. Both features need `OPENAI_API_KEY` and
+`FINSIGHT_LLM_MODEL`; nothing about them is hardcoded or committed.
+
+### 23.1 LLM vs FinBERT (`scripts/llm_benchmark.py`, `src/llm_sentiment.py`)
+
+**The question.** Does a general-purpose LLM, prompted zero-shot or
+few-shot, beat a 110M-parameter model fine-tuned on in-domain news? And
+what does each point of macro-F1 cost?
+
+**How it's fair.**
+- Same 2,388 headlines FinBERT was evaluated on.
+- Same metric and the same bootstrap code (`src/stats.py`, shared by every
+  interval in the project), so the intervals are directly comparable.
+- Few-shot examples come from the PhraseBank *training* split, 2 per class,
+  interleaved so their order doesn't hint at the answer. A test asserts none
+  of them appears in the evaluation set.
+- Temperature 0. The prompt has a version (`PROMPT_VERSION`) that is part of
+  the cache key, so changing the prompt never reuses stale answers.
+
+**How it's robust.**
+- **Structured output** (`with_structured_output` on a Pydantic model whose
+  field is `Literal["negative", "neutral", "positive"]`). The model can't
+  answer "Bullish!". If parsing fails the answer is *invalid* and counted as
+  wrong, not silently dropped, which would flatter the score.
+- **Retries and timeouts** via the client; a failed call is recorded with
+  its error and the run continues.
+- **Disk cache** of answers, keyed by model, prompt version, mode and text.
+  Re-runs are free; invalid answers are not cached so they get retried.
+- **Concurrency** with a thread pool (I/O bound), order preserved.
+
+**Cost and latency.** Token counts come from the API's usage metadata.
+Dollars are computed from prices passed on the command line, because prices
+change and a hardcoded table goes stale. Latency is p50/p95 per call over
+fresh (uncached) calls only.
+
+**How to run it.**
+
+```bash
+python scripts/llm_benchmark.py --dry-run          # prompts + token estimate, free
+python scripts/llm_benchmark.py --limit 200        # stratified trial, cents
+python scripts/llm_benchmark.py --price-in X --price-out Y   # full set
+```
+
+The dry run estimates roughly 340k input tokens for a zero-shot pass over
+all 2,388 headlines (few-shot is about 2.5x that, because the examples ride
+along with every call).
+
+**What to say about the result.** Whichever way it comes out, the story
+works:
+- *If FinBERT wins:* "A small model fine-tuned on 9.5k in-domain labels
+  beats a general LLM, runs locally in milliseconds, and costs nothing per
+  call. Fine-tuning still pays when you have labels."
+- *If the LLM wins or ties:* "Without any labels it matches a fine-tuned
+  model, so for a cold start I'd use the LLM to label data, then distil into
+  a small model for cost and latency."
+- Either way, point at the interval overlap before claiming a winner.
+
+**Likely questions.**
+- *Why not just use the LLM everywhere?* Cost per call, latency, rate
+  limits, a network dependency, data leaving your boundary, and the model
+  can change under you. FinBERT is pinned by a hash.
+- *How do you know the LLM hasn't seen these headlines?* I don't. The
+  dataset is public and older than the model's training cutoff, so treat
+  its score as an upper bound. That is a known limitation of benchmarking
+  closed models.
+- *Why few-shot from PhraseBank, not the news train split?* To keep the
+  setting comparable to "no in-domain labels". Using news examples is an
+  easy next experiment.
+- *Why not chain-of-thought?* More output tokens (cost and latency) for a
+  three-way label. Worth trying as another mode; the prompt version makes it
+  a clean comparison.
+
+### 23.2 Ask the News (`src/rag_news.py`, `app/views/10_Ask_the_News.py`)
+
+**Pipeline.**
+1. Embed all 2,388 headlines once (`text-embedding-3-small` by default)
+   into LangChain's `InMemoryVectorStore`; save it under `data/cache`, keyed
+   by embedding model and a hash of the corpus, so it's rebuilt only when
+   either changes.
+2. Embed the question, retrieve the top `k` by cosine similarity.
+3. Score each retrieved headline with the active FinSight model and show
+   the sentiment mix next to the answer.
+4. Ask the chat model to answer only from the numbered headlines, with
+   structured output `{answer, citations}`.
+5. **Validate citations**: any number that isn't one of the retrieved
+   headlines is removed and flagged in the UI. An answer with no citations
+   is labelled unsupported.
+
+**Safety.** Headlines are untrusted input. The system prompt says they are
+data and to ignore instructions inside them; the test corpus includes an
+"Ignore previous instructions" headline. The API key is read from the
+environment or Streamlit secrets and never logged or committed. Errors from
+the API are shown as a banner, not a stack trace.
+
+**Why these choices.**
+- *In-memory store, not a vector database:* 2,388 short texts is about
+  15 MB of vectors; brute-force cosine is instant. At 1M+ documents I'd move
+  to pgvector or a managed store with an ANN index (HNSW).
+- *No chunking:* every document is a single headline.
+- *`langchain-core` + `langchain-openai` only:* small dependency surface;
+  `langchain-community` is being wound down.
+
+**Limitations to raise yourself.**
+- The headlines have no timestamps, so it can't answer "what happened this
+  week"; it describes the dataset.
+- Retrieval is pure semantic similarity. Ticker queries like `$TSLA` would
+  benefit from hybrid search (BM25 + embeddings) and metadata filters.
+- No retrieval evaluation yet. Next step: a small labelled question set and
+  recall@k, plus answer faithfulness scored by an LLM judge.
+
+**Likely questions.**
+- *How do you stop hallucination?* Grounding instructions, structured
+  citations, citation validation against what was actually retrieved, and an
+  explicit "not in sources" answer. It reduces, not eliminates, the risk; the
+  sources table lets a user check every claim.
+- *How would you make it an agent?* Give the model tools (search headlines,
+  score sentiment, fetch prices with yfinance) and let it decide the order.
+  For this question set a fixed pipeline is cheaper and more predictable,
+  so I kept it a chain.
+- *How is it tested without an API key?* `DeterministicFakeEmbedding` and a
+  stub chat model: exact-match retrieval, index save/reload, the prompt's
+  injection guard, invented citations being dropped, and no LLM call when
+  nothing is retrieved.
+
