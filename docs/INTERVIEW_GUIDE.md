@@ -507,7 +507,13 @@ Tell these as stories: situation, what you tried, what you found, the result.
    ("The company" became "The co" / "mpany"). Test-first fix: compile that
    pattern case-sensitively with word boundaries, and filter currency codes
    like EUR. It surfaced only when the UI showed the output.
-6. **Small test set, overconfident conclusions.** Bootstrap intervals showed
+6. **Wrong label names, caught before publishing.** Preparing the model for
+   the Hugging Face Hub, I noticed `config.json` still named the classes in
+   ProsusAI's order (0 = positive) while training used mine (0 = negative).
+   The app was fine because it decodes with its own map, but any `pipeline()`
+   user would have got inverted labels. I fixed the config, added a test, and
+   made the upload script refuse a mismatched config.
+7. **Small test set, overconfident conclusions.** Bootstrap intervals showed
    the "best" baseline was statistically tied with three others, so I made
    model choice a CV decision and drew intervals everywhere in the UI.
 

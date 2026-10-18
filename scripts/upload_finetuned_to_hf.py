@@ -23,13 +23,14 @@ Usage
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 
-from utils import get_model_dir  # noqa: E402
+from utils import LABEL_MAP_INV, get_model_dir  # noqa: E402
 
 
 def main() -> None:
@@ -43,6 +44,13 @@ def main() -> None:
     local_dir = get_model_dir() / f"{args.model}_finetuned"
     if not local_dir.exists():
         raise SystemExit(f"[error] Local weights not found: {local_dir}")
+
+    # Refuse to publish weights whose label names would mislead pipeline() users.
+    config = json.loads((local_dir / "config.json").read_text())
+    if {int(k): v for k, v in config.get("id2label", {}).items()} != LABEL_MAP_INV:
+        raise SystemExit(f"[error] {local_dir}/config.json id2label does not match the project labels {LABEL_MAP_INV}")
+    if not (local_dir / "README.md").exists():
+        print("[warn] No README.md model card in the folder; the Hub page will be empty.")
 
     try:
         from huggingface_hub import HfApi, create_repo
