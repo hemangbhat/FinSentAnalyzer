@@ -13,11 +13,14 @@
 
 > **Deployed app:** `https://<your-app>.streamlit.app`  ← _replace with your public URL after deploying (see [Deployment](#deployment))._
 
-![FinSight demo](docs/demo.gif)
+![FinSight home page: headline metrics and macro-F1 with 95% bootstrap intervals](docs/screenshots/home.png)
 
-> _Demo GIF placeholder._ Record a ~15s screen capture of the Single Analysis and
-> Batch flows and save it as `docs/demo.gif` (e.g. with [ScreenToGif](https://www.screentogif.com/)
-> or `ffmpeg`). It will render here automatically.
+<details>
+<summary>Single Analysis: verdict, probability band and the words behind it</summary>
+
+![Single Analysis result for "The company will close its Tampere plant, cutting 300 jobs."](docs/screenshots/single-analysis.png)
+
+</details>
 
 ---
 
@@ -71,7 +74,7 @@ Financial sentiment analysis is a critical tool for quantitative finance, risk m
 
 - **Real-Time Prediction** — Enter any financial text and get instant sentiment with confidence scores
 - **Batch Processing** — Upload CSV/TXT files for bulk sentiment analysis with aggregate KPIs
-- **8 Trained Models** — Compare Logistic Regression, Naive Bayes, SVM, Random Forest, Gradient Boosting, MLP, and a Voting Ensemble (7 trained baselines), plus a pre-trained FinBERT (zero-shot, not fine-tuned by this project)
+- **9 Models** — Logistic Regression, Naive Bayes, SVM, Random Forest, Gradient Boosting, MLP and a Voting Ensemble (7 TF-IDF baselines), plus FinBERT zero-shot and FinBERT fine-tuned on real financial news
 - **5-Fold Cross-Validation** — Stratified CV with mean ± std for all metrics
 - **GridSearchCV Tuning** — Automated hyperparameter optimization for SVM and Gradient Boosting
 - **SHAP Explainability** — Global feature importance with per-class drivers
@@ -207,7 +210,7 @@ financial-sentiment-analyzer/
 │   ├── shap_gradient_boosting.json # SHAP feature importance (GB)
 │   └── shap_svm.json              # SHAP feature importance (SVM)
 │
-├── tests/                          # Automated test suite (116 tests)
+├── tests/                          # Automated test suite (119 tests)
 │   ├── conftest.py                 # Shared fixtures
 │   ├── test_utils.py
 │   ├── test_preprocess.py
@@ -288,7 +291,7 @@ This creates `data/processed/train.csv`, `val.csv`, and `test.csv` with an **80/
 streamlit run app/app.py
 ```
 
-Open **http://localhost:8501** in your browser. Use the sidebar to navigate 9 pages.
+Open **http://localhost:8501** in your browser. Use the sidebar to navigate the 10 pages.
 
 ### Train All Models
 
@@ -831,7 +834,7 @@ docker run -p 8501:8501 financial-sentiment
 The Dockerfile is a **full-featured build**: Python 3.10-slim base, CPU-only PyTorch
 (installed from the PyTorch CPU index to keep the image small), and the complete
 `requirements-deploy.txt`. It copies the core app plus the nested stock-prediction
-extension (`external-datasets/.../src` and `data`), so **all 9 pages — including
+extension (`external-datasets/.../src` and `data`), so **all 10 pages — including
 FinBERT and the LSTM Stock Prediction Extension — work in the container**. A
 Python-stdlib health check hits the Streamlit `/_stcore/health` endpoint.
 
@@ -927,7 +930,7 @@ the single-process bottleneck of a standalone Streamlit app.
 
 ### Q: What's your CI/CD story?
 
-**A:** Every push triggers GitHub Actions: ruff lint/format checks, mypy static type analysis, and 80 pytest tests. The Docker image has a health check endpoint. I can deploy to Streamlit Cloud, HuggingFace Spaces, or any container platform.
+**A:** Every push triggers GitHub Actions: ruff lint/format checks, mypy static type analysis, and 119 pytest tests. The Docker image has a health check endpoint. I can deploy to Streamlit Cloud, HuggingFace Spaces, or any container platform.
 
 ### Q: What would you do with more time?
 
