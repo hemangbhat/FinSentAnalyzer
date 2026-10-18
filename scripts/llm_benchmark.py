@@ -134,6 +134,13 @@ def main() -> None:
                 **usage,
             }
         )
+        if failed:
+            from collections import Counter
+
+            top = Counter(r["error"][:160] for r in failed).most_common(3)
+            print(f"  {len(failed)} calls failed (scored as wrong; not cached, so a re-run retries them):")
+            for msg, n in top:
+                print(f"    {n}× {msg}")
         cost = "n/a (no prices given)" if usage["cost_usd"] is None else f"${usage['cost_usd']:.4f}"
         print(
             f"  macro-F1 {ci['f1_macro']:.3f} [{ci['ci_low']:.3f}, {ci['ci_high']:.3f}] · "
