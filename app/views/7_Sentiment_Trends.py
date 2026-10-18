@@ -18,6 +18,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from shared import (  # pyre-ignore
     MODEL_LABELS,
     active_model,
+    empty_state,
     exhibit,
     interval_chart,
     kpi_strip,
@@ -135,6 +136,81 @@ if _fb and _fb.get("confusion_matrix"):
     fig_cm.update_yaxes(showgrid=False)
     render_chart(fig_cm)
     source_note(f"results/generalization_finbert.json (n={_fb.get('n_samples', 0):,}).")
+
+# ── LLM vs FinBERT ──────────────────────────────────────────────────────────────
+_llm = load_result("llm_benchmark.json")
+exhibit(
+    "A general-purpose LLM against the fine-tuned FinBERT",
+    "Same headlines, same metric, same bootstrap. The question is not only who scores higher "
+    "but what each point of macro-F1 costs in money and latency.",
+)
+if not _llm or not _llm.get("runs"):
+    empty_state(
+        "No LLM benchmark yet",
+        "It needs an OpenAI API key, so it is not run in CI. "
+        "<code>python scripts/llm_benchmark.py --model &lt;model&gt; --dry-run</code> shows the prompts and a "
+        "token estimate for free; drop <code>--dry-run</code> (add <code>--price-in</code> / "
+        "<code>--price-out</code> for cost) to write results/llm_benchmark.json.",
+    )
+else:
+    _mode_name = {"zero_shot": "zero-shot", "few_shot": "few-shot (6 PhraseBank examples)"}
+    rows = []
+    for key, label, color in (
+        ("finbert", "FinBERT · fine-tuned, runs locally", "#0E6E6A"),
+        ("svm", "TF-IDF + SVM · trained on PhraseBank", "#A3322B"),
+    ):
+        if key in _ci:
+            r = _ci[key]
+            rows.append(
+                {"label": label, "value": r["f1_macro"], "low": r["ci_low"], "high": r["ci_high"], "color": color}
+            )
+    for run in _llm["runs"]:
+        rows.append(
+            {
+                "label": f"{_llm['model']} · {_mode_name.get(run['mode'], run['mode'])}",
+                "value": run["f1_macro"],
+                "low": run["ci_low"],
+                "high": run["ci_high"],
+                "color": "#45627A",
+            }
+        )
+    render_chart(interval_chart(rows))
+
+    def _money(v):
+        return "—" if v is None else f"${v:.3f}"
+
+    def _ms(v):
+        return "—" if v is None else f"{v:,.0f} ms"
+
+    body = "".join(
+        f"<tr><td class='t'>{_mode_name.get(run['mode'], run['mode'])}</td>"
+        f"<td class='n fs-num'>{run['f1_macro']:.3f}</td>"
+        f"<td class='n fs-num'>{run['ci_low']:.3f}–{run['ci_high']:.3f}</td>"
+        f"<td class='n fs-num'>{_money(run.get('cost_per_1k_usd'))}</td>"
+        f"<td class='n fs-num'>{_ms(run.get('latency_ms_p50'))}</td>"
+        f"<td class='n fs-num'>{_ms(run.get('latency_ms_p95'))}</td>"
+        f"<td class='n fs-num'>{run.get('invalid', 0):,}</td></tr>"
+        for run in _llm["runs"]
+    )
+    st.markdown(
+        "<table class='fs-terms'><thead><tr><th class='t'>Prompt</th>"
+        "<th style='text-align:right;'>Macro-F1</th><th style='text-align:right;'>95% interval</th>"
+        "<th style='text-align:right;'>$ per 1k headlines</th><th style='text-align:right;'>p50</th>"
+        "<th style='text-align:right;'>p95</th><th style='text-align:right;'>Invalid</th></tr></thead>"
+        f"<tbody>{body}</tbody></table>",
+        unsafe_allow_html=True,
+    )
+    if not _llm.get("full_set", True):
+        status_banner(
+            f"The LLM rows are a stratified sample of {_llm['n']:,} headlines; FinBERT and SVM use all 2,388. "
+            "Intervals are wider and the comparison is indicative only.",
+            kind="warning",
+        )
+    source_note(
+        f"results/llm_benchmark.json · {_llm['model']} · prompt {_llm.get('prompt_version', '?')} · "
+        f"temperature 0 · run {_llm.get('run_at', '?')[:10]}. Invalid answers count as wrong. "
+        "Cost uses the prices passed to the script; latency is wall-clock per call from this machine."
+    )
 
 # Check if the news dataset integration module is available
 try:

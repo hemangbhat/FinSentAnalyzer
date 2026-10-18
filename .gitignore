@@ -73,3 +73,6 @@ mlruns/
 # Impeccable design-review scratch (captures, roll records)
 .impeccable/review/
 .impeccable/questions/
+
+# Cached LLM answers (re-runs are free; never commit)
+data/cache/

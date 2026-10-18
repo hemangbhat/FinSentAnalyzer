@@ -25,12 +25,12 @@ import sys
 from pathlib import Path
 
 import numpy as np
-from sklearn.metrics import f1_score
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 
 from preprocess import load_processed_data  # noqa: E402
+from stats import bootstrap_macro_f1, pairs_from_confusion  # noqa: E402
 from utils import get_model_dir, get_results_dir  # noqa: E402
 
 N_BOOT = 2000
@@ -39,26 +39,7 @@ BASELINES = ["logreg", "naive_bayes", "svm", "random_forest", "gradient_boosting
 
 
 def _ci(y_true: np.ndarray, y_pred: np.ndarray, rng: np.random.Generator) -> dict:
-    n = len(y_true)
-    scores = np.empty(N_BOOT)
-    for i in range(N_BOOT):
-        idx = rng.integers(0, n, n)
-        scores[i] = f1_score(y_true[idx], y_pred[idx], average="macro", labels=[0, 1, 2], zero_division=0)
-    return {
-        "f1_macro": float(f1_score(y_true, y_pred, average="macro", labels=[0, 1, 2], zero_division=0)),
-        "ci_low": float(np.percentile(scores, 2.5)),
-        "ci_high": float(np.percentile(scores, 97.5)),
-        "n": int(n),
-    }
-
-
-def _pairs_from_confusion(cm: list[list[int]]) -> tuple[np.ndarray, np.ndarray]:
-    y_true, y_pred = [], []
-    for t, row in enumerate(cm):
-        for p, count in enumerate(row):
-            y_true += [t] * count
-            y_pred += [p] * count
-    return np.array(y_true), np.array(y_pred)
+    return bootstrap_macro_f1(y_true, y_pred, n_boot=N_BOOT, rng=rng)
 
 
 def _predict(model, texts: np.ndarray) -> np.ndarray:
@@ -83,7 +64,7 @@ def main() -> None:
     for name in ["svm", "finbert"]:
         path = get_results_dir() / f"generalization_{name}.json"
         if path.exists():
-            yt, yp = _pairs_from_confusion(json.loads(path.read_text())["confusion_matrix"])
+            yt, yp = pairs_from_confusion(json.loads(path.read_text())["confusion_matrix"])
             out["real_news"][name] = _ci(yt, yp, rng)
 
     dest = get_results_dir() / "bootstrap_ci.json"
