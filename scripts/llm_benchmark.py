@@ -38,7 +38,7 @@ from sklearn.metrics import accuracy_score, confusion_matrix
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 
-from llm_provider import PROVIDERS, get_provider  # noqa: E402
+from llm_provider import KEY_ENV, PROVIDERS, get_provider, has_api_key  # noqa: E402
 from llm_sentiment import (  # noqa: E402
     MODES,
     PROMPT_VERSION,
@@ -102,6 +102,11 @@ def main() -> None:
 
     provider = get_provider(args.provider)
     model = get_model_name(args.model, provider)
+    if not has_api_key(provider):
+        sys.exit(
+            f"No API key for {provider}: set {KEY_ENV[provider]} first "
+            '(PowerShell: $env:NAME = "value"; bash: export NAME=value).'
+        )
     runnable = make_runnable(model, provider)
     cache = AnswerCache(CACHE)
     y_true = df["label"].to_numpy()
@@ -111,6 +116,12 @@ def main() -> None:
     for mode in args.modes:
         print(f"[{mode}] classifying {len(df):,} headlines with {model} …")
         records = classify(df["headline"].tolist(), runnable, model, mode, cache, args.max_concurrency)
+        failed = [r for r in records if r.get("error") and not r.get("cached")]
+        if len(failed) == len(records):
+            sys.exit(
+                f"Every call failed, so nothing was saved. First error:\n  {failed[0]['error']}\n"
+                "Check the API key, the model id and your credit."
+            )
         y_pred = np.array([LABEL_MAP.get(r["label"], -1) for r in records])
         ci = bootstrap_macro_f1(y_true, y_pred)
         usage = summarize_usage(records, args.price_in, args.price_out)
