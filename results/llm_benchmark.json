@@ -9,7 +9,7 @@
     "input": null,
     "output": null
   },
-  "run_at": "2026-10-18T09:32:02+00:00",
+  "run_at": "2026-10-18T10:08:12+00:00",
   "runs": [
     {
       "mode": "zero_shot",
@@ -39,8 +39,8 @@
       "output_tokens": 75296,
       "cost_usd": null,
       "cost_per_1k_usd": null,
-      "latency_ms_p50": null,
-      "latency_ms_p95": null,
+      "latency_ms_p50": 1378.575799993996,
+      "latency_ms_p95": 1584.671565003373,
       "invalid": 0,
       "errors": 0,
       "cached": 2388
