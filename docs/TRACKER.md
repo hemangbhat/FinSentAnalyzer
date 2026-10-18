@@ -73,4 +73,5 @@
 - [ ] Owner: run the benchmark with an API key and commit `results/llm_benchmark.json`
 - [ ] Owner: upload FinBERT to the Hub and set `FINSIGHT_FINBERT_REPO`
 - [x] Claude as the default provider (OpenAI optional); local TF-IDF/LSA embeddings, so one key is enough
+- [x] OpenRouter as a third provider (OpenAI-compatible client, tool-calling structured output)
 - [ ] Retrieval evaluation (labelled questions, recall@k) and hybrid BM25 + embedding search

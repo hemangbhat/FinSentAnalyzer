@@ -1,13 +1,18 @@
 """
-Which LLM provider and chat model to use: Anthropic (Claude) or OpenAI.
+Which LLM provider and chat model to use: Anthropic (Claude), OpenRouter or OpenAI.
+
+OpenRouter is one key for many vendors' models behind an OpenAI-compatible
+API, so it reuses LangChain's ``ChatOpenAI`` pointed at OpenRouter's URL.
 
 Resolution order:
-- Provider: ``FINSIGHT_LLM_PROVIDER`` (``anthropic`` or ``openai``); otherwise
-  whichever API key is set (Anthropic first); otherwise ``anthropic``.
+- Provider: ``FINSIGHT_LLM_PROVIDER`` (``anthropic``, ``openrouter`` or
+  ``openai``); otherwise whichever API key is set, in that order; otherwise
+  ``anthropic``.
 - Model: the explicit argument, then ``FINSIGHT_LLM_MODEL``, then the
   provider's default. Claude defaults to Haiku, the fastest and cheapest
-  tier, which is what a classification benchmark wants. OpenAI has no
-  default: pass one from OpenAI's model list.
+  tier, which is what a classification benchmark wants. OpenRouter and
+  OpenAI have no default: pass a model id from their model lists
+  (OpenRouter ids look like ``vendor/model``).
 - Temperature: 0 for repeatable answers. Set ``FINSIGHT_LLM_TEMPERATURE=none``
   for a model that doesn't accept the parameter.
 """
@@ -16,9 +21,10 @@ from __future__ import annotations
 
 import os
 
-PROVIDERS = ("anthropic", "openai")
-KEY_ENV = {"anthropic": "ANTHROPIC_API_KEY", "openai": "OPENAI_API_KEY"}
-DEFAULT_MODELS = {"anthropic": "claude-haiku-5-5", "openai": None}
+PROVIDERS = ("anthropic", "openrouter", "openai")
+KEY_ENV = {"anthropic": "ANTHROPIC_API_KEY", "openrouter": "OPENROUTER_API_KEY", "openai": "OPENAI_API_KEY"}
+DEFAULT_MODELS = {"anthropic": "claude-haiku-5-5", "openrouter": None, "openai": None}
+OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 
 
 def get_provider(provider: str | None = None) -> str:
@@ -72,4 +78,22 @@ def make_chat_model(
         return ChatAnthropic(max_tokens=max_tokens, **kwargs)
     from langchain_openai import ChatOpenAI  # pyre-ignore
 
+    if provider == "openrouter":
+        kwargs.update(
+            base_url=os.getenv("OPENROUTER_BASE_URL", OPENROUTER_BASE_URL),
+            api_key=os.getenv("OPENROUTER_API_KEY"),
+            default_headers={"X-Title": "FinSight"},  # app name on OpenRouter's dashboard
+        )
     return ChatOpenAI(max_tokens=max_tokens, **kwargs)
+
+
+def with_structured_output(llm, schema, provider: str | None = None, include_raw: bool = False):
+    """
+    Bind a Pydantic schema to the model's output.
+
+    OpenRouter routes to many vendors, and tool calling is supported by more
+    of them than OpenAI's JSON-schema mode, so it uses ``function_calling``.
+    """
+    if get_provider(provider) == "openrouter":
+        return llm.with_structured_output(schema, method="function_calling", include_raw=include_raw)
+    return llm.with_structured_output(schema, include_raw=include_raw)

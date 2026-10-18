@@ -1,5 +1,5 @@
 """
-LLM sentiment classification (Claude or OpenAI, via LangChain) for benchmarking against FinBERT.
+LLM sentiment classification (Claude, OpenRouter or OpenAI, via LangChain) for benchmarking against FinBERT.
 
 The question this answers: does a general-purpose LLM, prompted zero-shot or
 few-shot, beat a small fine-tuned model on real financial headlines, and at
@@ -15,7 +15,7 @@ Design:
 - Every answer is cached on disk, keyed by model, prompt version, mode and
   text, so re-running the benchmark never pays twice.
 
-Requires ``ANTHROPIC_API_KEY`` (Claude, the default) or ``OPENAI_API_KEY``;
+Requires ``ANTHROPIC_API_KEY`` (Claude, the default), ``OPENROUTER_API_KEY`` or ``OPENAI_API_KEY``;
 see ``llm_provider`` for how the provider and model are chosen.
 """
 
@@ -30,7 +30,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-from llm_provider import get_model_name, make_chat_model  # noqa: F401  (re-exported)
+from llm_provider import get_model_name, make_chat_model, with_structured_output  # noqa: F401  (re-exported)
 from utils import LABEL_MAP, get_project_root
 
 PROMPT_VERSION = "v1"
@@ -83,7 +83,7 @@ def build_messages(text: str, mode: str, examples: list[tuple[str, str]] | None 
 def make_runnable(model: str, provider: str | None = None, timeout: float = 60.0, max_retries: int = 3):
     """Chat model with structured output; ``include_raw`` keeps token usage."""
     llm = make_chat_model(model, provider, timeout=timeout, max_retries=max_retries, max_tokens=64)
-    return llm.with_structured_output(SentimentLabel, include_raw=True)
+    return with_structured_output(llm, SentimentLabel, provider, include_raw=True)
 
 
 def _cache_key(model: str, mode: str, text: str) -> str:

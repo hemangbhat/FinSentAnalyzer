@@ -53,6 +53,7 @@ def _setting(name: str) -> str | None:
 
 for _name in (
     "ANTHROPIC_API_KEY",
+    "OPENROUTER_API_KEY",
     "OPENAI_API_KEY",
     "FINSIGHT_LLM_PROVIDER",
     "FINSIGHT_LLM_MODEL",

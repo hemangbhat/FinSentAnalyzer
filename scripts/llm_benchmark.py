@@ -16,7 +16,8 @@ Usage:
     #    (https://www.anthropic.com/pricing or https://openai.com/api/pricing):
     python scripts/llm_benchmark.py --price-in <input> --price-out <output>
 
-    # OpenAI instead: export OPENAI_API_KEY=... and pass --provider openai --model <model>
+    # OpenRouter instead: export OPENROUTER_API_KEY=... and pass --provider openrouter --model <vendor/model>
+    # OpenAI instead:     export OPENAI_API_KEY=...     and pass --provider openai --model <model>
 
 Answers are cached in data/cache/llm_answers.jsonl, so re-runs are free.
 Writes results/llm_benchmark.json, which the Generalization page displays.
@@ -82,7 +83,9 @@ def dry_run(df: pd.DataFrame, modes: list[str]) -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--provider", choices=PROVIDERS, help="anthropic (default) or openai; or FINSIGHT_LLM_PROVIDER")
+    ap.add_argument(
+        "--provider", choices=PROVIDERS, help="anthropic (default), openrouter or openai; or FINSIGHT_LLM_PROVIDER"
+    )
     ap.add_argument("--model", help="Chat model (or FINSIGHT_LLM_MODEL); Claude defaults to Haiku")
     ap.add_argument("--modes", nargs="+", default=list(MODES), choices=MODES)
     ap.add_argument("--limit", type=int, help="Stratified sample size for a cheap trial run")

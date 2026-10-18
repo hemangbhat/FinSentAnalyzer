@@ -17,8 +17,8 @@ Pipeline:
 Headlines are untrusted text: the prompt tells the model to treat them as
 data and ignore any instructions they contain.
 
-Requires a chat-model key: ``ANTHROPIC_API_KEY`` (Claude, the default) or
-``OPENAI_API_KEY`` (see ``llm_provider``). OpenAI embeddings use
+Requires a chat-model key: ``ANTHROPIC_API_KEY`` (Claude, the default),
+``OPENROUTER_API_KEY`` or ``OPENAI_API_KEY`` (see ``llm_provider``). OpenAI embeddings use
 ``text-embedding-3-small`` unless ``FINSIGHT_EMBEDDING_MODEL`` says otherwise.
 """
 
@@ -33,7 +33,7 @@ import numpy as np
 import pandas as pd
 from pydantic import BaseModel, Field
 
-from llm_provider import make_chat_model
+from llm_provider import make_chat_model, with_structured_output
 from utils import get_project_root
 
 CORPUS_PATH = get_project_root() / "data" / "external" / "real_financial_news.csv"
@@ -176,7 +176,7 @@ def build_messages(question: str, sources: list[dict]) -> list[tuple[str, str]]:
 
 def make_answer_runnable(model: str | None = None, provider: str | None = None, timeout: float = 60.0):
     llm = make_chat_model(model, provider, timeout=timeout, max_retries=2, max_tokens=600)
-    return llm.with_structured_output(NewsAnswer)
+    return with_structured_output(llm, NewsAnswer, provider)
 
 
 def make_embeddings(model: str | None = None, kind: str | None = None, corpus: pd.DataFrame | None = None):

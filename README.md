@@ -61,7 +61,7 @@ Financial sentiment analysis is a critical tool for quantitative finance, risk m
 | Dimension | What We Do |
 |-----------|------------|
 | **9 Models** | 7 trained baselines (incl. Voting Ensemble) + FinBERT zero-shot + FinBERT fine-tuned on real news |
-| **LLM engineering** | Claude (or OpenAI) via LangChain: structured-output benchmark against FinBERT (cost, latency, CI) and a RAG Q&A page with validated citations |
+| **LLM engineering** | Claude (or OpenRouter / OpenAI) via LangChain: structured-output benchmark against FinBERT (cost, latency, CI) and a RAG Q&A page with validated citations |
 | **ML Rigor** | 5-fold stratified cross-validation + GridSearchCV hyperparameter tuning |
 | **Explainability** | SHAP feature importance + per-prediction word highlighting |
 | **Error Analysis** | Sankey misclassification diagrams + confidence calibration insights |
@@ -214,7 +214,7 @@ financial-sentiment-analyzer/
 │   ├── shap_gradient_boosting.json # SHAP feature importance (GB)
 │   └── shap_svm.json              # SHAP feature importance (SVM)
 │
-├── tests/                          # Automated test suite (145 tests)
+├── tests/                          # Automated test suite (147 tests)
 │   ├── conftest.py                 # Shared fixtures
 │   ├── test_utils.py
 │   ├── test_preprocess.py
@@ -512,7 +512,7 @@ python src/integrate_news.py --action generalization --model svm   # baseline nu
 ## LLM Benchmark & News Q&A (LangChain + Claude)
 
 Two features that call an LLM, so neither runs against a live API in CI (both are tested with stubs).
-They use **Claude** by default; OpenAI works too. Keys are read from the environment or Streamlit secrets
+They use **Claude** by default; **OpenRouter** (one key, many vendors' models) and OpenAI work too. Keys are read from the environment or Streamlit secrets
 and are never committed.
 
 ```bash
@@ -521,6 +521,16 @@ export ANTHROPIC_API_KEY=sk-ant-...      # from console.anthropic.com; that's al
 # export FINSIGHT_LLM_MODEL=claude-...   # default: Claude Haiku (fast, cheap)
 # export FINSIGHT_LLM_PROVIDER=openai OPENAI_API_KEY=sk-... FINSIGHT_LLM_MODEL=<model>   # use OpenAI instead
 ```
+
+**OpenRouter** instead (key from openrouter.ai/keys; model ids look like `vendor/model`, from openrouter.ai/models):
+
+```bash
+export OPENROUTER_API_KEY=sk-or-...
+export FINSIGHT_LLM_MODEL=<vendor/model>
+```
+
+Structured output goes through tool calling on OpenRouter, so pick a model whose OpenRouter page lists tool
+support.
 
 ### Does a general-purpose LLM beat the fine-tuned FinBERT?
 
@@ -873,6 +883,7 @@ promotion criteria.
    FINSIGHT_DISABLE_HEAVY = "true"   # stock page: skip live LSTM training on the shared instance
    # FINSIGHT_FINBERT_REPO = "your-hf-username/finbert-financial"   # optional, see below
    # ANTHROPIC_API_KEY = "sk-ant-..."      # optional: enables Ask the News (Claude)
+   # or: OPENROUTER_API_KEY = "sk-or-..." and FINSIGHT_LLM_MODEL = "<vendor/model>"
    ```
 
 4. Click **Deploy**. The first build takes 5–10 minutes (PyTorch CPU wheel + transformers).
@@ -994,7 +1005,7 @@ the single-process bottleneck of a standalone Streamlit app.
 
 ### Q: What's your CI/CD story?
 
-**A:** Every push triggers GitHub Actions: ruff lint/format checks, mypy static type analysis, and 145 pytest tests. The Docker image has a health check endpoint. I can deploy to Streamlit Cloud, HuggingFace Spaces, or any container platform.
+**A:** Every push triggers GitHub Actions: ruff lint/format checks, mypy static type analysis, and 147 pytest tests. The Docker image has a health check endpoint. I can deploy to Streamlit Cloud, HuggingFace Spaces, or any container platform.
 
 ### Q: What would you do with more time?
 

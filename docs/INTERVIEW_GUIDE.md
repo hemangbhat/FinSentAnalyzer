@@ -44,7 +44,7 @@ before the interview.
 Done:
 
 - [x] ML pipeline, API, 11-page dashboard, Docker, and CI green on `main`
-- [x] 145 automated tests; ruff and mypy in CI
+- [x] 147 automated tests; ruff and mypy in CI
 - [x] Every headline number traces to a file in `results/`, with bootstrap
       confidence intervals (`scripts/bootstrap_ci.py`)
 - [x] Limitations documented in the README, `docs/MODEL_CARD.md` and `docs/TRACKER.md`
@@ -455,7 +455,7 @@ themselves.
 
 ## 10. Testing and code quality
 
-145 tests (`tests/`). Number of tests per area:
+147 tests (`tests/`). Number of tests per area:
 
 | Area | Count |
 |---|---|
@@ -466,7 +466,7 @@ themselves.
 | LLM benchmark (stubbed API) | 9 |
 | Preprocessing | 10 |
 | RAG news Q&A (fake + local embeddings, stubbed LLM) | 9 |
-| LLM provider selection | 6 |
+| LLM provider selection | 8 |
 | News integration | 7 |
 | Prediction | 6 |
 | SHAP | 6 |
@@ -763,7 +763,7 @@ Use the STAR format: situation, task, action, result.
 | FinBERT's main error | 92 neutral headlines read as negative |
 | Always-"neutral" macro-F1 | 0.25 (PhraseBank test) · 0.26 (news) |
 | API limits | 60/min single · 10/min batch · 5,000 chars · 256 texts |
-| Tests | 145 · ruff + mypy in CI |
+| Tests | 147 · ruff + mypy in CI |
 | LLM benchmark | your numbers from `results/llm_benchmark.json` (fill in after running) |
 
 ---
@@ -804,7 +804,10 @@ If they say "show me the code", open these in order:
 This is where the AI-engineering course work shows: prompting, structured
 output, LangChain, embeddings and retrieval, applied to a question the
 project already asks. Both default to **Claude** and need only
-`ANTHROPIC_API_KEY`; OpenAI is a switch (`FINSIGHT_LLM_PROVIDER=openai`).
+`ANTHROPIC_API_KEY`; OpenRouter and OpenAI are a switch
+(`FINSIGHT_LLM_PROVIDER=openrouter|openai`). OpenRouter reuses the OpenAI
+client pointed at OpenRouter's URL, and uses tool calling for structured
+output because more of its models support that than JSON-schema mode.
 Provider choice lives in one module (`src/llm_provider.py`), so the rest of
 the code doesn't care which vendor answers. Keys are never committed.
 
