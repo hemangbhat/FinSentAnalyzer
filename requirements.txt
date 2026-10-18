@@ -23,8 +23,9 @@ fastapi>=0.110.0
 uvicorn[standard]>=0.27.0
 slowapi>=0.1.9
 
-# LLM benchmark and news Q&A (optional at runtime: need OPENAI_API_KEY)
+# LLM benchmark and news Q&A (optional at runtime: need ANTHROPIC_API_KEY or OPENAI_API_KEY)
 langchain-core==1.6.12
+langchain-anthropic==1.7.6
 langchain-openai==1.7.2
 
 # Experiment tracking (optional — registry works without it)

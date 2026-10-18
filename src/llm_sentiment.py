@@ -1,5 +1,5 @@
 """
-LLM sentiment classification (OpenAI via LangChain) for benchmarking against FinBERT.
+LLM sentiment classification (Claude or OpenAI, via LangChain) for benchmarking against FinBERT.
 
 The question this answers: does a general-purpose LLM, prompted zero-shot or
 few-shot, beat a small fine-tuned model on real financial headlines, and at
@@ -15,16 +15,14 @@ Design:
 - Every answer is cached on disk, keyed by model, prompt version, mode and
   text, so re-running the benchmark never pays twice.
 
-Requires ``OPENAI_API_KEY``. The model name is always passed explicitly
-(argument or ``FINSIGHT_LLM_MODEL``); none is hardcoded because OpenAI's
-lineup changes.
+Requires ``ANTHROPIC_API_KEY`` (Claude, the default) or ``OPENAI_API_KEY``;
+see ``llm_provider`` for how the provider and model are chosen.
 """
 
 from __future__ import annotations
 
 import hashlib
 import json
-import os
 import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -32,6 +30,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
+from llm_provider import get_model_name, make_chat_model  # noqa: F401  (re-exported)
 from utils import LABEL_MAP, get_project_root
 
 PROMPT_VERSION = "v1"
@@ -52,17 +51,6 @@ class SentimentLabel(BaseModel):
     """The only answer the model is allowed to give."""
 
     label: Literal["negative", "neutral", "positive"] = Field(description="The sentiment of the headline")
-
-
-def get_model_name(model: str | None = None) -> str:
-    """Resolve the chat model name from the argument or ``FINSIGHT_LLM_MODEL``."""
-    name = model or os.getenv("FINSIGHT_LLM_MODEL")
-    if not name:
-        raise ValueError(
-            "No LLM model set. Pass --model or set FINSIGHT_LLM_MODEL "
-            "(pick a current, inexpensive chat model from OpenAI's model list)."
-        )
-    return name
 
 
 def few_shot_examples(per_class: int = 2, seed: int = 42) -> list[tuple[str, str]]:
@@ -92,11 +80,9 @@ def build_messages(text: str, mode: str, examples: list[tuple[str, str]] | None 
     return messages
 
 
-def make_runnable(model: str, temperature: float = 0.0, timeout: float = 60.0, max_retries: int = 3):
-    """``ChatOpenAI`` with structured output; ``include_raw`` keeps token usage."""
-    from langchain_openai import ChatOpenAI  # pyre-ignore
-
-    llm = ChatOpenAI(model=model, temperature=temperature, timeout=timeout, max_retries=max_retries)
+def make_runnable(model: str, provider: str | None = None, timeout: float = 60.0, max_retries: int = 3):
+    """Chat model with structured output; ``include_raw`` keeps token usage."""
+    llm = make_chat_model(model, provider, timeout=timeout, max_retries=max_retries, max_tokens=64)
     return llm.with_structured_output(SentimentLabel, include_raw=True)
 
 

@@ -44,7 +44,7 @@ before the interview.
 Done:
 
 - [x] ML pipeline, API, 11-page dashboard, Docker, and CI green on `main`
-- [x] 139 automated tests; ruff and mypy in CI
+- [x] 145 automated tests; ruff and mypy in CI
 - [x] Every headline number traces to a file in `results/`, with bootstrap
       confidence intervals (`scripts/bootstrap_ci.py`)
 - [x] Limitations documented in the README, `docs/MODEL_CARD.md` and `docs/TRACKER.md`
@@ -103,7 +103,7 @@ explain every arrow.
 7. **Production.** FastAPI with Pydantic validation, an optional API key,
    Redis-backed rate limits, nginx load balancing across replicas, a model
    registry with SHA-256 hashes, monthly retraining in CI, and Docker.
-8. **LLM layer.** I benchmarked an OpenAI model against FinBERT on the same
+8. **LLM layer.** I benchmarked Claude against FinBERT on the same
    headlines with the same bootstrap, including cost and latency, and built
    a RAG page that answers questions from the headlines with validated
    citations (section 23).
@@ -174,7 +174,7 @@ explanations a human can check, and a service that's safe to expose.
 | API | `api/main.py`, `app/api_client.py` | REST service; UI client for split mode |
 | Ops | `src/monitoring.py`, `src/registry.py`, `scripts/retrain.py`, `.github/workflows/` | Logging, metrics, registry, retraining, CI |
 | UI | `app/app.py` (router), `app/ui.py` (design system), `app/views/*` | 11 pages |
-| LLM layer | `src/llm_sentiment.py`, `scripts/llm_benchmark.py`, `src/rag_news.py`, `src/stats.py` | LangChain + OpenAI; optional, needs a key |
+| LLM layer | `src/llm_sentiment.py`, `scripts/llm_benchmark.py`, `src/rag_news.py`, `src/stats.py` | LangChain + Claude (OpenAI optional); needs a key |
 
 **Path of a single prediction.** The UI page calls `active_model()` to get the
 cached predictor. `predictor.predict(text)` routes by model type:
@@ -455,7 +455,7 @@ themselves.
 
 ## 10. Testing and code quality
 
-139 tests (`tests/`). Number of tests per area:
+145 tests (`tests/`). Number of tests per area:
 
 | Area | Count |
 |---|---|
@@ -463,9 +463,10 @@ themselves.
 | Utilities | 19 |
 | Rule-based reasoning | 13 |
 | API | 10 |
-| LLM benchmark (stubbed API) | 10 |
+| LLM benchmark (stubbed API) | 9 |
 | Preprocessing | 10 |
-| RAG news Q&A (fake embeddings, stubbed LLM) | 8 |
+| RAG news Q&A (fake + local embeddings, stubbed LLM) | 9 |
+| LLM provider selection | 6 |
 | News integration | 7 |
 | Prediction | 6 |
 | SHAP | 6 |
@@ -762,7 +763,7 @@ Use the STAR format: situation, task, action, result.
 | FinBERT's main error | 92 neutral headlines read as negative |
 | Always-"neutral" macro-F1 | 0.25 (PhraseBank test) · 0.26 (news) |
 | API limits | 60/min single · 10/min batch · 5,000 chars · 256 texts |
-| Tests | 139 · ruff + mypy in CI |
+| Tests | 145 · ruff + mypy in CI |
 | LLM benchmark | your numbers from `results/llm_benchmark.json` (fill in after running) |
 
 ---
@@ -802,8 +803,10 @@ If they say "show me the code", open these in order:
 
 This is where the AI-engineering course work shows: prompting, structured
 output, LangChain, embeddings and retrieval, applied to a question the
-project already asks. Both features need `OPENAI_API_KEY` and
-`FINSIGHT_LLM_MODEL`; nothing about them is hardcoded or committed.
+project already asks. Both default to **Claude** and need only
+`ANTHROPIC_API_KEY`; OpenAI is a switch (`FINSIGHT_LLM_PROVIDER=openai`).
+Provider choice lives in one module (`src/llm_provider.py`), so the rest of
+the code doesn't care which vendor answers. Keys are never committed.
 
 ### 23.1 LLM vs FinBERT (`scripts/llm_benchmark.py`, `src/llm_sentiment.py`)
 
@@ -877,10 +880,12 @@ works:
 ### 23.2 Ask the News (`src/rag_news.py`, `app/views/10_Ask_the_News.py`)
 
 **Pipeline.**
-1. Embed all 2,388 headlines once (`text-embedding-3-small` by default)
-   into LangChain's `InMemoryVectorStore`; save it under `data/cache`, keyed
-   by embedding model and a hash of the corpus, so it's rebuilt only when
-   either changes.
+1. Embed all 2,388 headlines into LangChain's `InMemoryVectorStore`.
+   Anthropic has no embeddings API, so the default is **local LSA**: TF-IDF
+   (1-2 grams, stopwords and question words removed, cashtags like `$TSLA`
+   kept) reduced to 256 dimensions with truncated SVD. It builds in ~5 s and
+   needs no second key. OpenAI embeddings are an option and get cached under
+   `data/cache`, keyed by model and a hash of the corpus.
 2. Embed the question, retrieve the top `k` by cosine similarity.
 3. Score each retrieved headline with the active FinSight model and show
    the sentiment mix next to the answer.
@@ -897,11 +902,15 @@ environment or Streamlit secrets and never logged or committed. Errors from
 the API are shown as a banner, not a stack trace.
 
 **Why these choices.**
-- *In-memory store, not a vector database:* 2,388 short texts is about
-  15 MB of vectors; brute-force cosine is instant. At 1M+ documents I'd move
+- *In-memory store, not a vector database:* 2,388 headlines at 256 dims is about
+  2.5 MB of vectors; brute-force cosine is instant. At 1M+ documents I'd move
   to pgvector or a managed store with an ANN index (HNSW).
 - *No chunking:* every document is a single headline.
-- *`langchain-core` + `langchain-openai` only:* small dependency surface;
+- *Local LSA embeddings, not a neural model:* no download, no extra key,
+  and exact-term matching suits ticker-heavy headlines. The trade-off is
+  weaker paraphrase matching ("profit warning" vs "guidance cut"); a
+  sentence-transformer or Voyage AI embeddings would fix that.
+- *`langchain-core` + provider packages only:* small dependency surface;
   `langchain-community` is being wound down.
 
 **Limitations to raise yourself.**

@@ -147,8 +147,8 @@ exhibit(
 if not _llm or not _llm.get("runs"):
     empty_state(
         "No LLM benchmark yet",
-        "It needs an OpenAI API key, so it is not run in CI. "
-        "<code>python scripts/llm_benchmark.py --model &lt;model&gt; --dry-run</code> shows the prompts and a "
+        "It needs an Anthropic (Claude) or OpenAI API key, so it is not run in CI. "
+        "<code>python scripts/llm_benchmark.py --dry-run</code> shows the prompts and a "
         "token estimate for free; drop <code>--dry-run</code> (add <code>--price-in</code> / "
         "<code>--price-out</code> for cost) to write results/llm_benchmark.json.",
     )

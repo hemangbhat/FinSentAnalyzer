@@ -107,3 +107,15 @@ def test_sentiment_mix_sums_to_one():
     mix = sentiment_mix(["negative", "negative", "positive", "neutral"])
     assert mix == {"negative": 0.5, "neutral": 0.25, "positive": 0.25}
     assert sentiment_mix([]) == {"negative": 0.0, "neutral": 0.0, "positive": 0.0}
+
+
+def test_local_embeddings_find_topical_headlines():
+    from rag_news import LocalLSAEmbeddings, get_embedding_kind, get_embedding_model
+
+    assert get_embedding_kind() == "local" and get_embedding_model() == "local-tfidf-lsa"
+    corpus = load_corpus()
+    store = build_index(LocalLSAEmbeddings(corpus["headline"].tolist()), corpus, "local", cache_dir=None)
+    oil = retrieve(store, "What is the news saying about oil prices?", k=3)
+    assert all("oil" in h["headline"].lower() for h in oil)
+    aapl = retrieve(store, "$AAPL", k=3)
+    assert all("$AAPL" in h["headline"] for h in aapl)

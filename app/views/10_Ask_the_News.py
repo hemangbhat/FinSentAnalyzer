@@ -39,7 +39,7 @@ page_header(
 
 
 def _setting(name: str) -> str | None:
-    """Environment variable first, then Streamlit secrets (copied into the environment for the OpenAI client)."""
+    """Environment variable first, then Streamlit secrets (copied into the environment for the API clients)."""
     value = os.getenv(name)
     if not value:
         try:
@@ -51,11 +51,19 @@ def _setting(name: str) -> str | None:
     return value
 
 
-api_key = _setting("OPENAI_API_KEY")
-chat_model = _setting("FINSIGHT_LLM_MODEL")
-_setting("FINSIGHT_EMBEDDING_MODEL")
+for _name in (
+    "ANTHROPIC_API_KEY",
+    "OPENAI_API_KEY",
+    "FINSIGHT_LLM_PROVIDER",
+    "FINSIGHT_LLM_MODEL",
+    "FINSIGHT_LLM_TEMPERATURE",
+    "FINSIGHT_EMBEDDINGS",
+    "FINSIGHT_EMBEDDING_MODEL",
+):
+    _setting(_name)
 
 try:
+    import llm_provider  # pyre-ignore
     import rag_news  # pyre-ignore
 
     RAG_AVAILABLE = True
@@ -63,38 +71,56 @@ except ImportError:
     RAG_AVAILABLE = False
 
 if not RAG_AVAILABLE:
-    status_banner("LangChain is not installed: <code>pip install langchain-core langchain-openai</code>.", "warning")
+    status_banner(
+        "LangChain is not installed: <code>pip install langchain-core langchain-anthropic langchain-openai</code>.",
+        "warning",
+    )
     st.stop()
 
-if not api_key or not chat_model:
-    missing = [n for n, v in (("OPENAI_API_KEY", api_key), ("FINSIGHT_LLM_MODEL", chat_model)) if not v]
+try:
+    provider = llm_provider.get_provider()
+    chat_model = llm_provider.get_model_name(provider=provider)
+    embedding_kind = rag_news.get_embedding_kind()
+except ValueError as exc:
+    status_banner(html.escape(str(exc)), "warning")
+    st.stop()
+
+needed = [llm_provider.KEY_ENV[provider]]
+if embedding_kind == "openai" and provider != "openai":
+    needed.append("OPENAI_API_KEY")
+missing = [n for n in needed if not os.getenv(n)]
+if missing:
     empty_state(
-        "Needs an OpenAI key and a chat model",
-        f"Set {' and '.join(f'<code>{m}</code>' for m in missing)} as environment variables or in "
+        "Needs an API key",
+        f"Set {' and '.join(f'<code>{m}</code>' for m in missing)} as an environment variable or in "
         "<code>.streamlit/secrets.toml</code> (on Streamlit Cloud: app settings → Secrets). "
-        "Embedding the corpus once costs roughly 50k tokens; each question is one embedding and one chat call.",
+        f"Provider: <b>{provider}</b>, model: <b>{html.escape(chat_model)}</b>. Search runs locally by default, "
+        "so each question costs one chat call.",
         icon="warning",
     )
     st.stop()
 
-embedding_model = rag_news.get_embedding_model()
+embedding_model = rag_news.get_embedding_model(kind=embedding_kind)
 
 
 @st.cache_resource(show_spinner=False)
-def _store(embedding_model: str):
+def _store(embedding_model: str, kind: str):
     corpus = rag_news.load_corpus()
-    return rag_news.build_index(rag_news.make_embeddings(embedding_model), corpus, embedding_model)
+    embeddings = rag_news.make_embeddings(embedding_model, kind=kind, corpus=corpus)
+    # Local embeddings rebuild in seconds; only API embeddings are worth saving to disk.
+    cache_dir = rag_news.CACHE_DIR if kind == "openai" else None
+    return rag_news.build_index(embeddings, corpus, embedding_model, cache_dir=cache_dir)
 
 
 @st.cache_resource(show_spinner=False)
-def _answerer(model: str):
-    return rag_news.make_answer_runnable(model)
+def _answerer(provider: str, model: str):
+    return rag_news.make_answer_runnable(model, provider)
 
 
 EXAMPLES = [
     "Which companies cut their guidance or outlook?",
     "What is the news saying about oil prices?",
-    "Which banks are mentioned with positive news?",
+    "Which stocks were upgraded by analysts?",
     "What happened to Tesla?",
 ]
 
@@ -118,18 +144,18 @@ if not question.strip():
 
 try:
     with st.spinner("Searching the headlines…"):
-        sources = rag_news.retrieve(_store(embedding_model), question, k=k)
+        sources = rag_news.retrieve(_store(embedding_model, embedding_kind), question, k=k)
     preds = predictor.predict([s["headline"] for s in sources]) if sources else []
     for s, p in zip(sources, preds):
         s["model_label"] = p["label"]
     with st.spinner("Writing a grounded answer…"):
-        result = rag_news.answer_question(question, sources, _answerer(chat_model))
+        result = rag_news.answer_question(question, sources, _answerer(provider, chat_model))
 except Exception as exc:  # noqa: BLE001  (network, auth, rate limit: show it, don't crash the page)
-    status_banner(f"The OpenAI call failed: {html.escape(str(exc)[:300])}", "error")
+    status_banner(f"The {provider} API call failed: {html.escape(str(exc)[:300])}", "error")
     st.stop()
 
 # ── Answer ─────────────────────────────────────────────────────────────────────
-exhibit("Answer", f"{chat_model} · temperature 0 · answers only from the {len(sources)} headlines below")
+exhibit("Answer", f"{chat_model} ({provider}) · answers only from the {len(sources)} headlines below")
 answer_html = re.sub(
     r"\[(\d+)\]",
     lambda m: f"<sup><b>[{m.group(1)}]</b></sup>",
@@ -176,6 +202,6 @@ st.markdown(
     unsafe_allow_html=True,
 )
 source_note(
-    f"● cited in the answer. Embeddings: {embedding_model}, index cached in data/cache. "
+    f"● cited in the answer. Embeddings: {embedding_model}. "
     "Headlines are tweets without timestamps, so answers describe the dataset, not today's market."
 )

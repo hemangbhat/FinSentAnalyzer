@@ -1,5 +1,5 @@
 """
-Benchmark an OpenAI LLM against the fine-tuned FinBERT on real financial news.
+Benchmark an LLM (Claude by default, or OpenAI) against the fine-tuned FinBERT on real financial news.
 
 Same 2,388 headlines (`zeroshot/twitter-financial-news-sentiment`, validation),
 same metric (macro-F1 with a 2,000-resample bootstrap interval) as every other
@@ -7,13 +7,16 @@ number in the project, plus what an LLM costs that a local model doesn't:
 tokens, dollars and latency.
 
 Usage:
-    export OPENAI_API_KEY=sk-...
+    export ANTHROPIC_API_KEY=sk-ant-...      # Claude (default model: Claude Haiku)
     # 1. See the exact prompts and a token estimate; no API calls, no cost:
-    python scripts/llm_benchmark.py --model <model> --dry-run
+    python scripts/llm_benchmark.py --dry-run
     # 2. Cheap trial on a stratified sample:
-    python scripts/llm_benchmark.py --model <model> --limit 200
-    # 3. Full run with prices from https://openai.com/api/pricing (USD per 1M tokens):
-    python scripts/llm_benchmark.py --model <model> --price-in 0.10 --price-out 0.50
+    python scripts/llm_benchmark.py --limit 200
+    # 3. Full run, with prices in USD per 1M tokens from the provider's pricing page
+    #    (https://www.anthropic.com/pricing or https://openai.com/api/pricing):
+    python scripts/llm_benchmark.py --price-in <input> --price-out <output>
+
+    # OpenAI instead: export OPENAI_API_KEY=... and pass --provider openai --model <model>
 
 Answers are cached in data/cache/llm_answers.jsonl, so re-runs are free.
 Writes results/llm_benchmark.json, which the Generalization page displays.
@@ -34,6 +37,7 @@ from sklearn.metrics import accuracy_score, confusion_matrix
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 
+from llm_provider import PROVIDERS, get_provider  # noqa: E402
 from llm_sentiment import (  # noqa: E402
     MODES,
     PROMPT_VERSION,
@@ -78,10 +82,11 @@ def dry_run(df: pd.DataFrame, modes: list[str]) -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--model", help="OpenAI chat model (or set FINSIGHT_LLM_MODEL)")
+    ap.add_argument("--provider", choices=PROVIDERS, help="anthropic (default) or openai; or FINSIGHT_LLM_PROVIDER")
+    ap.add_argument("--model", help="Chat model (or FINSIGHT_LLM_MODEL); Claude defaults to Haiku")
     ap.add_argument("--modes", nargs="+", default=list(MODES), choices=MODES)
     ap.add_argument("--limit", type=int, help="Stratified sample size for a cheap trial run")
-    ap.add_argument("--price-in", type=float, help="USD per 1M input tokens (from OpenAI's pricing page)")
+    ap.add_argument("--price-in", type=float, help="USD per 1M input tokens (from the provider's pricing page)")
     ap.add_argument("--price-out", type=float, help="USD per 1M output tokens")
     ap.add_argument("--max-concurrency", type=int, default=8)
     ap.add_argument("--dry-run", action="store_true", help="Print prompts and a token estimate; no API calls")
@@ -92,8 +97,9 @@ def main() -> None:
         dry_run(df, args.modes)
         return
 
-    model = get_model_name(args.model)
-    runnable = make_runnable(model)
+    provider = get_provider(args.provider)
+    model = get_model_name(args.model, provider)
+    runnable = make_runnable(model, provider)
     cache = AnswerCache(CACHE)
     y_true = df["label"].to_numpy()
     full_set = len(df) == len(pd.read_csv(DATA))
@@ -122,6 +128,7 @@ def main() -> None:
         )
 
     out = {
+        "provider": provider,
         "model": model,
         "prompt_version": PROMPT_VERSION,
         "dataset": DATASET,

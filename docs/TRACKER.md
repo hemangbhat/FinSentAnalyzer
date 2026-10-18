@@ -64,7 +64,7 @@
 > deploy-ready (Dockerfile + `requirements-deploy.txt`), but the live URL and
 > recorded GIF must be added by the repository owner.
 
-## Epic 8 — LLM layer (LangChain + OpenAI)
+## Epic 8 — LLM layer (LangChain + Claude)
 - [x] LLM vs FinBERT benchmark on the 2,388 real headlines: zero-/few-shot, structured output, same bootstrap, cost and latency (`scripts/llm_benchmark.py`)
 - [x] Shared bootstrap in `src/stats.py` (baselines, FinBERT and LLM intervals computed identically)
 - [x] Generalization page shows the LLM comparison, or how to produce it
@@ -72,4 +72,5 @@
 - [x] Hugging Face Hub model card + label-map guard for the fine-tuned FinBERT
 - [ ] Owner: run the benchmark with an API key and commit `results/llm_benchmark.json`
 - [ ] Owner: upload FinBERT to the Hub and set `FINSIGHT_FINBERT_REPO`
+- [x] Claude as the default provider (OpenAI optional); local TF-IDF/LSA embeddings, so one key is enough
 - [ ] Retrieval evaluation (labelled questions, recall@k) and hybrid BM25 + embedding search

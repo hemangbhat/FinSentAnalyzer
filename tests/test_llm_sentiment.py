@@ -16,7 +16,6 @@ from llm_sentiment import (  # noqa: E402
     build_messages,
     classify,
     few_shot_examples,
-    get_model_name,
     summarize_usage,
 )
 from stats import bootstrap_macro_f1, macro_f1  # noqa: E402
@@ -41,15 +40,6 @@ class StubRunnable:
         parsed = SimpleNamespace(label=label) if label else None
         raw = SimpleNamespace(usage_metadata={"input_tokens": 100, "output_tokens": 5})
         return {"raw": raw, "parsed": parsed, "parsing_error": None if label else "bad output"}
-
-
-def test_model_name_must_be_explicit(monkeypatch):
-    monkeypatch.delenv("FINSIGHT_LLM_MODEL", raising=False)
-    with pytest.raises(ValueError):
-        get_model_name()
-    monkeypatch.setenv("FINSIGHT_LLM_MODEL", "some-model")
-    assert get_model_name() == "some-model"
-    assert get_model_name("explicit") == "explicit"
 
 
 def test_zero_shot_prompt_is_system_plus_headline():
