@@ -1,0 +1,121 @@
+# .understandignore — patterns for files/dirs to exclude from analysis
+# Syntax: same as .gitignore (globs, # comments, ! negation, trailing / for dirs)
+# Lines below are suggestions — uncomment to activate.
+# Use ! prefix to force-include something excluded by defaults.
+#
+# Built-in defaults (always excluded unless negated):
+#   node_modules/, .git/, dist/, build/, obj/, *.lock, *.min.js, etc.
+#
+
+# --- From .gitignore (uncomment to exclude) ---
+
+# venvMlProject/
+# external-datasets/**/.venv*/
+# external-datasets/**/.sixth/
+# *.py[cod]
+# *$py.class
+# *.so
+# *.egg-info/
+# .eggs/
+# data/raw/*
+# data/processed/*
+# !data/raw/.gitkeep
+# !data/processed/.gitkeep
+# !data/processed/*.csv
+# models/*.pkl
+# models/*.pt
+# models/*.bin
+# models/*.safetensors
+# models/finbert/*
+# models/*_finetuned/
+# !models/.gitkeep
+# !models/*.joblib
+# !models/finbert_finetuned/
+# !models/finbert_finetuned/**
+# .ipynb_checkpoints/
+# .sixth/
+# *.swp
+# *.swo
+# .DS_Store
+# Thumbs.db
+# .env
+# huggingface/
+# .hf_cache/
+# .pytest_cache/
+# test_output.txt
+# logs/
+# mlruns/
+# **/tempCodeRunnerFile.py
+# .claude/
+# .impeccable/review/
+# .impeccable/questions/
+# data/cache/
+# .streamlit/secrets.toml
+
+# --- Detected directories (uncomment to exclude) ---
+
+# docs/
+# scripts/
+# tests/
+
+# --- Test file patterns (uncomment to exclude) ---
+
+# JS / TS
+# *.test.*
+# *.spec.*
+# *.snap
+# C# / .NET
+# **/*Tests.cs
+# **/*Test.cs
+# **/*Fixture.cs
+# **/*.Tests.csproj
+# Java / Kotlin
+# **/src/test/**
+# **/*Test.java
+# **/*IT.java
+# **/*Spec.kt
+# Go
+# **/*_test.go
+# C++
+# **/*_test.cc
+# **/*_test.cpp
+# **/*_test.cxx
+# **/*Test.cc
+# **/*Test.cpp
+# **/*_unittest.cc
+# **/*_unittest.cpp
+# **/*_browsertest.cc
+# **/*_benchmark.cc
+# **/*Benchmark.cpp
+# Python
+# **/test_*.py
+# **/*_test.py
+# **/tests.py
+# **/conftest.py
+# Rust
+# **/tests.rs
+# **/test_*.rs
+# **/*_test.rs
+# **/bench_*.rs
+# **/*_bench.rs
+# Ruby
+# **/*_spec.rb
+# **/*_test.rb
+# **/test_*.rb
+# **/spec_helper.rb
+# **/test_helper.rb
+# **/rails_helper.rb
+# Swift
+# **/Tests/**/*.swift
+# **/Specs/**/*.swift
+
+# --- Active exclusions chosen for FinSentAnalyzer ---
+external-datasets/
+data/
+models/
+results/
+notebooks/
+.impeccable/
+.ua/
+*.png
+*.gif

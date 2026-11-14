@@ -79,3 +79,8 @@ data/cache/
 
 # Local Streamlit secrets (API keys)
 .streamlit/secrets.toml
+
+# Understand-Anything scratch (the final graph in .ua/ is committed)
+.ua/intermediate/
+.ua/tmp/
+.ua/.trash-*/
