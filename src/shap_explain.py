@@ -1,11 +1,21 @@
 """
 SHAP Explainability Module for Financial Sentiment Analysis.
-Provides SHAP-based model interpretability for baseline models.
 
-Supports:
-- TreeExplainer for Gradient Boosting / Random Forest
-- LinearExplainer for SVM / Logistic Regression
-- Summary plots saved to results/
+Exact SHAP values for the TF-IDF baselines, in the model's own output space
+(log-odds for Gradient Boosting and Logistic Regression, margin for the SVM):
+
+- Linear models (SVM, Logistic Regression): linear SHAP,
+  phi_j = coef_j * (x_j - mean_j), with the feature means taken from the
+  training split. This is what ``shap.LinearExplainer`` computes for
+  independent features, written out directly.
+- Gradient Boosting: ``shap.TreeExplainer`` does not support multi-class
+  ``GradientBoostingClassifier``, but the model's score for class k is a sum of
+  regression trees, so each tree is explained exactly and the results are
+  summed (scaled by the learning rate). Additivity is checked on every call.
+- Random Forest: ``shap.TreeExplainer`` directly.
+- Anything else: ``shap.KernelExplainer`` (sampling-based approximation).
+
+Every result records the method in ``"method"``.
 """
 
 import json
@@ -17,6 +27,59 @@ from preprocess import load_processed_data
 from utils import LABEL_MAP_INV, get_model_dir, get_results_dir, setup_logging
 
 logger = setup_logging(__name__)
+
+METHODS = {
+    "linear": "exact linear SHAP: coef * (x - training mean)",
+    "gb_trees": "exact TreeSHAP, summed over the boosted trees of each class",
+    "tree": "exact TreeSHAP (shap.TreeExplainer)",
+    "kernel": "KernelSHAP (sampling approximation)",
+}
+
+
+def _linear_shap(classifier, X_dense: np.ndarray, background_mean: np.ndarray) -> list[np.ndarray]:
+    """phi[k][i, j] = coef[k, j] * (x[i, j] - mean[j]); exact for a linear model with independent features."""
+    centered = X_dense - background_mean
+    return [centered * classifier.coef_[k] for k in range(classifier.coef_.shape[0])]
+
+
+def _gradient_boosting_shap(classifier, X_dense: np.ndarray) -> list[np.ndarray]:
+    """Exact SHAP for multi-class GradientBoostingClassifier by explaining each boosted tree."""
+    import shap
+
+    n_classes = classifier.estimators_.shape[1]
+    values = [np.zeros_like(X_dense, dtype=float) for _ in range(n_classes)]
+    for stage in classifier.estimators_:
+        for k, tree in enumerate(stage):
+            values[k] += classifier.learning_rate * shap.TreeExplainer(tree).shap_values(X_dense)
+    # Additivity: score_k(x) - sum_j phi_kj(x) must be the same constant (the base value) for every x.
+    raw = classifier.decision_function(X_dense)
+    for k in range(n_classes):
+        residual = raw[:, k] - values[k].sum(axis=1)
+        if np.ptp(residual) > 1e-6:
+            raise RuntimeError(f"SHAP additivity check failed for class {k} (spread {np.ptp(residual):.2e})")
+    return values
+
+
+def compute_shap_values(model_name: str, classifier, X_dense: np.ndarray, background_mean: np.ndarray):
+    """Return (per-class SHAP arrays, method key) for a fitted baseline classifier."""
+    if hasattr(classifier, "coef_") and model_name in {"logreg", "svm"}:
+        return _linear_shap(classifier, X_dense, background_mean), "linear"
+    if type(classifier).__name__ == "GradientBoostingClassifier":
+        return _gradient_boosting_shap(classifier, X_dense), "gb_trees"
+
+    import shap
+
+    if type(classifier).__name__ == "RandomForestClassifier":
+        values = shap.TreeExplainer(classifier).shap_values(X_dense)
+        if isinstance(values, np.ndarray) and values.ndim == 3:  # newer shap: (samples, features, classes)
+            values = [values[:, :, k] for k in range(values.shape[2])]
+        return list(values), "tree"
+    background = X_dense[: min(50, len(X_dense))]
+    fn = classifier.predict_proba if hasattr(classifier, "predict_proba") else classifier.decision_function
+    values = shap.KernelExplainer(fn, background).shap_values(X_dense[: min(50, len(X_dense))])
+    if isinstance(values, np.ndarray) and values.ndim == 3:
+        values = [values[:, :, k] for k in range(values.shape[2])]
+    return list(values), "kernel"
 
 
 def get_shap_explanation(
@@ -30,16 +93,11 @@ def get_shap_explanation(
     Args:
         model_name: One of 'gradient_boosting', 'random_forest', 'logreg', 'svm'
         split: Data split to explain
-        max_samples: Maximum samples to explain (SHAP can be slow)
+        max_samples: Maximum samples to explain
 
     Returns:
-        Dictionary with SHAP values, feature names, and summary data
+        Dictionary with the method used, top features and per-class signed values
     """
-    try:
-        import shap
-    except ImportError:
-        raise ImportError("SHAP is not installed. Install with: pip install shap")
-
     model_path = get_model_dir() / f"baseline_{model_name}.joblib"
     if not model_path.exists():
         raise FileNotFoundError(f"Model not found: {model_path}")
@@ -57,66 +115,12 @@ def get_shap_explanation(
     tfidf = pipeline.named_steps["tfidf"]
     classifier = pipeline.named_steps["classifier"]
 
-    X_tfidf = tfidf.transform(X_text)
+    X_dense = tfidf.transform(X_text).toarray()
     feature_names = tfidf.get_feature_names_out()
+    background_mean = np.asarray(tfidf.transform(load_processed_data("train")["sentence"].values).mean(axis=0)).ravel()
 
     logger.info("Computing SHAP values for %s on %d samples...", model_name, len(X_text))
-
-    # Choose appropriate explainer
-    tree_models = {"random_forest"}  # Only RF supports multi-class TreeExplainer reliably
-    linear_models = {"logreg", "svm"}
-    feature_importance_models = {"gradient_boosting"}  # Use feature_importances_ instead
-
-    if model_name in tree_models:
-        try:
-            explainer = shap.TreeExplainer(classifier)
-            shap_values = explainer.shap_values(X_tfidf.toarray())
-        except Exception as e:
-            logger.warning("TreeExplainer failed (%s), using feature_importances_ fallback", e)
-            # Fall through to feature_importances_ approach
-            feature_importance_models.add(model_name)
-
-    if model_name in feature_importance_models:
-        # Use feature_importances_ + per-sample approximation
-        if hasattr(classifier, "feature_importances_"):
-            fi = classifier.feature_importances_  # global importance per feature
-            X_dense = X_tfidf.toarray()
-            # Approximate SHAP as feature_value * importance (1 class proxy)
-            shap_values = X_dense * fi
-            # For per-class analysis, use the model to predict class probabilities
-            # and weight the importance by prediction confidence per class
-            if hasattr(classifier, "predict_proba"):
-                probas = classifier.predict_proba(X_dense)
-                shap_values = []
-                for class_idx in range(3):
-                    class_weight = probas[:, class_idx : class_idx + 1]
-                    class_shap = X_dense * fi * class_weight
-                    shap_values.append(class_shap)
-            else:
-                # Single array, wrap for consistency
-                shap_values = [shap_values]
-        else:
-            raise ValueError(f"Model {model_name} has no feature_importances_")
-    elif model_name in linear_models:
-        # For linear models, use the coefficients directly as feature importance
-        if hasattr(classifier, "coef_"):
-            # Compute per-sample SHAP-like values: feature_value * coefficient
-            X_dense = X_tfidf.toarray()
-            coefs = classifier.coef_  # shape: (n_classes, n_features)
-            shap_values = []
-            for class_idx in range(coefs.shape[0]):
-                class_shap = X_dense * coefs[class_idx]
-                shap_values.append(class_shap)
-        else:
-            raise ValueError(f"Model {model_name} doesn't have coef_ attribute")
-    elif model_name not in tree_models:
-        # Fallback: use KernelExplainer (slow but universal)
-        background = shap.sample(X_tfidf, min(50, X_tfidf.shape[0]))
-        if hasattr(classifier, "predict_proba"):
-            explainer = shap.KernelExplainer(classifier.predict_proba, background)
-        else:
-            explainer = shap.KernelExplainer(classifier.decision_function, background)
-        shap_values = explainer.shap_values(X_tfidf.toarray()[: min(50, len(X_text))])
+    shap_values, method = compute_shap_values(model_name, classifier, X_dense, background_mean)
 
     # Compute feature importance (mean absolute SHAP across all classes)
     if isinstance(shap_values, list):
@@ -155,6 +159,7 @@ def get_shap_explanation(
 
     result = {
         "model": model_name,
+        "method": METHODS[method],
         "split": split,
         "num_samples": len(X_text),
         "num_features": len(feature_names),
@@ -223,35 +228,31 @@ def generate_shap_plot(model_name: str = "gradient_boosting", split: str = "test
     X_tfidf = tfidf.transform(df["sentence"].values)
     feature_names = tfidf.get_feature_names_out()
 
-    tree_models = {"gradient_boosting", "random_forest"}
-    if model_name in tree_models:
-        explainer = shap.TreeExplainer(classifier)
-        shap_values = explainer.shap_values(X_tfidf.toarray())
+    X_dense = X_tfidf.toarray()
+    background_mean = np.asarray(tfidf.transform(load_processed_data("train")["sentence"].values).mean(axis=0)).ravel()
+    shap_values, _ = compute_shap_values(model_name, classifier, X_dense, background_mean)
+    fig, ax = plt.subplots(figsize=(12, 8))
+    shap.summary_plot(
+        shap_values,
+        X_dense,
+        feature_names=feature_names,
+        class_names=[LABEL_MAP_INV[i] for i in range(3)],
+        plot_type="bar",
+        max_display=20,
+        show=False,
+    )
+    plt.title(f"SHAP Feature Importance — {model_name.replace('_', ' ').title()}", fontsize=14)
+    plt.tight_layout()
 
-        fig, ax = plt.subplots(figsize=(12, 8))
-        shap.summary_plot(
-            shap_values,
-            X_tfidf.toarray(),
-            feature_names=feature_names,
-            class_names=[LABEL_MAP_INV[i] for i in range(3)],
-            plot_type="bar",
-            max_display=20,
-            show=False,
-        )
-        plt.title(f"SHAP Feature Importance — {model_name.replace('_', ' ').title()}", fontsize=14)
-        plt.tight_layout()
-
-        if save:
-            results_dir = get_results_dir()
-            results_dir.mkdir(parents=True, exist_ok=True)
-            save_path = results_dir / f"shap_summary_{model_name}.png"
-            plt.savefig(save_path, dpi=150, bbox_inches="tight", facecolor="white")
-            logger.info("SHAP plot saved to: %s", save_path)
-            plt.close()
-        else:
-            plt.show()
+    if save:
+        results_dir = get_results_dir()
+        results_dir.mkdir(parents=True, exist_ok=True)
+        save_path = results_dir / f"shap_summary_{model_name}.png"
+        plt.savefig(save_path, dpi=150, bbox_inches="tight", facecolor="white")
+        logger.info("SHAP plot saved to: %s", save_path)
+        plt.close()
     else:
-        logger.warning("SHAP summary plots are best suited for tree-based models.")
+        plt.show()
 
 
 if __name__ == "__main__":

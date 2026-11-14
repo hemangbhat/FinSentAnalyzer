@@ -44,7 +44,7 @@ before the interview.
 Done:
 
 - [x] ML pipeline, API, 11-page dashboard, Docker, and CI green on `main`
-- [x] 147 automated tests; ruff and mypy in CI
+- [x] 149 automated tests; ruff and mypy in CI
 - [x] Every headline number traces to a file in `results/`, with bootstrap
       confidence intervals (`scripts/bootstrap_ci.py`)
 - [x] Limitations documented in the README, `docs/MODEL_CARD.md` and `docs/TRACKER.md`
@@ -350,7 +350,7 @@ themselves.
 | Method | Where | What it tells you |
 |---|---|---|
 | **Term attribution** | Single Analysis, Explainability | For TF-IDF models: each term's TF-IDF weight × the class coefficient, so you see which words pushed the verdict. Exact for linear models. |
-| **SHAP** | Explainability, Generalization | Global feature importance (mean \|SHAP\|) and signed per-class drivers. TreeExplainer for tree models; coefficient-based for linear models. |
+| **SHAP** | Explainability, Generalization | Global feature importance (mean \|SHAP\|) and signed per-class drivers. Exact in every case: linear SHAP for SVM/LogReg, TreeSHAP summed over the boosted trees for Gradient Boosting (shap's TreeExplainer refuses multi-class boosting), TreeExplainer for Random Forest. Additivity is asserted in tests. |
 | **Word Insights** | Word Insights | The top-weighted vocabulary per class; flags stopwords. |
 | **Lexicon + entities** | Deep Analysis | Loughran-McDonald positive, negative, uncertainty and litigious word lists; regex extraction of percentages, amounts and company tickers. |
 | **Rule-based reasoning** | Deep Analysis | Six deterministic steps (comprehension → entities → sentiment → context → confidence → synthesis). **Not an LLM**; say so if asked. |
@@ -455,7 +455,7 @@ themselves.
 
 ## 10. Testing and code quality
 
-147 tests (`tests/`). Number of tests per area:
+149 tests (`tests/`). Number of tests per area:
 
 | Area | Count |
 |---|---|
@@ -469,7 +469,7 @@ themselves.
 | LLM provider selection | 8 |
 | News integration | 7 |
 | Prediction | 6 |
-| SHAP | 6 |
+| SHAP (incl. exactness checks) | 8 |
 | Stock extension | 6 |
 | API client | 5 |
 | Real-news generalization | 1 |
@@ -536,6 +536,18 @@ Tell these as stories: situation, what you tried, what you found, the result.
    answers are cached, a re-run retries just the failures. Lesson: count
    failures separately from wrong answers, or an outage looks like a weak
    model.
+9. **"SHAP" that wasn't quite SHAP.** An audit of my own code found that
+   Gradient Boosting, the model behind the published SHAP chart, silently
+   fell back to `feature_importances_` × TF-IDF, because `shap.TreeExplainer`
+   refuses multi-class `GradientBoostingClassifier`. The linear models also
+   skipped the mean-centring. The fix: a multi-class boosted model's score
+   for class k is a sum of regression trees, so I explain each tree exactly
+   with TreeSHAP and sum them (times the learning rate), and compute linear
+   SHAP as coef × (x − training mean). Tests assert additivity: contributions
+   plus the base value reproduce the model's score to about 1e-15. The
+   conclusion (stopwords among the top features) survived, but now it's
+   evidence rather than an approximation. Lesson: verify that an explanation
+   method is what its label says.
 
 ---
 
@@ -547,7 +559,7 @@ fix.
 | # | Limitation | Fix |
 |---|---|---|
 | 1 | FinBERT's 0.84 is **in-domain held-out**, not out-of-domain | Evaluate on a third, unseen source (e.g. SEC filings) |
-| 2 | **Selection bias:** best epoch chosen on 500 rows of the same validation split that's reported | Carve a separate dev split out of `train` |
+| 2 | **Selection bias:** the published 0.84 chose its best epoch on 500 rows of the same validation split that's reported | Fixed in code: `finetune_finbert_news.py` now holds out a stratified 10% dev split from `train` by default (`--dev-fraction`); the published number needs a GPU re-run to refresh |
 | 3 | 226-row test set is small | Already mitigated with CV + bootstrap; the AllAgree-only data also flatters in-domain scores |
 | 4 | TF-IDF keeps stopwords; SHAP shows the model leaning on them | Stopword handling plus re-tuning; test the effect out of domain |
 | 5 | No calibration analysis | Reliability diagram + ECE; temperature scaling |
@@ -771,7 +783,7 @@ Use the STAR format: situation, task, action, result.
 | FinBERT's main error | 92 neutral headlines read as negative |
 | Always-"neutral" macro-F1 | 0.25 (PhraseBank test) · 0.26 (news) |
 | API limits | 60/min single · 10/min batch · 5,000 chars · 256 texts |
-| Tests | 147 · ruff + mypy in CI |
+| Tests | 149 · ruff + mypy in CI |
 | Claude Haiku zero-shot, real news (n=2,388) | 0.813 acc · **0.792** macro-F1 · CI 0.774–0.810 · 0 invalid · ~1.4 s/call |
 | LLM error pattern | 366 of 1,566 neutral headlines read as negative/positive (FinBERT: 180) |
 

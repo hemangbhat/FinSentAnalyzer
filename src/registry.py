@@ -63,10 +63,23 @@ def _load_eval_metrics() -> Dict[str, Dict[str, Any]]:
     return out
 
 
+def _finetune_metrics(key: str) -> Dict[str, Any]:
+    """Metrics for a fine-tuned transformer from results/finetune_results_<model>.json."""
+    if not key.endswith("_finetuned"):
+        return {}
+    path = get_results_dir() / f"finetune_results_{key.removesuffix('_finetuned')}.json"
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return {k: data[k] for k in ("accuracy", "f1_macro", "dataset", "n_train", "n_val") if k in data}
+
+
 def _discover_artifacts() -> List[Path]:
-    """Find tracked model artifacts across the project."""
+    """Find tracked model artifacts: TF-IDF baselines, fine-tuned transformers and stock LSTMs."""
     model_dir = get_model_dir()
     artifacts = sorted(model_dir.glob("baseline_*.joblib"))
+    artifacts += sorted(model_dir.glob("*_finetuned/model.safetensors"))
     stock_lstm = get_project_root() / "external-datasets" / "financial-news-stock-prediction" / "models"
     if stock_lstm.exists():
         artifacts += sorted(stock_lstm.glob("lstm_*.pt"))
@@ -79,7 +92,8 @@ def build_registry() -> Dict[str, Any]:
     entries = []
     for path in _discover_artifacts():
         stat = path.stat()
-        key = path.stem  # e.g. baseline_svm, lstm_AAPL
+        # baseline_svm, lstm_AAPL, or the directory name for a transformer (finbert_finetuned)
+        key = path.parent.name if path.name == "model.safetensors" else path.stem
         entries.append(
             {
                 "model": key,
@@ -87,7 +101,9 @@ def build_registry() -> Dict[str, Any]:
                 "sha256": _hash_file(path),
                 "size_bytes": stat.st_size,
                 "modified": datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc).isoformat(),
-                "metrics": eval_metrics.get(key, {}),
+                "metrics": eval_metrics.get(key) or _finetune_metrics(key),
+                # A ~130-byte file is an un-fetched Git LFS pointer, not the weights.
+                "lfs_pointer": stat.st_size < 1024 and path.suffix == ".safetensors",
             }
         )
     return {

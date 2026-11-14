@@ -121,3 +121,48 @@ class TestShapExplain:
             data = json.load(f)
         assert data["model"] == "gradient_boosting"
         assert len(data["top_features"]) > 0
+
+
+def _linear_case():
+    np = pytest.importorskip("numpy")
+    from sklearn.feature_extraction.text import TfidfVectorizer
+    from sklearn.linear_model import LogisticRegression
+
+    texts = ["profit rose sharply", "loss widened badly", "shares were flat", "sales grew strongly"] * 5
+    labels = [2, 0, 1, 2] * 5
+    tfidf = TfidfVectorizer().fit(texts)
+    X = tfidf.transform(texts).toarray()
+    clf = LogisticRegression(max_iter=500).fit(X, labels)
+    return np, clf, X
+
+
+def test_linear_shap_is_exact_and_additive():
+    """sum_j phi_j(x) + base must equal the model's score for every sample (base = score at the mean)."""
+    from shap_explain import compute_shap_values
+
+    np, clf, X = _linear_case()
+    mean = X.mean(axis=0)
+    values, method = compute_shap_values("logreg", clf, X, mean)
+    assert method == "linear"
+    raw = clf.decision_function(X)
+    base = clf.decision_function(mean.reshape(1, -1))[0]
+    for k in range(3):
+        assert np.allclose(values[k].sum(axis=1) + base[k], raw[:, k])
+
+
+def test_gradient_boosting_shap_is_exact_and_additive():
+    """Multi-class GradientBoosting is explained tree by tree; contributions must add up to the model score."""
+    pytest.importorskip("shap")
+    from sklearn.ensemble import GradientBoostingClassifier
+
+    from shap_explain import compute_shap_values
+
+    np, _, X = _linear_case()
+    labels = [2, 0, 1, 2] * 5
+    gb = GradientBoostingClassifier(n_estimators=10, random_state=0).fit(X, labels)
+    values, method = compute_shap_values("gradient_boosting", gb, X, X.mean(axis=0))
+    assert method == "gb_trees"
+    raw = gb.decision_function(X)
+    for k in range(3):
+        residual = raw[:, k] - values[k].sum(axis=1)
+        assert np.ptp(residual) < 1e-8  # the same base value for every sample

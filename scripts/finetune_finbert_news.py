@@ -57,7 +57,15 @@ def main() -> None:
     parser.add_argument("--batch-size", type=int, default=16)
     parser.add_argument("--lr", type=float, default=2e-5)
     parser.add_argument("--max-train", type=int, default=None, help="Cap training rows (for CPU runs)")
-    parser.add_argument("--val-monitor", type=int, default=500, help="Val subset size used during training")
+    parser.add_argument(
+        "--dev-fraction",
+        type=float,
+        default=0.1,
+        help="Stratified share of the train split held out for epoch selection (0 = legacy: monitor on validation)",
+    )
+    parser.add_argument(
+        "--val-monitor", type=int, default=500, help="Legacy (--dev-fraction 0): validation rows used for monitoring"
+    )
     parser.add_argument(
         "--class-weights", action="store_true", help="Use inverse-frequency class weights (helps macro-F1)"
     )
@@ -79,9 +87,20 @@ def main() -> None:
     train_texts, train_labels = _load_news_split("train", args.max_train)
     val_texts, val_labels = _load_news_split("validation")
 
-    # Smaller val subset for per-epoch monitoring; full set for final eval.
-    mon_texts = val_texts[: args.val_monitor]
-    mon_labels = val_labels[: args.val_monitor]
+    # Epoch selection must not see the rows we report on. By default a stratified
+    # dev split is carved out of train; validation is used only for the final score.
+    if args.dev_fraction > 0:
+        from sklearn.model_selection import train_test_split
+
+        train_texts, mon_texts, train_labels, mon_labels = train_test_split(
+            train_texts, train_labels, test_size=args.dev_fraction, stratify=train_labels, random_state=42
+        )
+        monitor = f"dev split carved from train (n={len(mon_texts)})"
+    else:
+        mon_texts = val_texts[: args.val_monitor]
+        mon_labels = val_labels[: args.val_monitor]
+        monitor = f"first {len(mon_texts)} validation rows (legacy; the reported score is slightly optimistic)"
+        print(f"Warning: epoch selection uses {monitor}.")
 
     print(f"Train: {len(train_texts)} | Val: {len(val_texts)} | model: {args.model}")
     fsm = FinancialSentimentModel(model_name=args.model, num_labels=3)
@@ -119,6 +138,7 @@ def main() -> None:
         "n_train": len(train_texts),
         "n_val": len(val_texts),
         "epochs": args.epochs,
+        "epoch_selection": monitor,
         "accuracy": float(final["accuracy"]),
         "f1_macro": float(final["f1_macro"]),
     }

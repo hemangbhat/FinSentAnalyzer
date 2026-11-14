@@ -218,10 +218,10 @@ _MODEL_METADATA = {
         "type": "Transformer (fine-tuned)",
         "speed": "Slow (CPU) / Fast (GPU)",
         "features": [
-            "FinBERT fine-tuned on Financial PhraseBank",
+            "FinBERT fine-tuned on 9.5k real financial-news headlines",
             "Class-weighted training + early stopping",
-            "Best in-domain accuracy of all models",
-            "Strongest out-of-domain generalization",
+            "Best macro-F1 on held-out real news (0.84)",
+            "Beats a zero-shot LLM (Claude Haiku, 0.79) on the same set",
             "110M parameters",
         ],
     },

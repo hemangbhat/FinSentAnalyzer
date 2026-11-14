@@ -57,7 +57,8 @@
 - [x] `st.navigation` router: grouped sidebar, model selection persists across pages
 - [x] Home page built around the evaluation story, numbers read from `results/`
 - [x] Pinned CI dependencies; fixed scheduled retraining (missing matplotlib)
-- [ ] Re-run FinBERT fine-tuning with a separate dev split for early stopping
+- [x] Fine-tuning script holds out a dev split from train for epoch selection (`--dev-fraction`, default 0.1)
+- [ ] Re-run FinBERT on a GPU with the dev split to refresh the published 0.84
 - [ ] Add stopword handling / re-tune TF-IDF (SHAP shows stopwords among top SVM features)
 
 > Note: public deployment URL and demo GIF are owner-action items — the app is
@@ -76,3 +77,9 @@
 - [x] Claude as the default provider (OpenAI optional); local TF-IDF/LSA embeddings, so one key is enough
 - [x] OpenRouter as a third provider (OpenAI-compatible client, tool-calling structured output)
 - [ ] Retrieval evaluation (labelled questions, recall@k) and hybrid BM25 + embedding search
+
+## Epic 9 — Audit fixes (from the Understand-Anything code review)
+- [x] Exact SHAP everywhere: linear SHAP for SVM/LogReg, per-tree TreeSHAP for multi-class Gradient Boosting, additivity tests
+- [x] Hyperparameter tuning writes `models/tuned_*.joblib` instead of overwriting the baselines (`--promote-tuned` to replace)
+- [x] Model registry includes fine-tuned transformers and flags un-fetched LFS pointers
+- [x] Docs agree: 149 tests, FinBERT 4 epochs / 0.87 acc / 0.84 macro-F1, fine-tuned on news (not PhraseBank)

@@ -214,7 +214,7 @@ financial-sentiment-analyzer/
 │   ├── shap_gradient_boosting.json # SHAP feature importance (GB)
 │   └── shap_svm.json              # SHAP feature importance (SVM)
 │
-├── tests/                          # Automated test suite (147 tests)
+├── tests/                          # Automated test suite (149 tests)
 │   ├── conftest.py                 # Shared fixtures
 │   ├── test_utils.py
 │   ├── test_preprocess.py
@@ -481,8 +481,9 @@ human-labeled, out-of-distribution** dataset:
 > set — the comparison shows that domain-matched training data closes the gap,
 > not that FinBERT generalizes zero-shot. Also note the fine-tuning run selects
 > its best epoch on the first 500 rows of that same validation split, so the
-> 0.84 carries a small optimistic bias; a clean re-run would carve a separate
-> dev split out of `train` for early stopping.
+> 0.84 carries a small optimistic bias. The script now carves a stratified 10% dev
+> split out of `train` for epoch selection by default (`--dev-fraction`), so the next
+> GPU run reports a score the selection never saw.
 
 **Honest takeaway:** the PhraseBank-trained model **generalizes poorly** to a
 different domain — on real financial-news headlines its accuracy barely exceeds
@@ -616,9 +617,15 @@ Each prediction comes with **word-importance highlighting** showing which tokens
 
 SHAP (SHapley Additive exPlanations) provides global feature importance:
 
-- **Tree models** (Random Forest): SHAP TreeExplainer
-- **Gradient Boosting**: Feature importance + probability-weighted per-class approximation
-- **Linear models** (SVM, LogReg): Coefficient-based analysis per class
+All values are exact SHAP values in the model's own score space (log-odds, or the SVM margin), and each result file
+records the method used:
+
+- **Linear models** (SVM, LogReg): linear SHAP, `coef × (x − training mean)`, which is what `shap.LinearExplainer`
+  computes for independent features
+- **Gradient Boosting**: `shap.TreeExplainer` rejects multi-class `GradientBoostingClassifier`, so each boosted
+  regression tree is explained exactly and the contributions are summed per class (scaled by the learning rate).
+  Every run checks additivity: contributions + base value reproduce the model's score to ~1e-15
+- **Random Forest**: `shap.TreeExplainer` directly
 
 Results include:
 - Top 30 most important features globally
@@ -778,7 +785,7 @@ python src/stock_extension.py --ticker AAPL --days-back 120 --save-model   # per
 
 ## Testing
 
-The project has **88 automated tests** across 8 test files:
+The project has **149 automated tests** across 16 test files:
 
 ```bash
 # Run all tests
@@ -786,8 +793,6 @@ python -m pytest tests/ -v --tb=short
 
 # Run a specific test file
 python -m pytest tests/test_predict.py -v
-python -m pytest tests/test_integrate_news.py -v
-python -m pytest tests/test_stock_extension.py -v
 python -m pytest tests/test_shap_explain.py -v
 ```
 
@@ -795,14 +800,22 @@ python -m pytest tests/test_shap_explain.py -v
 
 | Test File | Tests | Covers |
 |-----------|:-----:|--------|
-| `test_utils.py` | 15 | Path helpers, logging, constants, model info |
-| `test_preprocess.py` | 7 | Text cleaning, label encoding, data splits |
-| `test_predict.py` | 6 | Model loading, single/batch prediction |
-| `test_nlp_advanced.py` | 14 | Text processing, NER, lexicon, features |
-| `test_llm_enhanced.py` | 10 | Thought steps, market outlook, confidence |
+| `test_nlp_advanced.py` | 24 | Text processing, entity extraction, lexicon, features |
+| `test_utils.py` | 19 | Path helpers, logging, constants, model info |
+| `test_llm_enhanced.py` | 13 | Rule-based thought steps, market outlook, confidence |
+| `test_page_imports.py` | 13 | Every dashboard page's imports resolve (one test per page file) |
+| `test_api.py` | 10 | FastAPI validation, auth, batch limits, metrics |
+| `test_preprocess.py` | 10 | Text cleaning, label encoding, data splits |
+| `test_llm_sentiment.py` | 9 | LLM benchmark: prompts, structured output, cache, cost, invalid answers (stubbed API) |
+| `test_rag_news.py` | 9 | RAG: retrieval, index caching, citation validation, injection guard (no API) |
+| `test_llm_provider.py` | 8 | Claude / OpenRouter / OpenAI selection and client construction |
+| `test_shap_explain.py` | 8 | SHAP results, plus exactness (additivity) checks for the linear and boosted-tree explainers |
 | `test_integrate_news.py` | 7 | News loading, sentiment prediction, trends |
-| `test_stock_extension.py` | 6 | Pipeline orchestration, news fallbacks, model-path logic, save-model behavior |
-| `test_shap_explain.py` | 6 | SHAP analysis, per-class features, JSON save |
+| `test_predict.py` | 6 | Model loading, single/batch prediction |
+| `test_stock_extension.py` | 6 | Pipeline orchestration, news fallbacks, model paths |
+| `test_api_client.py` | 5 | Dashboard's HTTP client for the API |
+| `test_generalization.py` | 1 | Out-of-domain evaluation on real news |
+| `test_model_artifacts.py` | 1 | Fine-tuned FinBERT label map matches the project's labels |
 
 ### CI/CD Pipeline
 
@@ -977,7 +990,7 @@ the single-process bottleneck of a standalone Streamlit app.
 | **ML Framework** | scikit-learn (Pipelines, GridSearchCV, StratifiedKFold) |
 | **Deep Learning** | PyTorch, HuggingFace Transformers (FinBERT) |
 | **NLP** | TF-IDF, spaCy-inspired NER, financial lexicons |
-| **Explainability** | SHAP (TreeExplainer, coefficient analysis) |
+| **Explainability** | SHAP (exact linear SHAP, per-tree TreeSHAP for boosting, TreeExplainer) |
 | **Data** | pandas, numpy |
 | **Visualization** | Plotly, matplotlib |
 | **Dashboard** | Streamlit (multipage app) |
@@ -1019,7 +1032,7 @@ the single-process bottleneck of a standalone Streamlit app.
 
 ### Q: What's your CI/CD story?
 
-**A:** Every push triggers GitHub Actions: ruff lint/format checks, mypy static type analysis, and 147 pytest tests. The Docker image has a health check endpoint. I can deploy to Streamlit Cloud, HuggingFace Spaces, or any container platform.
+**A:** Every push triggers GitHub Actions: ruff lint/format checks, mypy static type analysis, and 149 pytest tests. The Docker image has a health check endpoint. I can deploy to Streamlit Cloud, HuggingFace Spaces, or any container platform.
 
 ### Q: What would you do with more time?
 

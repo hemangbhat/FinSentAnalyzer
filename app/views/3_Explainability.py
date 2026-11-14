@@ -182,7 +182,12 @@ if shap_data and shap_data.get("top_features"):
     fig.update_xaxes(showgrid=True)
     fig.update_yaxes(showgrid=False, ticks="")
     render_chart(fig)
-    source_note(f"results/shap_{classifier_name}.json (pre-computed with src/shap_explain.py).")
+    _method = shap_data.get("method", "method not recorded (re-run src/shap_explain.py)")
+    source_note(
+        f"results/shap_{classifier_name}.json (pre-computed with src/shap_explain.py) · {_method} · "
+        f"{shap_data.get('num_samples', '?')} test sentences. Values are in the model's score space "
+        "(log-odds or SVM margin)."
+    )
 
     class_features = shap_data.get("class_features", {})
     if class_features:

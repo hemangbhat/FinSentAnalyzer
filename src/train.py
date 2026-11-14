@@ -468,9 +468,14 @@ def cross_validate_baselines(k: int = 5) -> dict:
     return cv_results
 
 
-def tune_hyperparameters() -> dict:
+def tune_hyperparameters(promote: bool = False) -> dict:
     """
     Run GridSearchCV hyperparameter tuning for SVM and Gradient Boosting.
+
+    The best estimators are saved as ``models/tuned_<name>.joblib``. They are
+    refit on train + validation, so they never silently replace the
+    ``baseline_<name>.joblib`` files that every reported number comes from;
+    pass ``promote=True`` (``--promote-tuned``) to replace them on purpose.
 
     Returns:
         Dictionary with best params and scores for each model
@@ -518,9 +523,10 @@ def tune_hyperparameters() -> dict:
         "best_params": svm_grid.best_params_,
         "best_f1_macro": float(svm_grid.best_score_),
     }
-    # Save the best tuned model
+    # Save the best tuned model (see the docstring for why baselines are kept)
     model_dir = get_model_dir()
-    joblib.dump(svm_grid.best_estimator_, model_dir / "baseline_svm.joblib")
+    prefix = "baseline" if promote else "tuned"
+    joblib.dump(svm_grid.best_estimator_, model_dir / f"{prefix}_svm.joblib")
     logger.info("  Best SVM: C=%s, F1=%.4f", svm_grid.best_params_["classifier__C"], svm_grid.best_score_)
 
     # --- Tune Gradient Boosting ---
@@ -550,7 +556,9 @@ def tune_hyperparameters() -> dict:
         "best_params": gb_grid.best_params_,
         "best_f1_macro": float(gb_grid.best_score_),
     }
-    joblib.dump(gb_grid.best_estimator_, model_dir / "baseline_gradient_boosting.joblib")
+    joblib.dump(gb_grid.best_estimator_, model_dir / f"{prefix}_gradient_boosting.joblib")
+    if promote:
+        logger.warning("Promoted tuned models over baseline_*.joblib; re-run evaluation before quoting numbers.")
     logger.info("  Best GB: %s, F1=%.4f", gb_grid.best_params_, gb_grid.best_score_)
 
     # Save tuning results
@@ -585,6 +593,11 @@ if __name__ == "__main__":
     parser.add_argument("--epochs", type=int, default=3, help="Epochs for transformer training")
     parser.add_argument("--batch-size", type=int, default=16, help="Batch size")
     parser.add_argument("--lr", type=float, default=2e-5, help="Learning rate")
+    parser.add_argument(
+        "--promote-tuned",
+        action="store_true",
+        help="With --model tune: overwrite baseline_svm/gradient_boosting.joblib instead of writing tuned_*.joblib",
+    )
 
     args = parser.parse_args()
 
@@ -598,7 +611,7 @@ if __name__ == "__main__":
     elif args.model == "cv":
         cross_validate_baselines(k=5)
     elif args.model == "tune":
-        tune_hyperparameters()
+        tune_hyperparameters(promote=args.promote_tuned)
     elif args.model in ["finbert", "distilbert", "roberta", "bert"]:
         train_transformer(args.model, epochs=args.epochs, batch_size=args.batch_size, learning_rate=args.lr)
     elif args.model in ["logreg", "svm", "naive_bayes", "random_forest", "gradient_boosting", "mlp"]:
