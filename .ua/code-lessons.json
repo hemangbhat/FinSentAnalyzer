@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-11-14T05:18:06.368073+00:00",
+  "generatedAt": "2026-11-14T08:59:36.394309+00:00",
   "files": {
     "README.md": {
       "overview": "The README is the front door of the project and the best single source for a two-minute pitch. It covers the whole system: seven TF-IDF baselines plus FinBERT (zero-shot and fine-tuned), stratified CV and GridSearchCV, an honest out-of-domain test on real news with bootstrap intervals, the LangChain LLM benchmark and RAG page, the FastAPI service, the Streamlit dashboard and four deployment options. It is the main reference for tour step 1, and its later sections preview most of the other tour steps. A theme that runs through it is honesty: synthetic data, chance-level stock results and in-domain vs out-of-domain caveats are all stated openly.",
@@ -455,33 +455,42 @@
       ]
     },
     "src/train.py": {
-      "overview": "The classical-ML training module for tour step 4. It builds TF-IDF + classifier scikit-learn Pipelines for six models, trains a soft-voting ensemble with a calibrated SVM, runs 5-fold stratified cross-validation and GridSearchCV tuning scored on macro-F1, and saves joblib artifacts and JSON results. It also delegates transformer training to model.py and has a CLI with modes such as baselines, cv and tune. The strong baselines built here are the bar that FinBERT has to beat.",
+      "overview": "The training entry point for the classical baselines. It builds TF-IDF plus classifier pipelines for six models (logistic regression, multinomial Naive Bayes, linear SVM, random forest, gradient boosting, MLP), trains a soft-voting ensemble with a calibrated SVM, runs stratified k-fold cross-validation, and tunes the SVM and Gradient Boosting with GridSearchCV. Transformer training is delegated to `model.py`. The tuner writes `tuned_*.joblib` and leaves the reported `baseline_*.joblib` files alone unless you pass `promote=True` (`--promote-tuned`). This file is the core of tour step 4.",
       "sections": [
         {
-          "title": "Imports",
+          "title": "Imports and logger",
           "lineRange": [
             1,
             26
           ],
-          "explanation": "Imports everything for classical text classification: TfidfVectorizer, six classifier families, CalibratedClassifierCV, VotingClassifier, Pipeline, and the CV and tuning tools (StratifiedKFold, cross_validate, GridSearchCV, make_scorer). Data comes only through preprocess.load_processed_data, so training always uses the frozen splits from step 3.",
+          "explanation": "Imports the scikit-learn pieces used here: vectoriser, six classifier families, calibration, voting, metrics and model-selection tools. It also imports project helpers for loading the processed splits from step 3 and for resolving model and result directories.",
           "tourOrder": 4
         },
         {
-          "title": "TF-IDF pipeline factory",
+          "title": "Baseline pipeline factory",
           "lineRange": [
             29,
             73
           ],
-          "explanation": "One factory builds every baseline as Pipeline([tfidf, classifier]). The shared TF-IDF settings are unigrams+bigrams, 10k features, min_df=2 and max_df=0.95; bigrams capture phrases like 'fell sharply'. LogReg, SVM and RF use `class_weight='balanced'` to counter the neutral majority, and every model has random_state=42. Because the vectorizer is inside the pipeline, it is refit on each CV training fold (no leakage), and the whole object is saved as one artifact.",
+          "explanation": "`create_baseline_pipeline` returns a `Pipeline` of a TF-IDF vectoriser (up to 10k features, unigrams plus bigrams, `min_df=2` to drop rare noise, `max_df=0.95` to drop near-universal terms) and the chosen classifier. Logistic regression, the SVM and the random forest use `class_weight='balanced'` because the sentiment classes are imbalanced. All models get a fixed `random_state` for reproducibility. Note that the `svm` here is a plain `LinearSVC` with no `predict_proba`; calibration is only added in the ensemble. Keeping the vectoriser inside the pipeline means it is refit on each CV training fold, so the validation folds never leak into the vocabulary.",
           "tourOrder": 4
         },
         {
-          "title": "Train and compare baselines",
+          "title": "Training a single baseline",
           "lineRange": [
             76,
+            138
+          ],
+          "explanation": "Fits a pipeline on the train split, evaluates on the validation split with accuracy, macro-F1 and weighted-F1 plus a classification report, and saves the whole pipeline as `baseline_<name>.joblib`. Macro-F1 matters because it weights each class equally, so a model cannot look good just by predicting the majority neutral class. The docstring lists only three classifier names, but the function accepts all six from the factory.",
+          "tourOrder": 4
+        },
+        {
+          "title": "Training all baselines",
+          "lineRange": [
+            141,
             168
           ],
-          "explanation": "train_baseline fits on train, scores on val (accuracy, macro and weighted F1, classification report) and saves `baseline_<name>.joblib`. train_all_baselines loops over six models and picks the best by val macro-F1. These are single-split numbers on 226 rows, which is why the project relies on CV rather than this comparison to choose a model.",
+          "explanation": "Trains and saves all six baselines, logs a comparison table and picks the best model by macro-F1. Comparing on macro-F1 rather than accuracy is consistent with the class imbalance.",
           "tourOrder": 4
         },
         {
@@ -490,17 +499,16 @@
             171,
             259
           ],
-          "explanation": "Combines LogReg, a calibrated SVM and a Random Forest with `voting='soft'`, averaging class probabilities. LinearSVC has no predict_proba, so it is wrapped in CalibratedClassifierCV(cv=3), which fits a calibration mapping on internal folds. Unlike the baselines, the vectorizer is fitted separately and saved as a dict `{tfidf, ensemble}`. That is why predict.py needs a separate branch to transform the text before calling the ensemble.",
+          "explanation": "Here the TF-IDF vectoriser is fit by hand rather than wrapped in a pipeline, and the artifact is saved as a dict `{'tfidf', 'ensemble'}`, so code that loads it must handle this different shape. Soft voting averages predicted probabilities, but `LinearSVC` produces only margins, so it is wrapped in `CalibratedClassifierCV(cv=3)` to learn a mapping from margins to probabilities. That is the answer to 'why calibrate the SVM?'. The ensemble combines logistic regression, the calibrated SVM and a smaller random forest.",
           "tourOrder": 4
         },
         {
-          "title": "Loading and transformer delegate",
+          "title": "Loading and transformer delegation",
           "lineRange": [
             262,
             302
           ],
-          "explanation": "load_model is a simple joblib loader keyed by artifact name. train_transformer is a thin wrapper that imports model.train_transformer only when called. The lazy import keeps torch and transformers out of the import path for anyone using only the classical baselines, which keeps light environments such as CI fast.",
-          "tourOrder": 4
+          "explanation": "`load_model` loads any `.joblib` from the model directory and raises a clear error if the file is missing. `train_transformer` is a thin wrapper that imports `model.train_transformer` lazily, so the heavy torch and transformers dependencies are only loaded when a transformer is actually trained."
         },
         {
           "title": "Train everything",
@@ -508,34 +516,33 @@
             305,
             367
           ],
-          "explanation": "Trains three baselines plus FinBERT and DistilBERT on PhraseBank and logs a combined comparison. Transformer failures are caught and logged so that one heavy model does not stop the run. Note that this 'all' mode trains transformers on PhraseBank. The news-fine-tuned models reported in the README come from scripts/finetune_finbert_news.py instead.",
-          "tourOrder": 4
+          "explanation": "Trains three baselines (logreg, Naive Bayes, SVM) and optionally FinBERT and DistilBERT, then prints a combined comparison and the best model by macro-F1. Each transformer run is wrapped in try/except, so one failure (for example out of memory or a missing GPU) is logged and does not abort the whole run."
         },
         {
-          "title": "Stratified k-fold CV",
+          "title": "Stratified k-fold cross-validation",
           "lineRange": [
             370,
             468
           ],
-          "explanation": "Combines train+val (2,033 rows) and runs cross_validate with StratifiedKFold(5, shuffle, seed 42), scoring accuracy, macro-F1 and weighted F1 in parallel. It records mean, std and per-fold scores in results/cv_results.json. The test split is never touched, so it stays a clean final check. This is where the 0.838 +/- 0.016 SVM figure comes from, and why the project reports CV scores and not only one noisy 226-row test score.",
+          "explanation": "Concatenates train and validation and runs `StratifiedKFold(k, shuffle=True, random_state=42)` over all six pipelines with `cross_validate`, scoring accuracy, macro-F1 and weighted-F1. It reports the mean and standard deviation plus per-fold scores, and saves them to `results/cv_results.json`. Stratification keeps the class ratio the same in every fold. The standard deviation shows how much a single split can mislead, which is why CV is reported alongside the small test set. The test split is never used here, so it stays held out.",
           "tourOrder": 4
         },
         {
-          "title": "GridSearchCV tuning",
+          "title": "Grid-search tuning",
           "lineRange": [
             471,
-            574
+            582
           ],
-          "explanation": "Tunes the SVM (C in {0.1..5} x max_iter in {1000, 2000} = 10 combinations) and Gradient Boosting (2x3x3 = 18) with 5-fold stratified CV and a macro-F1 scorer, using `refit=True`. Gotcha: the best estimators, refit on train+val, overwrite baseline_svm.joblib and baseline_gradient_boosting.joblib, so the saved artifacts depend on whether tuning ran last. numpy integer and float values in best_params are converted before json.dump, which would otherwise fail on them.",
+          "explanation": "Runs GridSearchCV with 5-fold stratified CV and macro-F1 scoring over SVM `C` and `max_iter`, and over Gradient Boosting `n_estimators`, `max_depth` and `learning_rate`. With `refit=True` the best configuration is retrained on all of train plus validation. For that reason it is saved as `tuned_<name>.joblib` by default rather than overwriting `baseline_<name>.joblib`, which is the model all reported validation and test numbers come from. `promote=True` swaps the prefix to `baseline` and logs a warning to re-run evaluation. Best params are converted from numpy scalar types to plain Python types so they can be serialised to `results/tuning_results.json`.",
           "tourOrder": 4
         },
         {
           "title": "CLI dispatch",
           "lineRange": [
-            577,
-            607
+            585,
+            620
           ],
-          "explanation": "argparse maps `--model` to a mode: all, baselines (which also trains the ensemble), ensemble, cv, tune, a transformer name or a single baseline. Transformer runs pass through the epochs, batch-size and lr flags. This is the entry point that scripts/retrain.py and the README commands use.",
+          "explanation": "`--model` selects the mode: `all`, `baselines` (which also trains the ensemble), `ensemble`, `cv`, `tune`, a transformer name, or a single baseline name. `--promote-tuned` is passed to `tune_hyperparameters`, so overwriting the baselines is always an explicit decision on the command line.",
           "tourOrder": 4
         }
       ]
@@ -1249,70 +1256,93 @@
       ]
     },
     "src/shap_explain.py": {
-      "overview": "Computes global and per-class feature importance for the TF-IDF baseline models and saves them to `results/shap_<model>.json`, with an optional summary plot. The method depends on the model type. Linear models (logreg, SVM) use TF-IDF value \u00d7 coefficient. Gradient boosting uses a `feature_importances_`-based approximation weighted by predicted probability. Random forest uses SHAP's `TreeExplainer`, and other models fall back to `KernelExplainer`. This is the explainability layer in tour step 9. Its output is displayed on the dashboard but not recomputed there.",
+      "overview": "Computes SHAP explanations for the TF-IDF baseline classifiers and saves them as JSON or as a bar plot. It picks the explanation method by model type: an exact closed-form linear SHAP for Logistic Regression and the SVM, exact per-tree TreeSHAP summed per class for multi-class Gradient Boosting (with an additivity check), shap.TreeExplainer for Random Forest, and KernelSHAP as a sampling fallback for anything else. Every result records the method it used in a \"method\" field. This is the SHAP half of tour step 9. Note that the linear case does not call shap.LinearExplainer; it writes out the same formula directly.",
       "sections": [
         {
-          "title": "Module docstring and imports",
+          "title": "Module docstring: method map",
           "lineRange": [
             1,
             19
           ],
-          "explanation": "Describes the intended explainer per model family. Note that the code below only partly follows the docstring: gradient boosting does not use TreeExplainer in the main path, and linear models compute coefficient products directly instead of calling `shap.LinearExplainer`. `shap` itself is imported inside functions, so the module can be imported without it installed.",
+          "explanation": "The docstring states the module's design. SHAP values are exact and are given in each model's own output space: log-odds for Gradient Boosting and Logistic Regression, and the decision margin for the SVM, not probabilities. It also explains why Gradient Boosting needs special handling: `shap.TreeExplainer` does not support a multi-class `GradientBoostingClassifier`. A good interview point is that the explanation is only as trustworthy as the method behind it, so the module says which method produced each result.",
           "tourOrder": 9
         },
         {
-          "title": "Loading the pipeline and features",
+          "title": "Imports and METHODS labels",
           "lineRange": [
-            22,
-            63
+            21,
+            36
           ],
-          "explanation": "Imports SHAP lazily with a clear install message, loads `baseline_<model>.joblib`, and takes up to `max_samples` (default 100) rows with a fixed seed, because SHAP can be slow. It extracts the `tfidf` and `classifier` steps from the Pipeline by name, transforms the text, and gets the vocabulary through `get_feature_names_out()`, so importances map back to readable words and bigrams.",
+          "explanation": "Standard imports plus project helpers for loading data splits, label names and directories. `shap` is not imported at module level. It is imported inside the functions that need it, so the linear path works even without shap installed and importing the module stays cheap. `METHODS` maps short internal keys to readable descriptions that end up in the saved JSON, so anyone reading a result file can see whether its numbers are exact or approximate."
+        },
+        {
+          "title": "Exact linear SHAP",
+          "lineRange": [
+            39,
+            42
+          ],
+          "explanation": "For a linear model the score for class k is `coef_k \u00b7 x + b_k`. If features are treated as independent, the SHAP value of feature j is exactly `coef_kj * (x_j - mean_j)`. The function centres the dense TF-IDF matrix on the training-set mean and multiplies by each class's coefficient row, which gives one array per class. Using the training mean as the baseline means a word only gets credit for being more or less present than usual. Plain coefficient-times-value would mix in the baseline frequency.",
           "tourOrder": 9
         },
         {
-          "title": "Choosing the explainer by model type",
+          "title": "Per-tree SHAP for Gradient Boosting",
           "lineRange": [
-            65,
-            119
+            45,
+            60
           ],
-          "explanation": "This is the core design choice. Random forest tries `TreeExplainer` and, if it fails, falls back to the feature-importance path by adding itself to that set. Gradient boosting skips TreeExplainer (the comment notes multi-class support is unreliable) and approximates per-class contributions as value \u00d7 global importance \u00d7 predicted class probability. Linear models use `x_i \u00b7 coef[c, i]`, which is the exact additive contribution of each feature to the class score (relative to a zero baseline rather than the mean). Any other model falls back to the slow, model-agnostic `KernelExplainer` on a 50-sample background. Interview point: these approximations are faster but less faithful than true SHAP for the tree models.",
+          "explanation": "A multi-class `GradientBoostingClassifier` stores an `estimators_` grid of shape (stages, classes), where each cell is a regression tree. The raw score for class k is an initial constant plus `learning_rate` times the sum of that class's trees. SHAP values add up across a sum of models, so the code explains each tree with TreeExplainer, scales the result by the learning rate and accumulates it per class. It then checks additivity: `decision_function(x) - sum(phi)` must equal the same constant (the base value) for every sample. If the spread (`np.ptp`) of that residual is above 1e-6, it raises an error instead of returning wrong explanations. This is a cheap correctness test built into the algorithm.",
           "tourOrder": 9
         },
         {
-          "title": "Global and per-class rankings",
+          "title": "Method dispatch",
           "lineRange": [
-            121,
-            169
+            63,
+            82
           ],
-          "explanation": "Global importance is the mean absolute value over classes and samples (taking abs first, so positive and negative contributions do not cancel), and the top 30 features are kept. When there are three per-class arrays, it also takes the signed mean per class and keeps the top 15 by magnitude, each tagged with a direction. Signed per-class values show which words push towards or away from each sentiment, which is the most useful view for finance users.",
+          "explanation": "`compute_shap_values` chooses the explainer. Logistic Regression and SVM (models with `coef_`) take the linear path. Gradient Boosting is matched by class name and takes the per-tree path. Random Forest uses `shap.TreeExplainer` directly. Newer shap versions return a 3-D array (samples, features, classes), so that array is split into the per-class list the rest of the code expects. Any other model falls back to KernelSHAP, which only approximates the values by sampling. It uses the first 50 rows as background, explains at most 50 rows, and uses `predict_proba` when available, otherwise `decision_function`. Returning `(values, method_key)` keeps every caller honest about which method was used.",
           "tourOrder": 9
         },
         {
-          "title": "Saving results",
+          "title": "Building the explanation",
           "lineRange": [
-            172,
-            193
+            85,
+            123
           ],
-          "explanation": "Runs the explanation and writes it as JSON to `results/shap_<model>.json`, creating the directory if needed. The Generalization and Explainability pages read these files, so the dashboard never pays SHAP's computation cost.",
+          "explanation": "`get_shap_explanation` loads `baseline_<model>.joblib`, samples up to `max_samples` sentences with a fixed seed so results are reproducible, and splits the pipeline into its `tfidf` and `classifier` steps. Explainers work on numeric features, not raw text, so the text is vectorised and densified. The background mean is computed from the training split, not the split being explained, so the baseline does not depend on the evaluation data. Densifying a 10,000-feature matrix is affordable here only because the datasets are small.",
           "tourOrder": 9
         },
         {
-          "title": "Summary plot generation",
+          "title": "Global and per-class importance",
           "lineRange": [
-            196,
-            254
+            125,
+            174
           ],
-          "explanation": "Uses the non-interactive `Agg` matplotlib backend so it works on headless servers and in CI. It subsamples up to 200 rows and draws a real `TreeExplainer` summary bar plot (top 20 features) for tree models only, saved at 150 dpi on a white background. Non-tree models get a warning instead of a plot.",
+          "explanation": "Global importance is the mean absolute SHAP value over classes and samples, and the top 30 features are kept. For the three-class case it also computes each class's mean signed SHAP value, keeps the top 15 by magnitude and labels them positive or negative, which shows which words push toward or away from each sentiment. The result dictionary includes the readable `method` string and the sample and feature counts. The `else` branch for a single array is kept for safety, although `compute_shap_values` always returns a list.",
           "tourOrder": 9
         },
         {
-          "title": "Command-line interface",
+          "title": "Saving results to JSON",
           "lineRange": [
-            257,
-            278
+            177,
+            198
           ],
-          "explanation": "`--model` selects the baseline (default gradient boosting) and `--plot` switches between drawing the summary plot and saving the JSON results; in JSON mode it also prints the top 10 features.",
-          "tourOrder": 9
+          "explanation": "A thin wrapper that runs the explanation and writes `results/shap_<model>.json`. Saving to a file lets the Streamlit Explainability page read precomputed results instead of running SHAP on every page load."
+        },
+        {
+          "title": "Summary bar plot",
+          "lineRange": [
+            201,
+            255
+          ],
+          "explanation": "Recomputes SHAP values on up to 200 samples, using the same `compute_shap_values` dispatch so the plot and the JSON always use the same method, and draws a shap summary bar plot with class names. The non-interactive `Agg` matplotlib backend is set so the plot renders on headless servers. The image is saved as `results/shap_summary_<model>.png`, or shown when `save=False`. A missing optional dependency raises an ImportError that tells the user what to install."
+        },
+        {
+          "title": "Command-line entry point",
+          "lineRange": [
+            258,
+            279
+          ],
+          "explanation": "The argparse CLI selects the model and split, and `--plot` switches between producing the image and saving JSON plus printing the top 10 features. This makes the module a script you can run from the command line as well as a library for the app."
         }
       ]
     },
@@ -1941,60 +1971,84 @@
       ]
     },
     "src/registry.py": {
-      "overview": "A lightweight model registry (tour step 11 and the retraining workflow). It finds trained artifacts, hashes them, adds their latest evaluation metrics, and writes a snapshot to `models/registry.json`. MLflow logging is optional. It gives reviewable model lineage without running a tracking server.",
+      "overview": "A lightweight model registry with no infrastructure. It finds the trained model files, hashes each with SHA-256, records its size and modification time, attaches its latest evaluation metrics, and writes everything to `models/registry.json`. It tracks TF-IDF baselines, fine-tuned transformers (`*_finetuned/model.safetensors`, with metrics from `results/finetune_results_<model>.json`) and stock-prediction LSTMs. It also flags safetensors files that are really un-fetched Git LFS pointers. MLflow logging is optional. This is the lineage part of tour step 11: it answers 'which exact model produced this prediction?'.",
       "sections": [
         {
-          "title": "Docstring and setup",
+          "title": "Docstring and imports",
           "lineRange": [
             1,
             33
           ],
-          "explanation": "The docstring explains the goal: reproducible lineage with no infrastructure, plus optional MLflow integration. `REGISTRY_PATH` sits next to the models, so the registry is versioned in git together with them.",
+          "explanation": "The docstring describes the design: a versioned JSON snapshot of model lineage, with MLflow as an optional extra rather than a requirement, plus usage examples for `--update`, `--mlflow` and `--show`. `from __future__ import annotations` allows modern type hints. `REGISTRY_PATH` is resolved once from the project's model directory.",
           "tourOrder": 11
         },
         {
-          "title": "Artifact hashing",
+          "title": "Content hashing",
           "lineRange": [
             36,
             41
           ],
-          "explanation": "The function streams the file in 8 KB chunks into SHA-256, so large models never have to fit in memory, and keeps 12 hex characters as a short fingerprint. Comparing hashes shows whether a retrain actually changed an artifact.",
+          "explanation": "Hashes the file in 8 KB chunks, so a large transformer weight file never has to fit in memory, and keeps the first 12 hex characters as a short fingerprint. A content hash identifies a model by its bytes rather than its filename, so a retrained model with the same name still gets a new identity. That is the basis for tracing a prediction back to a model version.",
           "tourOrder": 11
         },
         {
-          "title": "Loading evaluation metrics",
+          "title": "Baseline evaluation metrics",
           "lineRange": [
             44,
             63
           ],
-          "explanation": "This function reads `results/evaluation_results.json` defensively. A missing file, invalid JSON or a non-list payload all return an empty mapping instead of crashing. It keeps accuracy, macro-F1 and weighted-F1 keyed by model name.",
+          "explanation": "Reads `results/evaluation_results.json` and builds a map from model name to accuracy, macro-F1 and weighted-F1. It fails soft: a missing file, invalid JSON or an unexpected (non-list) structure gives an empty map instead of an exception. Missing metrics should not stop the registry from recording artifacts.",
           "tourOrder": 11
         },
         {
-          "title": "Discovery and snapshot build",
+          "title": "Fine-tuned transformer metrics",
           "lineRange": [
             66,
-            97
+            75
           ],
-          "explanation": "Discovery covers `baseline_*.joblib` and, if present, LSTM `.pt` files from the stock-prediction extension. Fine-tuned transformer weights are not included in this registry. Each entry records name, filename, hash, size, modification time and the matching metrics, and the snapshot is stamped with a generation time and a count.",
+          "explanation": "For keys ending in `_finetuned`, the suffix is removed (`removesuffix`, Python 3.9+) to find `results/finetune_results_<model>.json`. Only a whitelist of fields is copied: accuracy, macro-F1, dataset, and train and validation sizes. Recording the dataset and split sizes next to the score matters, because a score means little unless you know what data it was measured on. Read errors again return an empty dict.",
           "tourOrder": 11
         },
         {
-          "title": "Write and MLflow",
+          "title": "Artifact discovery",
           "lineRange": [
-            100,
-            126
+            78,
+            86
           ],
-          "explanation": "`update_registry` writes the JSON snapshot. `log_to_mlflow` imports MLflow lazily and returns False with a warning if it is missing. Otherwise it creates one run per model with the hash and artifact as tags, size as a param and numeric metrics. This keeps MLflow an optional add-on and not a hard dependency.",
+          "explanation": "Collects three kinds of artifact with glob patterns: `baseline_*.joblib`, `*_finetuned/model.safetensors` and, if the external stock-prediction project exists, its `lstm_*.pt` files. Each list is sorted, so registry output is deterministic and diffs cleanly in version control. Because only `baseline_*` is matched, `tuned_*.joblib` files from hyperparameter search are not registered."
+        },
+        {
+          "title": "Building the snapshot",
+          "lineRange": [
+            89,
+            113
+          ],
+          "explanation": "For each artifact it derives a key. For a transformer it uses the parent directory name (for example `finbert_finetuned`), because every transformer's weight file is called `model.safetensors`. For everything else it uses the file stem. Each entry records hash, size, UTC modification time and metrics: evaluation metrics first, with fine-tune metrics as the fallback via `or`. The `lfs_pointer` flag is true for a `.safetensors` file under 1 KB. A real weight file is hundreds of MB, so a tiny one is an un-fetched Git LFS pointer, and flagging it catches a common deployment bug where the weights were never downloaded.",
           "tourOrder": 11
         },
         {
-          "title": "Command-line interface",
+          "title": "Writing the registry",
           "lineRange": [
-            129,
-            151
+            116,
+            121
           ],
-          "explanation": "`--update` rebuilds the registry and prints it, `--mlflow` implies an update, and `--show` prints the saved file. The retrain workflow calls this to refresh lineage after training."
+          "explanation": "Builds the snapshot, writes it as indented JSON to `models/registry.json` and logs the model count. Keeping `build_registry` (pure, returns a dict) separate from `update_registry` (writes the file) makes the logic easy to test without touching disk."
+        },
+        {
+          "title": "Optional MLflow logging",
+          "lineRange": [
+            124,
+            142
+          ],
+          "explanation": "Imports MLflow lazily and returns False with a warning if it is not installed, so it is an optional integration. When available, it opens one MLflow run per model, stores the artifact name and hash as tags and the size as a param, and logs only the numeric metrics. That filter matters because the fine-tune metrics include strings such as `dataset`, which `log_metric` would reject."
+        },
+        {
+          "title": "CLI",
+          "lineRange": [
+            145,
+            167
+          ],
+          "explanation": "`--update` or `--mlflow` rebuilds and prints the registry (and logs to MLflow if asked). `--show` prints the existing file or explains how to create one. With no flags it prints help. Making `--mlflow` imply an update ensures MLflow always receives a fresh snapshot."
         }
       ]
     },

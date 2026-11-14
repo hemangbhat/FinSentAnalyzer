@@ -3,13 +3,16 @@
   "project": {
     "name": "financial-sentiment-analyzer",
     "languages": [
-      "python",
-      "markdown",
-      "yaml",
-      "toml",
+      "conf",
       "dockerfile",
       "makefile",
-      "powershell"
+      "markdown",
+      "powershell",
+      "python",
+      "toml",
+      "txt",
+      "unknown",
+      "yaml"
     ],
     "frameworks": [
       "Streamlit",
@@ -25,8 +28,8 @@
       "GitHub Actions"
     ],
     "description": "An end-to-end ML pipeline for classifying financial text sentiment, with classical TF-IDF baselines and FinBERT models, out-of-domain evaluation on real financial news with bootstrap confidence intervals, SHAP explainability, an LLM benchmark and RAG Q&A, a FastAPI inference service, and a Streamlit dashboard.",
-    "analyzedAt": "2026-11-14T05:18:06.373853+00:00",
-    "gitCommitHash": "9ca2f62502a422c7fd813454b295116e830b4df1"
+    "analyzedAt": "2026-11-14T08:57:36.641Z",
+    "gitCommitHash": "5d2f4e9b1259edbbfc8f22364d5236887fce6206"
   },
   "nodes": [
     {
@@ -1642,209 +1645,6 @@
       "complexity": "moderate"
     },
     {
-      "id": "file:src/registry.py",
-      "type": "file",
-      "name": "registry.py",
-      "filePath": "src/registry.py",
-      "summary": "Zero-infrastructure model registry: hashes and sizes every trained artifact, joins it with the latest evaluation metrics into a versioned models/registry.json for reproducible lineage, and optionally logs params/metrics to a local MLflow store when installed. Runnable as a CLI (--update, --mlflow, --show).",
-      "tags": [
-        "mlops",
-        "model-registry",
-        "versioning",
-        "cli",
-        "entry-point"
-      ],
-      "complexity": "moderate",
-      "languageNotes": "MLflow is an optional, lazily-imported dependency so the core registry works without it."
-    },
-    {
-      "id": "function:src/registry.py:_hash_file",
-      "type": "function",
-      "name": "_hash_file",
-      "filePath": "src/registry.py",
-      "lineRange": [
-        36,
-        41
-      ],
-      "summary": "Computes a SHA-256 hash of an artifact for versioned lineage.",
-      "tags": [
-        "mlops",
-        "registry",
-        "private-helper"
-      ],
-      "complexity": "simple"
-    },
-    {
-      "id": "function:src/registry.py:_load_eval_metrics",
-      "type": "function",
-      "name": "_load_eval_metrics",
-      "filePath": "src/registry.py",
-      "lineRange": [
-        44,
-        63
-      ],
-      "summary": "Loads latest evaluation metrics keyed by model name.",
-      "tags": [
-        "mlops",
-        "registry",
-        "private-helper"
-      ],
-      "complexity": "simple"
-    },
-    {
-      "id": "function:src/registry.py:_discover_artifacts",
-      "type": "function",
-      "name": "_discover_artifacts",
-      "filePath": "src/registry.py",
-      "lineRange": [
-        66,
-        73
-      ],
-      "summary": "Finds trained model artifact files and directories under models/.",
-      "tags": [
-        "mlops",
-        "registry",
-        "private-helper"
-      ],
-      "complexity": "simple"
-    },
-    {
-      "id": "function:src/registry.py:build_registry",
-      "type": "function",
-      "name": "build_registry",
-      "filePath": "src/registry.py",
-      "lineRange": [
-        76,
-        97
-      ],
-      "summary": "Builds registry entries with hash, size, timestamp and metrics for each artifact.",
-      "tags": [
-        "mlops",
-        "registry",
-        "public-api"
-      ],
-      "complexity": "simple"
-    },
-    {
-      "id": "function:src/registry.py:update_registry",
-      "type": "function",
-      "name": "update_registry",
-      "filePath": "src/registry.py",
-      "lineRange": [
-        100,
-        105
-      ],
-      "summary": "Rebuilds and writes models/registry.json.",
-      "tags": [
-        "mlops",
-        "registry",
-        "public-api"
-      ],
-      "complexity": "simple"
-    },
-    {
-      "id": "function:src/registry.py:log_to_mlflow",
-      "type": "function",
-      "name": "log_to_mlflow",
-      "filePath": "src/registry.py",
-      "lineRange": [
-        108,
-        126
-      ],
-      "summary": "Optionally logs registry params and metrics to a local MLflow tracking store.",
-      "tags": [
-        "mlops",
-        "registry",
-        "public-api"
-      ],
-      "complexity": "simple"
-    },
-    {
-      "id": "function:src/registry.py:main",
-      "type": "function",
-      "name": "main",
-      "filePath": "src/registry.py",
-      "lineRange": [
-        129,
-        147
-      ],
-      "summary": "CLI entry point handling --update, --mlflow and --show.",
-      "tags": [
-        "mlops",
-        "registry",
-        "public-api"
-      ],
-      "complexity": "simple"
-    },
-    {
-      "id": "file:src/shap_explain.py",
-      "type": "file",
-      "name": "shap_explain.py",
-      "filePath": "src/shap_explain.py",
-      "summary": "SHAP-based interpretability for baseline models, choosing TreeExplainer for tree ensembles and LinearExplainer for linear models on TF-IDF features, extracting top contributing features per class, and saving JSON results and summary plots to results/.",
-      "tags": [
-        "explainability",
-        "shap",
-        "interpretability",
-        "visualization",
-        "entry-point",
-        "tested"
-      ],
-      "complexity": "complex",
-      "languageNotes": "shap and matplotlib are imported inside functions (with a non-interactive backend) so the module imports cheaply and degrades gracefully."
-    },
-    {
-      "id": "function:src/shap_explain.py:get_shap_explanation",
-      "type": "function",
-      "name": "get_shap_explanation",
-      "filePath": "src/shap_explain.py",
-      "lineRange": [
-        22,
-        169
-      ],
-      "summary": "Computes SHAP values for a baseline model, selecting Tree or Linear explainer, and returns top features per class.",
-      "tags": [
-        "shap",
-        "explainability",
-        "public-api"
-      ],
-      "complexity": "complex"
-    },
-    {
-      "id": "function:src/shap_explain.py:save_shap_results",
-      "type": "function",
-      "name": "save_shap_results",
-      "filePath": "src/shap_explain.py",
-      "lineRange": [
-        172,
-        193
-      ],
-      "summary": "Runs SHAP explanation and saves results to JSON.",
-      "tags": [
-        "shap",
-        "explainability",
-        "public-api"
-      ],
-      "complexity": "simple"
-    },
-    {
-      "id": "function:src/shap_explain.py:generate_shap_plot",
-      "type": "function",
-      "name": "generate_shap_plot",
-      "filePath": "src/shap_explain.py",
-      "lineRange": [
-        196,
-        254
-      ],
-      "summary": "Generates and saves a SHAP summary plot for a baseline model.",
-      "tags": [
-        "shap",
-        "explainability",
-        "public-api"
-      ],
-      "complexity": "moderate"
-    },
-    {
       "id": "file:src/stock_extension.py",
       "type": "file",
       "name": "stock_extension.py",
@@ -2115,175 +1915,6 @@
         "class"
       ],
       "complexity": "simple"
-    },
-    {
-      "id": "file:src/train.py",
-      "type": "file",
-      "name": "train.py",
-      "filePath": "src/train.py",
-      "summary": "Training entry point for all models: builds TF-IDF pipelines for six classical classifiers (logreg, NB, SVM with calibration, RF, GB, MLP), a soft-voting ensemble, delegates transformer fine-tuning to model.py, and adds stratified k-fold cross-validation and GridSearchCV hyperparameter tuning with results written to results/.",
-      "tags": [
-        "training",
-        "entry-point",
-        "baseline-models",
-        "hyperparameter-tuning",
-        "cross-validation"
-      ],
-      "complexity": "complex",
-      "languageNotes": "LinearSVC is wrapped in CalibratedClassifierCV to obtain probabilities needed for soft voting and confidence scores."
-    },
-    {
-      "id": "function:src/train.py:create_baseline_pipeline",
-      "type": "function",
-      "name": "create_baseline_pipeline",
-      "filePath": "src/train.py",
-      "lineRange": [
-        29,
-        73
-      ],
-      "summary": "Builds a TF-IDF (1-2 grams) plus classifier sklearn Pipeline for the named baseline.",
-      "tags": [
-        "training",
-        "baseline-models",
-        "public-api"
-      ],
-      "complexity": "moderate"
-    },
-    {
-      "id": "function:src/train.py:train_baseline",
-      "type": "function",
-      "name": "train_baseline",
-      "filePath": "src/train.py",
-      "lineRange": [
-        76,
-        138
-      ],
-      "summary": "Trains one baseline pipeline, reports validation metrics and saves it with joblib.",
-      "tags": [
-        "training",
-        "baseline-models",
-        "public-api"
-      ],
-      "complexity": "moderate"
-    },
-    {
-      "id": "function:src/train.py:train_all_baselines",
-      "type": "function",
-      "name": "train_all_baselines",
-      "filePath": "src/train.py",
-      "lineRange": [
-        141,
-        168
-      ],
-      "summary": "Trains every supported baseline classifier in sequence.",
-      "tags": [
-        "training",
-        "baseline-models",
-        "public-api"
-      ],
-      "complexity": "moderate"
-    },
-    {
-      "id": "function:src/train.py:train_ensemble",
-      "type": "function",
-      "name": "train_ensemble",
-      "filePath": "src/train.py",
-      "lineRange": [
-        171,
-        259
-      ],
-      "summary": "Trains a soft-voting ensemble over calibrated classifiers sharing one TF-IDF vectorizer and saves it as a dict.",
-      "tags": [
-        "training",
-        "baseline-models",
-        "public-api"
-      ],
-      "complexity": "complex"
-    },
-    {
-      "id": "function:src/train.py:load_model",
-      "type": "function",
-      "name": "load_model",
-      "filePath": "src/train.py",
-      "lineRange": [
-        262,
-        277
-      ],
-      "summary": "Loads a saved baseline model by name.",
-      "tags": [
-        "training",
-        "baseline-models",
-        "public-api"
-      ],
-      "complexity": "simple"
-    },
-    {
-      "id": "function:src/train.py:train_transformer",
-      "type": "function",
-      "name": "train_transformer",
-      "filePath": "src/train.py",
-      "lineRange": [
-        280,
-        302
-      ],
-      "summary": "Thin wrapper delegating transformer fine-tuning to model.train_transformer.",
-      "tags": [
-        "training",
-        "baseline-models",
-        "public-api"
-      ],
-      "complexity": "simple"
-    },
-    {
-      "id": "function:src/train.py:train_all_models",
-      "type": "function",
-      "name": "train_all_models",
-      "filePath": "src/train.py",
-      "lineRange": [
-        305,
-        367
-      ],
-      "summary": "Trains all baselines and optionally transformer models.",
-      "tags": [
-        "training",
-        "baseline-models",
-        "public-api"
-      ],
-      "complexity": "moderate"
-    },
-    {
-      "id": "function:src/train.py:cross_validate_baselines",
-      "type": "function",
-      "name": "cross_validate_baselines",
-      "filePath": "src/train.py",
-      "lineRange": [
-        370,
-        468
-      ],
-      "summary": "Runs stratified k-fold cross-validation for baselines and saves mean/std metrics.",
-      "tags": [
-        "training",
-        "baseline-models",
-        "public-api"
-      ],
-      "complexity": "complex"
-    },
-    {
-      "id": "function:src/train.py:tune_hyperparameters",
-      "type": "function",
-      "name": "tune_hyperparameters",
-      "filePath": "src/train.py",
-      "lineRange": [
-        471,
-        574
-      ],
-      "summary": "Runs GridSearchCV over baseline pipeline hyperparameters with macro-F1 scoring and saves best params.",
-      "tags": [
-        "training",
-        "baseline-models",
-        "public-api"
-      ],
-      "complexity": "complex"
     },
     {
       "id": "file:src/utils.py",
@@ -3092,37 +2723,6 @@
       "complexity": "simple"
     },
     {
-      "id": "document:README.md",
-      "type": "document",
-      "name": "README.md",
-      "filePath": "README.md",
-      "summary": "Comprehensive project README (~90 sections) covering architecture, project structure, setup, training/evaluation/SHAP CLI usage, datasets, TF-IDF and transformer models, cross-validation and GridSearchCV, real-news OOD generalization with bootstrap CIs, the LangChain LLM benchmark and RAG news Q&A, dashboard pages, the FastAPI inference API, monitoring/registry, retraining, four deployment options, and a closing interview Q&A section.",
-      "tags": [
-        "documentation",
-        "entry-point",
-        "overview",
-        "architecture",
-        "interview-prep"
-      ],
-      "complexity": "complex"
-    },
-    {
-      "id": "config:data_manifest.toml",
-      "type": "config",
-      "name": "data_manifest.toml",
-      "filePath": "data_manifest.toml",
-      "summary": "Reproducibility manifest documenting every dataset: Financial PhraseBank AllAgree (2,264 samples, stratified 80/10/10 split, seed 42), synthetic news headlines explicitly flagged as pipeline-demo only, the MIT-licensed Twitter Financial News validation set used as the real OOD benchmark with recorded SVM/DistilBERT/FinBERT results, and processed-split paths with label encoding.",
-      "tags": [
-        "configuration",
-        "data-lineage",
-        "reproducibility",
-        "dataset-versioning",
-        "documentation"
-      ],
-      "complexity": "moderate",
-      "languageNotes": "Uses TOML inline tables for class distributions and splits; comments record achieved OOD metrics so data versions and results stay traceable together."
-    },
-    {
       "id": "config:pyproject.toml",
       "type": "config",
       "name": "pyproject.toml",
@@ -3239,21 +2839,6 @@
       "complexity": "simple"
     },
     {
-      "id": "document:docs/INTERVIEW_GUIDE.md",
-      "type": "document",
-      "name": "INTERVIEW_GUIDE.md",
-      "filePath": "docs/INTERVIEW_GUIDE.md",
-      "summary": "Comprehensive technical interview guide for the project: pitch, motivation, architecture, data, models, evaluation methodology (OOD drop 0.90 -> 0.46 -> 0.84 macro-F1 with bootstrap CIs), explainability, serving/MLOps, challenges, limitations, trade-offs, scaling, ethics, demo script, question bank, numbers cheat sheet, code walkthrough map, and the LLM benchmark/RAG layer.",
-      "tags": [
-        "documentation",
-        "interview-prep",
-        "architecture",
-        "evaluation",
-        "entry-point"
-      ],
-      "complexity": "complex"
-    },
-    {
       "id": "document:docs/MODEL_CARD.md",
       "type": "document",
       "name": "MODEL_CARD.md",
@@ -3351,20 +2936,6 @@
         "database"
       ],
       "complexity": "simple"
-    },
-    {
-      "id": "document:docs/TRACKER.md",
-      "type": "document",
-      "name": "TRACKER.md",
-      "filePath": "docs/TRACKER.md",
-      "summary": "Epic-based progress tracker listing completed and pending work: core sentiment system, explainability, dashboard pages, quality/CI, deployment hardening, FastAPI service and MLOps, UX, and the LangChain/Claude LLM layer (benchmark, RAG).",
-      "tags": [
-        "documentation",
-        "tracker",
-        "roadmap",
-        "project-management"
-      ],
-      "complexity": "moderate"
     },
     {
       "id": "document:docs/TRD.md",
@@ -5342,37 +4913,6 @@
       "complexity": "simple"
     },
     {
-      "id": "file:tests/test_shap_explain.py",
-      "type": "file",
-      "name": "test_shap_explain.py",
-      "filePath": "tests/test_shap_explain.py",
-      "summary": "Tests for shap_explain.py: SHAP availability, explanations for gradient boosting and logistic regression baselines, per-class feature contributions, and saving results to JSON. Skips when SHAP or trained models are absent.",
-      "tags": [
-        "test",
-        "explainability",
-        "shap",
-        "model-interpretation"
-      ],
-      "complexity": "moderate"
-    },
-    {
-      "id": "class:tests/test_shap_explain.py:TestShapExplain",
-      "type": "class",
-      "name": "TestShapExplain",
-      "filePath": "tests/test_shap_explain.py",
-      "lineRange": [
-        15,
-        123
-      ],
-      "summary": "Test class covering SHAP explanations for classical baselines and result persistence.",
-      "tags": [
-        "test",
-        "test-class",
-        "pytest"
-      ],
-      "complexity": "moderate"
-    },
-    {
       "id": "file:tests/test_stock_extension.py",
       "type": "file",
       "name": "test_stock_extension.py",
@@ -5519,6 +5059,591 @@
         "pytest"
       ],
       "complexity": "simple"
+    },
+    {
+      "id": "file:src/registry.py",
+      "type": "file",
+      "name": "registry.py",
+      "filePath": "src/registry.py",
+      "summary": "Lightweight model registry CLI that snapshots every trained artifact (TF-IDF baselines, fine-tuned transformers, stock LSTMs) with SHA-256 hash, size, timestamp and latest metrics into models/registry.json, with optional best-effort MLflow logging.",
+      "tags": [
+        "model-registry",
+        "versioning",
+        "mlops",
+        "cli",
+        "entry-point"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/shap_explain.py",
+      "type": "file",
+      "name": "shap_explain.py",
+      "filePath": "src/shap_explain.py",
+      "summary": "SHAP explainability module for the TF-IDF baselines that computes exact SHAP values (linear SHAP for linear models, per-tree TreeSHAP summed over boosting stages with an additivity check for multi-class gradient boosting, TreeExplainer for random forests, KernelSHAP fallback) and produces top-feature JSON reports and summary plots.",
+      "tags": [
+        "explainability",
+        "shap",
+        "model-interpretation",
+        "visualization",
+        "service",
+        "tested"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Works around shap.TreeExplainer's lack of multi-class GradientBoostingClassifier support by exploiting that each class score is a learning-rate-scaled sum of regression trees."
+    },
+    {
+      "id": "file:src/train.py",
+      "type": "file",
+      "name": "train.py",
+      "filePath": "src/train.py",
+      "summary": "Training entry point for financial sentiment models: builds TF-IDF + classifier pipelines, trains baselines and a soft-voting ensemble, delegates transformer fine-tuning to model.py, runs stratified k-fold cross-validation, and GridSearchCV tuning that writes tuned_*.joblib unless --promote-tuned is given.",
+      "tags": [
+        "training",
+        "entry-point",
+        "cli",
+        "hyperparameter-tuning",
+        "cross-validation"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/registry.py:_hash_file",
+      "type": "function",
+      "name": "_hash_file",
+      "filePath": "src/registry.py",
+      "lineRange": [
+        36,
+        41
+      ],
+      "summary": "Computes a truncated (12-char) SHA-256 digest of a model artifact by streaming it in 8 KB chunks.",
+      "tags": [
+        "hashing",
+        "utility",
+        "versioning"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/registry.py:_load_eval_metrics",
+      "type": "function",
+      "name": "_load_eval_metrics",
+      "filePath": "src/registry.py",
+      "lineRange": [
+        44,
+        63
+      ],
+      "summary": "Loads results/evaluation_results.json and maps each model name to its accuracy, macro-F1 and weighted-F1, tolerating missing or malformed files.",
+      "tags": [
+        "metrics",
+        "io",
+        "utility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/registry.py:_finetune_metrics",
+      "type": "function",
+      "name": "_finetune_metrics",
+      "filePath": "src/registry.py",
+      "lineRange": [
+        66,
+        75
+      ],
+      "summary": "Reads metrics for a *_finetuned transformer from results/finetune_results_<model>.json, returning accuracy, F1, dataset and split sizes when present.",
+      "tags": [
+        "metrics",
+        "transformer",
+        "io"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/registry.py:_discover_artifacts",
+      "type": "function",
+      "name": "_discover_artifacts",
+      "filePath": "src/registry.py",
+      "lineRange": [
+        78,
+        86
+      ],
+      "summary": "Globs the models directory for baseline_*.joblib files and *_finetuned/model.safetensors weights, plus stock-prediction LSTM checkpoints when that external dataset exists.",
+      "tags": [
+        "discovery",
+        "filesystem",
+        "utility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/registry.py:build_registry",
+      "type": "function",
+      "name": "build_registry",
+      "filePath": "src/registry.py",
+      "lineRange": [
+        89,
+        113
+      ],
+      "summary": "Builds the registry snapshot dict: one entry per discovered artifact with hash, size, mtime, joined metrics, and a flag marking un-fetched Git LFS pointer files.",
+      "tags": [
+        "model-registry",
+        "versioning",
+        "factory"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/registry.py:update_registry",
+      "type": "function",
+      "name": "update_registry",
+      "filePath": "src/registry.py",
+      "lineRange": [
+        116,
+        121
+      ],
+      "summary": "Builds the registry and writes it as JSON to models/registry.json, returning the snapshot.",
+      "tags": [
+        "model-registry",
+        "persistence",
+        "io"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/registry.py:log_to_mlflow",
+      "type": "function",
+      "name": "log_to_mlflow",
+      "filePath": "src/registry.py",
+      "lineRange": [
+        124,
+        142
+      ],
+      "summary": "Best-effort MLflow logging that creates a run per registered model with artifact/hash tags, size param and numeric metrics; returns False if MLflow is not installed.",
+      "tags": [
+        "mlflow",
+        "mlops",
+        "experiment-tracking"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/registry.py:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "src/registry.py",
+      "lineRange": [
+        145,
+        163
+      ],
+      "summary": "Argparse CLI entry handling --update, --mlflow and --show to refresh, log or print the model registry.",
+      "tags": [
+        "cli",
+        "entry-point"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/shap_explain.py:_linear_shap",
+      "type": "function",
+      "name": "_linear_shap",
+      "filePath": "src/shap_explain.py",
+      "lineRange": [
+        39,
+        42
+      ],
+      "summary": "Computes exact linear SHAP values per class as coef times the deviation of each feature from its training-set mean.",
+      "tags": [
+        "shap",
+        "linear-model",
+        "explainability"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/shap_explain.py:_gradient_boosting_shap",
+      "type": "function",
+      "name": "_gradient_boosting_shap",
+      "filePath": "src/shap_explain.py",
+      "lineRange": [
+        45,
+        60
+      ],
+      "summary": "Computes exact SHAP for multi-class GradientBoostingClassifier by running TreeExplainer on every boosted regression tree, scaling by learning rate, summing per class, and verifying additivity against decision_function.",
+      "tags": [
+        "shap",
+        "gradient-boosting",
+        "tree-shap",
+        "validation"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/shap_explain.py:compute_shap_values",
+      "type": "function",
+      "name": "compute_shap_values",
+      "filePath": "src/shap_explain.py",
+      "lineRange": [
+        63,
+        82
+      ],
+      "summary": "Dispatches to the appropriate SHAP method for a classifier (linear, boosted trees, TreeExplainer, or KernelSHAP fallback) and returns per-class values with the method name.",
+      "tags": [
+        "shap",
+        "dispatcher",
+        "explainability"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/shap_explain.py:get_shap_explanation",
+      "type": "function",
+      "name": "get_shap_explanation",
+      "filePath": "src/shap_explain.py",
+      "lineRange": [
+        85,
+        174
+      ],
+      "summary": "Loads a saved baseline pipeline and a sample of a data split, computes SHAP values against a training-mean background, and returns per-class top contributing TF-IDF features with their mean attributions.",
+      "tags": [
+        "shap",
+        "explainability",
+        "feature-importance",
+        "model-interpretation"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/shap_explain.py:save_shap_results",
+      "type": "function",
+      "name": "save_shap_results",
+      "filePath": "src/shap_explain.py",
+      "lineRange": [
+        177,
+        198
+      ],
+      "summary": "Runs get_shap_explanation for a model/split and writes the result to a JSON file in the results directory.",
+      "tags": [
+        "persistence",
+        "shap",
+        "io"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/shap_explain.py:generate_shap_plot",
+      "type": "function",
+      "name": "generate_shap_plot",
+      "filePath": "src/shap_explain.py",
+      "lineRange": [
+        201,
+        255
+      ],
+      "summary": "Produces a SHAP summary plot of TF-IDF feature contributions for a baseline model on a sampled split, saving it as an image or displaying it.",
+      "tags": [
+        "visualization",
+        "shap",
+        "matplotlib"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/train.py:create_baseline_pipeline",
+      "type": "function",
+      "name": "create_baseline_pipeline",
+      "filePath": "src/train.py",
+      "lineRange": [
+        29,
+        73
+      ],
+      "summary": "Factory that builds a scikit-learn Pipeline of TF-IDF vectorizer plus one of six classifiers (logreg, svm, naive_bayes, random_forest, gradient_boosting, mlp).",
+      "tags": [
+        "factory",
+        "pipeline",
+        "scikit-learn"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/train.py:train_baseline",
+      "type": "function",
+      "name": "train_baseline",
+      "filePath": "src/train.py",
+      "lineRange": [
+        76,
+        138
+      ],
+      "summary": "Trains one baseline pipeline on the train split, evaluates accuracy and F1 on validation, and optionally saves it as baseline_<name>.joblib.",
+      "tags": [
+        "training",
+        "evaluation",
+        "persistence"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/train.py:train_all_baselines",
+      "type": "function",
+      "name": "train_all_baselines",
+      "filePath": "src/train.py",
+      "lineRange": [
+        141,
+        168
+      ],
+      "summary": "Trains every baseline classifier in turn and logs the best by validation macro-F1.",
+      "tags": [
+        "training",
+        "orchestration"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/train.py:train_ensemble",
+      "type": "function",
+      "name": "train_ensemble",
+      "filePath": "src/train.py",
+      "lineRange": [
+        171,
+        259
+      ],
+      "summary": "Trains a soft-voting ensemble of calibrated LinearSVC, logistic regression and random forest on shared TF-IDF features, evaluates it, and saves it.",
+      "tags": [
+        "ensemble",
+        "training",
+        "calibration"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/train.py:load_model",
+      "type": "function",
+      "name": "load_model",
+      "filePath": "src/train.py",
+      "lineRange": [
+        262,
+        277
+      ],
+      "summary": "Loads a saved joblib model from the models directory, raising FileNotFoundError if absent.",
+      "tags": [
+        "io",
+        "persistence",
+        "utility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/train.py:train_transformer",
+      "type": "function",
+      "name": "train_transformer",
+      "filePath": "src/train.py",
+      "lineRange": [
+        280,
+        302
+      ],
+      "summary": "Thin wrapper that lazily imports model.train_transformer and fine-tunes a transformer (FinBERT, DistilBERT, RoBERTa, BERT).",
+      "tags": [
+        "transformer",
+        "training",
+        "wrapper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/train.py:train_all_models",
+      "type": "function",
+      "name": "train_all_models",
+      "filePath": "src/train.py",
+      "lineRange": [
+        305,
+        367
+      ],
+      "summary": "Orchestrates training of all baselines and optionally transformers, collecting results and reporting the best model.",
+      "tags": [
+        "orchestration",
+        "training"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/train.py:cross_validate_baselines",
+      "type": "function",
+      "name": "cross_validate_baselines",
+      "filePath": "src/train.py",
+      "lineRange": [
+        370,
+        468
+      ],
+      "summary": "Runs stratified k-fold cross-validation of all baseline pipelines on combined train+val data, reporting mean/std accuracy and F1 and saving results JSON.",
+      "tags": [
+        "cross-validation",
+        "evaluation",
+        "statistics"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/train.py:tune_hyperparameters",
+      "type": "function",
+      "name": "tune_hyperparameters",
+      "filePath": "src/train.py",
+      "lineRange": [
+        471,
+        582
+      ],
+      "summary": "Grid-searches TF-IDF and classifier hyperparameters for SVM and gradient boosting with stratified CV, saving the best estimators as tuned_*.joblib (or overwriting baselines when promote=True) and writing tuning results JSON.",
+      "tags": [
+        "hyperparameter-tuning",
+        "grid-search",
+        "training"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "document:README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "README.md",
+      "summary": "Comprehensive project guide (89 sections) covering architecture, setup, training/evaluation/SHAP CLIs, Financial PhraseBank and real out-of-domain Twitter news datasets, cross-validation and tuning, LLM benchmark with RAG, the 10-page Streamlit dashboard, FastAPI inference, monitoring/registry, retraining, deployment options, and interview Q&A.",
+      "tags": [
+        "documentation",
+        "entry-point",
+        "overview",
+        "machine-learning",
+        "interview-prep"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "config:data_manifest.toml",
+      "type": "config",
+      "name": "data_manifest.toml",
+      "filePath": "data_manifest.toml",
+      "summary": "Reproducibility manifest documenting dataset versions: the Financial PhraseBank primary dataset with stratified 80/10/10 splits, synthetic pipeline-demo headlines, the real Twitter Financial News generalization set with achieved OOD results, and processed train/val/test paths with label encoding.",
+      "tags": [
+        "configuration",
+        "data-versioning",
+        "reproducibility",
+        "dataset-metadata"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "TOML inline tables encode class distributions, splits, and label encodings compactly."
+    },
+    {
+      "id": "document:docs/INTERVIEW_GUIDE.md",
+      "type": "document",
+      "name": "INTERVIEW_GUIDE.md",
+      "filePath": "docs/INTERVIEW_GUIDE.md",
+      "summary": "Comprehensive 23-section technical interview guide for the FinSight project covering pitch, architecture, data, models, out-of-domain evaluation with bootstrap CIs, exact SHAP explainability, serving/MLOps, the LLM benchmark and RAG layer, a question bank, numbers cheat sheet, and a code walkthrough map.",
+      "tags": [
+        "documentation",
+        "interview-prep",
+        "architecture",
+        "evaluation",
+        "explainability"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "document:docs/TRACKER.md",
+      "type": "document",
+      "name": "TRACKER.md",
+      "filePath": "docs/TRACKER.md",
+      "summary": "Epic-based project task tracker with checkboxes across core pipeline, explainability, dashboard, MLOps, LLM layer and audit fixes (exact SHAP, tuned-model artifacts, registry with fine-tuned transformers), plus outstanding owner-action items like public deployment.",
+      "tags": [
+        "documentation",
+        "project-tracking",
+        "roadmap",
+        "mlops"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_shap_explain.py",
+      "type": "file",
+      "name": "test_shap_explain.py",
+      "filePath": "tests/test_shap_explain.py",
+      "summary": "Pytest suite for the SHAP explainability module: smoke tests against trained baseline models (skipped when models or SHAP are missing) plus self-contained tests that check exact, additive linear SHAP and per-tree gradient-boosting SHAP against model decision scores.",
+      "tags": [
+        "test",
+        "explainability",
+        "shap",
+        "additivity-check",
+        "pytest"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Adds src/ to sys.path and imports shap_explain lazily inside tests, using pytest.skip/importorskip so optional dependencies and untrained models do not fail the suite."
+    },
+    {
+      "id": "class:tests/test_shap_explain.py:TestShapExplain",
+      "type": "class",
+      "name": "TestShapExplain",
+      "filePath": "tests/test_shap_explain.py",
+      "lineRange": [
+        15,
+        123
+      ],
+      "summary": "Groups integration tests for shap_explain: module import, SHAP availability, get_shap_explanation output shape for gradient boosting and logistic regression, per-class feature drivers, and saving results to JSON in the results directory.",
+      "tags": [
+        "test",
+        "integration-test",
+        "explainability",
+        "shap"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_shap_explain.py:_linear_case",
+      "type": "function",
+      "name": "_linear_case",
+      "filePath": "tests/test_shap_explain.py",
+      "lineRange": [
+        126,
+        136
+      ],
+      "summary": "Test fixture helper that builds a tiny three-class TF-IDF dataset and fits a LogisticRegression, returning numpy, the classifier, and the dense feature matrix.",
+      "tags": [
+        "test",
+        "fixture",
+        "utility",
+        "tfidf"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_shap_explain.py:test_linear_shap_is_exact_and_additive",
+      "type": "function",
+      "name": "test_linear_shap_is_exact_and_additive",
+      "filePath": "tests/test_shap_explain.py",
+      "lineRange": [
+        139,
+        150
+      ],
+      "summary": "Verifies compute_shap_values uses the linear method for logreg and that per-class SHAP values plus the score at the feature mean reproduce the model's decision_function for every sample.",
+      "tags": [
+        "test",
+        "shap",
+        "additivity-check",
+        "linear-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_shap_explain.py:test_gradient_boosting_shap_is_exact_and_additive",
+      "type": "function",
+      "name": "test_gradient_boosting_shap_is_exact_and_additive",
+      "filePath": "tests/test_shap_explain.py",
+      "lineRange": [
+        153,
+        168
+      ],
+      "summary": "Verifies compute_shap_values explains a multi-class GradientBoostingClassifier tree by tree (method gb_trees) and that the residual between raw scores and summed SHAP values is constant across samples.",
+      "tags": [
+        "test",
+        "shap",
+        "tree-shap",
+        "gradient-boosting",
+        "additivity-check"
+      ],
+      "complexity": "simple"
     }
   ],
   "edges": [
@@ -5559,13 +5684,6 @@
     },
     {
       "source": "file:app/views/2_Batch_Processing.py",
-      "target": "file:app/shared.py",
-      "type": "imports",
-      "direction": "forward",
-      "weight": 0.7
-    },
-    {
-      "source": "file:app/views/3_Explainability.py",
       "target": "file:app/shared.py",
       "type": "imports",
       "direction": "forward",
@@ -5618,7 +5736,7 @@
       "target": "function:app/home.py:headline_numbers",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:app/home.py",
@@ -5632,21 +5750,21 @@
       "target": "function:app/views/10_Ask_the_News.py:_setting",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:app/views/3_Explainability.py",
       "target": "function:app/views/3_Explainability.py:_highlight",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:app/views/8_Error_Analysis.py",
       "target": "function:app/views/8_Error_Analysis.py:get_error_analysis",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:app/views/8_Error_Analysis.py",
@@ -5660,7 +5778,7 @@
       "target": "function:app/ui.py:model_label",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:app/ui.py",
@@ -5674,7 +5792,7 @@
       "target": "function:app/ui.py:get_sentiment_color",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:app/ui.py",
@@ -5688,7 +5806,7 @@
       "target": "function:app/ui.py:sentiment_tag",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:app/ui.py",
@@ -5702,7 +5820,7 @@
       "target": "function:app/ui.py:load_result",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:app/ui.py",
@@ -5716,7 +5834,7 @@
       "target": "function:app/ui.py:icon",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:app/ui.py",
@@ -5730,7 +5848,7 @@
       "target": "function:app/ui.py:inject_css",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:app/ui.py",
@@ -5744,14 +5862,14 @@
       "target": "function:app/ui.py:_register_template",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:app/ui.py",
       "target": "function:app/ui.py:style_fig",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:app/ui.py",
@@ -5765,7 +5883,7 @@
       "target": "function:app/ui.py:render_chart",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:app/ui.py",
@@ -5779,7 +5897,7 @@
       "target": "function:app/ui.py:page_header",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:app/ui.py",
@@ -5793,7 +5911,7 @@
       "target": "function:app/ui.py:section_header",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:app/ui.py",
@@ -5807,7 +5925,7 @@
       "target": "function:app/ui.py:exhibit",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:app/ui.py",
@@ -5821,7 +5939,7 @@
       "target": "function:app/ui.py:source_note",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:app/ui.py",
@@ -5835,7 +5953,7 @@
       "target": "function:app/ui.py:kpi_strip",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:app/ui.py",
@@ -5849,7 +5967,7 @@
       "target": "function:app/ui.py:metric_card",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:app/ui.py",
@@ -5863,7 +5981,7 @@
       "target": "function:app/ui.py:pill",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:app/ui.py",
@@ -5877,7 +5995,7 @@
       "target": "function:app/ui.py:status_banner",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:app/ui.py",
@@ -5891,7 +6009,7 @@
       "target": "function:app/ui.py:empty_state",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:app/ui.py",
@@ -5905,7 +6023,7 @@
       "target": "function:app/ui.py:probability_band",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:app/ui.py",
@@ -5919,7 +6037,7 @@
       "target": "function:app/ui.py:verdict_card",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:app/ui.py",
@@ -5933,7 +6051,7 @@
       "target": "function:app/ui.py:term_table",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:app/ui.py",
@@ -5947,7 +6065,7 @@
       "target": "function:app/ui.py:chart_container",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:app/ui.py",
@@ -5961,7 +6079,7 @@
       "target": "function:app/ui.py:create_probability_chart",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:app/ui.py",
@@ -5975,7 +6093,7 @@
       "target": "function:app/ui.py:create_gauge_chart",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:app/ui.py",
@@ -5989,7 +6107,7 @@
       "target": "function:app/ui.py:interval_chart",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:app/ui.py",
@@ -6003,7 +6121,7 @@
       "target": "function:app/ui.py:load_predictor",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:app/ui.py",
@@ -6017,14 +6135,14 @@
       "target": "function:app/ui.py:_list_models",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:app/ui.py",
       "target": "function:app/ui.py:setup_sidebar",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:app/ui.py",
@@ -6038,7 +6156,7 @@
       "target": "function:app/ui.py:active_model",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:app/ui.py",
@@ -6178,7 +6296,7 @@
       "target": "function:src/benchmark_finbert.py:load_test_set",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/benchmark_finbert.py",
@@ -6192,7 +6310,7 @@
       "target": "function:src/benchmark_finbert.py:run_finbert_benchmark",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/benchmark_finbert.py",
@@ -6206,7 +6324,7 @@
       "target": "function:src/benchmark_finbert.py:save_to_evaluation_results",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/benchmark_finbert.py",
@@ -6220,7 +6338,7 @@
       "target": "function:src/evaluate.py:evaluate_baseline",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/evaluate.py",
@@ -6234,7 +6352,7 @@
       "target": "function:src/evaluate.py:evaluate_transformer",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/evaluate.py",
@@ -6248,7 +6366,7 @@
       "target": "function:src/evaluate.py:compute_metrics",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/evaluate.py",
@@ -6262,7 +6380,7 @@
       "target": "function:src/evaluate.py:print_evaluation_report",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/evaluate.py",
@@ -6276,7 +6394,7 @@
       "target": "function:src/evaluate.py:plot_confusion_matrix",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/evaluate.py",
@@ -6290,7 +6408,7 @@
       "target": "function:src/evaluate.py:compare_models",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/evaluate.py",
@@ -6304,7 +6422,7 @@
       "target": "function:src/evaluate.py:error_analysis",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/evaluate.py",
@@ -6318,7 +6436,7 @@
       "target": "function:src/evaluate.py:save_results",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/evaluate.py",
@@ -6332,7 +6450,7 @@
       "target": "function:src/explain.py:get_word_importance_baseline",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/explain.py",
@@ -6346,7 +6464,7 @@
       "target": "function:src/explain.py:explain_prediction_baseline",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/explain.py",
@@ -6360,7 +6478,7 @@
       "target": "function:src/explain.py:highlight_text",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/explain.py",
@@ -6374,7 +6492,7 @@
       "target": "function:src/explain.py:get_feature_importance_summary",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/explain.py",
@@ -6388,7 +6506,7 @@
       "target": "function:src/finbert_pretrained.py:get_finbert",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/finbert_pretrained.py",
@@ -6402,7 +6520,7 @@
       "target": "function:src/finbert_pretrained.py:predict_with_finbert",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/finbert_pretrained.py",
@@ -6416,7 +6534,7 @@
       "target": "class:src/finbert_pretrained.py:PretrainedFinBERT",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/finbert_pretrained.py",
@@ -6430,7 +6548,7 @@
       "target": "function:src/integrate_news.py:load_news_headlines",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/integrate_news.py",
@@ -6444,7 +6562,7 @@
       "target": "function:src/integrate_news.py:load_stock_data",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/integrate_news.py",
@@ -6458,7 +6576,7 @@
       "target": "function:src/integrate_news.py:predict_news_sentiment",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/integrate_news.py",
@@ -6472,7 +6590,7 @@
       "target": "function:src/integrate_news.py:compute_daily_sentiment",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/integrate_news.py",
@@ -6486,7 +6604,7 @@
       "target": "function:src/integrate_news.py:compute_sentiment_stock_correlation",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/integrate_news.py",
@@ -6500,7 +6618,7 @@
       "target": "function:src/integrate_news.py:run_cross_dataset_evaluation",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/integrate_news.py",
@@ -6514,7 +6632,7 @@
       "target": "function:src/integrate_news.py:get_sentiment_trends",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/integrate_news.py",
@@ -6528,7 +6646,7 @@
       "target": "function:src/integrate_news.py:evaluate_generalization",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/integrate_news.py",
@@ -6885,7 +7003,7 @@
       "target": "function:src/model.py:train_transformer",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/model.py",
@@ -6899,7 +7017,7 @@
       "target": "class:src/model.py:SentimentDataset",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/model.py",
@@ -6913,7 +7031,7 @@
       "target": "class:src/model.py:FinancialSentimentModel",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/model.py",
@@ -6927,21 +7045,21 @@
       "target": "function:src/predict.py:_finetuned_hf_repo",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/predict.py",
       "target": "function:src/predict.py:_has_usable_local_weights",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/predict.py",
       "target": "function:src/predict.py:predict_single",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/predict.py",
@@ -6955,7 +7073,7 @@
       "target": "function:src/predict.py:predict_batch",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/predict.py",
@@ -6969,7 +7087,7 @@
       "target": "function:src/predict.py:get_available_models",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/predict.py",
@@ -6983,7 +7101,7 @@
       "target": "class:src/predict.py:SentimentPredictor",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/predict.py",
@@ -6997,7 +7115,7 @@
       "target": "function:src/preprocess.py:load_raw_data",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/preprocess.py",
@@ -7011,7 +7129,7 @@
       "target": "function:src/preprocess.py:load_processed_data",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/preprocess.py",
@@ -7025,7 +7143,7 @@
       "target": "function:src/preprocess.py:clean_text",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/preprocess.py",
@@ -7039,7 +7157,7 @@
       "target": "function:src/preprocess.py:preprocess_dataframe",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/preprocess.py",
@@ -7053,7 +7171,7 @@
       "target": "function:src/preprocess.py:create_splits",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/preprocess.py",
@@ -7067,7 +7185,7 @@
       "target": "function:src/preprocess.py:save_processed_data",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/preprocess.py",
@@ -7081,130 +7199,11 @@
       "target": "function:src/preprocess.py:prepare_data",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/preprocess.py",
       "target": "function:src/preprocess.py:prepare_data",
-      "type": "exports",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "file:src/registry.py",
-      "target": "function:src/registry.py:_hash_file",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1.0
-    },
-    {
-      "source": "file:src/registry.py",
-      "target": "function:src/registry.py:_load_eval_metrics",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1.0
-    },
-    {
-      "source": "file:src/registry.py",
-      "target": "function:src/registry.py:_discover_artifacts",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1.0
-    },
-    {
-      "source": "file:src/registry.py",
-      "target": "function:src/registry.py:build_registry",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1.0
-    },
-    {
-      "source": "file:src/registry.py",
-      "target": "function:src/registry.py:build_registry",
-      "type": "exports",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "file:src/registry.py",
-      "target": "function:src/registry.py:update_registry",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1.0
-    },
-    {
-      "source": "file:src/registry.py",
-      "target": "function:src/registry.py:update_registry",
-      "type": "exports",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "file:src/registry.py",
-      "target": "function:src/registry.py:log_to_mlflow",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1.0
-    },
-    {
-      "source": "file:src/registry.py",
-      "target": "function:src/registry.py:log_to_mlflow",
-      "type": "exports",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "file:src/registry.py",
-      "target": "function:src/registry.py:main",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1.0
-    },
-    {
-      "source": "file:src/registry.py",
-      "target": "function:src/registry.py:main",
-      "type": "exports",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "file:src/shap_explain.py",
-      "target": "function:src/shap_explain.py:get_shap_explanation",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1.0
-    },
-    {
-      "source": "file:src/shap_explain.py",
-      "target": "function:src/shap_explain.py:get_shap_explanation",
-      "type": "exports",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "file:src/shap_explain.py",
-      "target": "function:src/shap_explain.py:save_shap_results",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1.0
-    },
-    {
-      "source": "file:src/shap_explain.py",
-      "target": "function:src/shap_explain.py:save_shap_results",
-      "type": "exports",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "file:src/shap_explain.py",
-      "target": "function:src/shap_explain.py:generate_shap_plot",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1.0
-    },
-    {
-      "source": "file:src/shap_explain.py",
-      "target": "function:src/shap_explain.py:generate_shap_plot",
       "type": "exports",
       "direction": "forward",
       "weight": 0.8
@@ -7225,27 +7224,6 @@
     },
     {
       "source": "file:src/preprocess.py",
-      "target": "file:src/utils.py",
-      "type": "imports",
-      "direction": "forward",
-      "weight": 0.7
-    },
-    {
-      "source": "file:src/registry.py",
-      "target": "file:src/utils.py",
-      "type": "imports",
-      "direction": "forward",
-      "weight": 0.7
-    },
-    {
-      "source": "file:src/shap_explain.py",
-      "target": "file:src/preprocess.py",
-      "type": "imports",
-      "direction": "forward",
-      "weight": 0.7
-    },
-    {
-      "source": "file:src/shap_explain.py",
       "target": "file:src/utils.py",
       "type": "imports",
       "direction": "forward",
@@ -7413,118 +7391,6 @@
       "weight": 0.8
     },
     {
-      "source": "function:src/registry.py:_load_eval_metrics",
-      "target": "function:src/utils.py:get_results_dir",
-      "type": "calls",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "function:src/registry.py:_discover_artifacts",
-      "target": "function:src/utils.py:get_model_dir",
-      "type": "calls",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "function:src/registry.py:_discover_artifacts",
-      "target": "function:src/utils.py:get_project_root",
-      "type": "calls",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "function:src/registry.py:build_registry",
-      "target": "function:src/registry.py:_load_eval_metrics",
-      "type": "calls",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "function:src/registry.py:build_registry",
-      "target": "function:src/registry.py:_discover_artifacts",
-      "type": "calls",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "function:src/registry.py:build_registry",
-      "target": "function:src/registry.py:_hash_file",
-      "type": "calls",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "function:src/registry.py:update_registry",
-      "target": "function:src/registry.py:build_registry",
-      "type": "calls",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "function:src/registry.py:main",
-      "target": "function:src/registry.py:update_registry",
-      "type": "calls",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "function:src/registry.py:main",
-      "target": "function:src/registry.py:log_to_mlflow",
-      "type": "calls",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "function:src/shap_explain.py:get_shap_explanation",
-      "target": "function:src/utils.py:get_model_dir",
-      "type": "calls",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "function:src/shap_explain.py:get_shap_explanation",
-      "target": "function:src/preprocess.py:load_processed_data",
-      "type": "calls",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "function:src/shap_explain.py:save_shap_results",
-      "target": "function:src/shap_explain.py:get_shap_explanation",
-      "type": "calls",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "function:src/shap_explain.py:save_shap_results",
-      "target": "function:src/utils.py:get_results_dir",
-      "type": "calls",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "function:src/shap_explain.py:generate_shap_plot",
-      "target": "function:src/utils.py:get_model_dir",
-      "type": "calls",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "function:src/shap_explain.py:generate_shap_plot",
-      "target": "function:src/preprocess.py:load_processed_data",
-      "type": "calls",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "function:src/shap_explain.py:generate_shap_plot",
-      "target": "function:src/utils.py:get_results_dir",
-      "type": "calls",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
       "source": "class:src/predict.py:SentimentPredictor",
       "target": "class:src/model.py:FinancialSentimentModel",
       "type": "calls",
@@ -7536,7 +7402,7 @@
       "target": "function:src/stock_extension.py:get_stock_project_root",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/stock_extension.py",
@@ -7550,7 +7416,7 @@
       "target": "function:src/stock_extension.py:get_lstm_model_path",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/stock_extension.py",
@@ -7564,70 +7430,70 @@
       "target": "function:src/stock_extension.py:_save_trained_model",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/stock_extension.py",
       "target": "function:src/stock_extension.py:_ensure_stock_project_import_path",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/stock_extension.py",
       "target": "function:src/stock_extension.py:_load_stock_components",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/stock_extension.py",
       "target": "function:src/stock_extension.py:_normalize_price_dataframe",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/stock_extension.py",
       "target": "function:src/stock_extension.py:_filter_news_by_range",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/stock_extension.py",
       "target": "function:src/stock_extension.py:_build_neutral_daily_sentiment",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/stock_extension.py",
       "target": "function:src/stock_extension.py:_get_sample_news_fallback",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/stock_extension.py",
       "target": "function:src/stock_extension.py:_align_sentiment_to_prices",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/stock_extension.py",
       "target": "function:src/stock_extension.py:_compute_sentiment_coverage",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/stock_extension.py",
       "target": "function:src/stock_extension.py:run_stock_prediction_extension",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/stock_extension.py",
@@ -7641,7 +7507,7 @@
       "target": "function:src/stock_extension.py:result_to_summary_dict",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/stock_extension.py",
@@ -7655,144 +7521,18 @@
       "target": "function:src/stock_extension.py:_build_arg_parser",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/stock_extension.py",
       "target": "class:src/stock_extension.py:StockPredictionExtensionResult",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/stock_extension.py",
       "target": "class:src/stock_extension.py:StockPredictionExtensionResult",
-      "type": "exports",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "file:src/train.py",
-      "target": "function:src/train.py:create_baseline_pipeline",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1.0
-    },
-    {
-      "source": "file:src/train.py",
-      "target": "function:src/train.py:create_baseline_pipeline",
-      "type": "exports",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "file:src/train.py",
-      "target": "function:src/train.py:train_baseline",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1.0
-    },
-    {
-      "source": "file:src/train.py",
-      "target": "function:src/train.py:train_baseline",
-      "type": "exports",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "file:src/train.py",
-      "target": "function:src/train.py:train_all_baselines",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1.0
-    },
-    {
-      "source": "file:src/train.py",
-      "target": "function:src/train.py:train_all_baselines",
-      "type": "exports",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "file:src/train.py",
-      "target": "function:src/train.py:train_ensemble",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1.0
-    },
-    {
-      "source": "file:src/train.py",
-      "target": "function:src/train.py:train_ensemble",
-      "type": "exports",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "file:src/train.py",
-      "target": "function:src/train.py:load_model",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1.0
-    },
-    {
-      "source": "file:src/train.py",
-      "target": "function:src/train.py:load_model",
-      "type": "exports",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "file:src/train.py",
-      "target": "function:src/train.py:train_transformer",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1.0
-    },
-    {
-      "source": "file:src/train.py",
-      "target": "function:src/train.py:train_transformer",
-      "type": "exports",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "file:src/train.py",
-      "target": "function:src/train.py:train_all_models",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1.0
-    },
-    {
-      "source": "file:src/train.py",
-      "target": "function:src/train.py:train_all_models",
-      "type": "exports",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "file:src/train.py",
-      "target": "function:src/train.py:cross_validate_baselines",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1.0
-    },
-    {
-      "source": "file:src/train.py",
-      "target": "function:src/train.py:cross_validate_baselines",
-      "type": "exports",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "file:src/train.py",
-      "target": "function:src/train.py:tune_hyperparameters",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1.0
-    },
-    {
-      "source": "file:src/train.py",
-      "target": "function:src/train.py:tune_hyperparameters",
       "type": "exports",
       "direction": "forward",
       "weight": 0.8
@@ -7802,7 +7542,7 @@
       "target": "function:src/utils.py:get_project_root",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/utils.py",
@@ -7816,7 +7556,7 @@
       "target": "function:src/utils.py:get_model_dir",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/utils.py",
@@ -7830,7 +7570,7 @@
       "target": "function:src/utils.py:get_data_dir",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/utils.py",
@@ -7844,7 +7584,7 @@
       "target": "function:src/utils.py:get_results_dir",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/utils.py",
@@ -7858,7 +7598,7 @@
       "target": "function:src/utils.py:setup_logging",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/utils.py",
@@ -7872,7 +7612,7 @@
       "target": "function:src/utils.py:get_model_info",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/utils.py",
@@ -7886,7 +7626,7 @@
       "target": "function:src/utils.py:get_all_model_info",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/utils.py",
@@ -7901,27 +7641,6 @@
       "type": "imports",
       "direction": "forward",
       "weight": 0.7
-    },
-    {
-      "source": "file:src/train.py",
-      "target": "file:src/preprocess.py",
-      "type": "imports",
-      "direction": "forward",
-      "weight": 0.7
-    },
-    {
-      "source": "file:src/train.py",
-      "target": "file:src/utils.py",
-      "type": "imports",
-      "direction": "forward",
-      "weight": 0.7
-    },
-    {
-      "source": "file:src/train.py",
-      "target": "file:src/model.py",
-      "type": "depends_on",
-      "direction": "forward",
-      "weight": 0.6
     },
     {
       "source": "function:src/stock_extension.py:get_stock_project_root",
@@ -8029,111 +7748,6 @@
       "weight": 0.8
     },
     {
-      "source": "function:src/train.py:train_baseline",
-      "target": "function:src/preprocess.py:load_processed_data",
-      "type": "calls",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "function:src/train.py:train_baseline",
-      "target": "function:src/train.py:create_baseline_pipeline",
-      "type": "calls",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "function:src/train.py:train_baseline",
-      "target": "function:src/utils.py:get_model_dir",
-      "type": "calls",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "function:src/train.py:train_all_baselines",
-      "target": "function:src/train.py:train_baseline",
-      "type": "calls",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "function:src/train.py:train_ensemble",
-      "target": "function:src/preprocess.py:load_processed_data",
-      "type": "calls",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "function:src/train.py:train_ensemble",
-      "target": "function:src/utils.py:get_model_dir",
-      "type": "calls",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "function:src/train.py:load_model",
-      "target": "function:src/utils.py:get_model_dir",
-      "type": "calls",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "function:src/train.py:train_all_models",
-      "target": "function:src/train.py:train_baseline",
-      "type": "calls",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "function:src/train.py:train_all_models",
-      "target": "function:src/train.py:train_transformer",
-      "type": "calls",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "function:src/train.py:cross_validate_baselines",
-      "target": "function:src/preprocess.py:load_processed_data",
-      "type": "calls",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "function:src/train.py:cross_validate_baselines",
-      "target": "function:src/train.py:create_baseline_pipeline",
-      "type": "calls",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "function:src/train.py:cross_validate_baselines",
-      "target": "function:src/utils.py:get_results_dir",
-      "type": "calls",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "function:src/train.py:tune_hyperparameters",
-      "target": "function:src/preprocess.py:load_processed_data",
-      "type": "calls",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "function:src/train.py:tune_hyperparameters",
-      "target": "function:src/utils.py:get_model_dir",
-      "type": "calls",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "function:src/train.py:tune_hyperparameters",
-      "target": "function:src/utils.py:get_results_dir",
-      "type": "calls",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
       "source": "function:src/utils.py:get_model_dir",
       "target": "function:src/utils.py:get_project_root",
       "type": "calls",
@@ -8169,18 +7783,11 @@
       "weight": 0.8
     },
     {
-      "source": "function:src/train.py:train_transformer",
-      "target": "function:src/model.py:train_transformer",
-      "type": "calls",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
       "source": "file:src/llm_provider.py",
       "target": "function:src/llm_provider.py:get_provider",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/llm_provider.py",
@@ -8194,7 +7801,7 @@
       "target": "function:src/llm_provider.py:get_model_name",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/llm_provider.py",
@@ -8208,7 +7815,7 @@
       "target": "function:src/llm_provider.py:get_temperature",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/llm_provider.py",
@@ -8222,7 +7829,7 @@
       "target": "function:src/llm_provider.py:has_api_key",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/llm_provider.py",
@@ -8236,7 +7843,7 @@
       "target": "function:src/llm_provider.py:make_chat_model",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/llm_provider.py",
@@ -8250,7 +7857,7 @@
       "target": "function:src/llm_provider.py:with_structured_output",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/llm_provider.py",
@@ -8264,7 +7871,7 @@
       "target": "class:src/llm_sentiment.py:SentimentLabel",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/llm_sentiment.py",
@@ -8278,7 +7885,7 @@
       "target": "function:src/llm_sentiment.py:few_shot_examples",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/llm_sentiment.py",
@@ -8292,7 +7899,7 @@
       "target": "function:src/llm_sentiment.py:build_messages",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/llm_sentiment.py",
@@ -8306,7 +7913,7 @@
       "target": "function:src/llm_sentiment.py:make_runnable",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/llm_sentiment.py",
@@ -8320,7 +7927,7 @@
       "target": "class:src/llm_sentiment.py:AnswerCache",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/llm_sentiment.py",
@@ -8334,7 +7941,7 @@
       "target": "function:src/llm_sentiment.py:_call_one",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/llm_sentiment.py",
@@ -8348,7 +7955,7 @@
       "target": "function:src/llm_sentiment.py:classify",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/llm_sentiment.py",
@@ -8362,7 +7969,7 @@
       "target": "function:src/llm_sentiment.py:summarize_usage",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/llm_sentiment.py",
@@ -8376,7 +7983,7 @@
       "target": "class:src/rag_news.py:NewsAnswer",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/rag_news.py",
@@ -8390,7 +7997,7 @@
       "target": "function:src/rag_news.py:get_embedding_kind",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/rag_news.py",
@@ -8404,7 +8011,7 @@
       "target": "function:src/rag_news.py:get_embedding_model",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/rag_news.py",
@@ -8418,7 +8025,7 @@
       "target": "class:src/rag_news.py:LocalLSAEmbeddings",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/rag_news.py",
@@ -8432,7 +8039,7 @@
       "target": "function:src/rag_news.py:load_corpus",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/rag_news.py",
@@ -8446,7 +8053,7 @@
       "target": "function:src/rag_news.py:build_index",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/rag_news.py",
@@ -8460,7 +8067,7 @@
       "target": "function:src/rag_news.py:retrieve",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/rag_news.py",
@@ -8474,7 +8081,7 @@
       "target": "function:src/rag_news.py:build_messages",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/rag_news.py",
@@ -8488,7 +8095,7 @@
       "target": "function:src/rag_news.py:make_answer_runnable",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/rag_news.py",
@@ -8502,7 +8109,7 @@
       "target": "function:src/rag_news.py:make_embeddings",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/rag_news.py",
@@ -8516,7 +8123,7 @@
       "target": "function:src/rag_news.py:answer_question",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/rag_news.py",
@@ -8530,7 +8137,7 @@
       "target": "function:src/rag_news.py:sentiment_mix",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/rag_news.py",
@@ -8726,28 +8333,28 @@
       "target": "service:docker-compose.yml:redis",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "service:docker-compose.yml",
       "target": "service:docker-compose.yml:api",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "service:docker-compose.yml",
       "target": "service:docker-compose.yml:lb",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "service:docker-compose.yml",
       "target": "service:docker-compose.yml:ui",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "service:docker-compose.yml:api",
@@ -8926,13 +8533,6 @@
     },
     {
       "source": "pipeline:.github/workflows/ci.yml",
-      "target": "file:tests/test_shap_explain.py",
-      "type": "triggers",
-      "direction": "forward",
-      "weight": 0.6
-    },
-    {
-      "source": "pipeline:.github/workflows/ci.yml",
       "target": "file:tests/test_stock_extension.py",
       "type": "triggers",
       "direction": "forward",
@@ -9032,13 +8632,6 @@
     {
       "source": "pipeline:.github/workflows/retrain.yml",
       "target": "file:tests/test_rag_news.py",
-      "type": "triggers",
-      "direction": "forward",
-      "weight": 0.6
-    },
-    {
-      "source": "pipeline:.github/workflows/retrain.yml",
-      "target": "file:tests/test_shap_explain.py",
       "type": "triggers",
       "direction": "forward",
       "weight": 0.6
@@ -9163,104 +8756,6 @@
       "weight": 0.5
     },
     {
-      "source": "document:README.md",
-      "target": "file:app/app.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:README.md",
-      "target": "file:api/main.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:README.md",
-      "target": "file:src/train.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:README.md",
-      "target": "file:src/evaluate.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:README.md",
-      "target": "file:src/predict.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:README.md",
-      "target": "file:src/shap_explain.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:README.md",
-      "target": "file:src/rag_news.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:README.md",
-      "target": "file:scripts/llm_benchmark.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:README.md",
-      "target": "file:scripts/retrain.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:README.md",
-      "target": "file:scripts/finetune_finbert_news.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:README.md",
-      "target": "file:src/registry.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:README.md",
-      "target": "pipeline:Makefile",
-      "type": "related",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "config:data_manifest.toml",
-      "target": "file:src/preprocess.py",
-      "type": "configures",
-      "direction": "forward",
-      "weight": 0.6
-    },
-    {
-      "source": "config:data_manifest.toml",
-      "target": "file:scripts/fetch_real_news_dataset.py",
-      "type": "related",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
       "source": "config:pyproject.toml",
       "target": "file:tests/conftest.py",
       "type": "configures",
@@ -9380,244 +8875,6 @@
       "weight": 0.5
     },
     {
-      "source": "document:docs/INTERVIEW_GUIDE.md",
-      "target": "file:api/main.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/INTERVIEW_GUIDE.md",
-      "target": "file:app/api_client.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/INTERVIEW_GUIDE.md",
-      "target": "file:app/app.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/INTERVIEW_GUIDE.md",
-      "target": "file:app/ui.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/INTERVIEW_GUIDE.md",
-      "target": "file:src/evaluate.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/INTERVIEW_GUIDE.md",
-      "target": "file:src/explain.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/INTERVIEW_GUIDE.md",
-      "target": "file:src/finbert_pretrained.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/INTERVIEW_GUIDE.md",
-      "target": "file:src/integrate_news.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/INTERVIEW_GUIDE.md",
-      "target": "file:src/llm_enhanced.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/INTERVIEW_GUIDE.md",
-      "target": "file:src/llm_provider.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/INTERVIEW_GUIDE.md",
-      "target": "file:src/llm_sentiment.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/INTERVIEW_GUIDE.md",
-      "target": "file:src/model.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/INTERVIEW_GUIDE.md",
-      "target": "file:src/monitoring.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/INTERVIEW_GUIDE.md",
-      "target": "file:src/nlp_advanced.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/INTERVIEW_GUIDE.md",
-      "target": "file:src/predict.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/INTERVIEW_GUIDE.md",
-      "target": "file:src/preprocess.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/INTERVIEW_GUIDE.md",
-      "target": "file:src/rag_news.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/INTERVIEW_GUIDE.md",
-      "target": "file:src/registry.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/INTERVIEW_GUIDE.md",
-      "target": "file:src/shap_explain.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/INTERVIEW_GUIDE.md",
-      "target": "file:src/stats.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/INTERVIEW_GUIDE.md",
-      "target": "file:src/train.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/INTERVIEW_GUIDE.md",
-      "target": "file:scripts/bootstrap_ci.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/INTERVIEW_GUIDE.md",
-      "target": "file:scripts/fetch_real_news_dataset.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/INTERVIEW_GUIDE.md",
-      "target": "file:scripts/llm_benchmark.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/INTERVIEW_GUIDE.md",
-      "target": "file:scripts/retrain.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/INTERVIEW_GUIDE.md",
-      "target": "file:tests/test_api.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/INTERVIEW_GUIDE.md",
-      "target": "file:tests/test_nlp_advanced.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/INTERVIEW_GUIDE.md",
-      "target": "file:tests/test_page_imports.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/INTERVIEW_GUIDE.md",
-      "target": "file:app/views/10_Ask_the_News.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/INTERVIEW_GUIDE.md",
-      "target": "document:docs/DESIGN.md",
-      "type": "related",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/INTERVIEW_GUIDE.md",
-      "target": "document:docs/MODEL_CARD.md",
-      "type": "related",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/INTERVIEW_GUIDE.md",
-      "target": "document:docs/RETRAINING.md",
-      "type": "related",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/INTERVIEW_GUIDE.md",
-      "target": "document:docs/TRACKER.md",
-      "type": "related",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/MODEL_CARD.md",
-      "target": "file:src/train.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
       "source": "document:docs/MODEL_CARD.md",
       "target": "file:src/evaluate.py",
       "type": "documents",
@@ -9675,13 +8932,6 @@
     },
     {
       "source": "document:docs/PRODUCTION_SETUP.md",
-      "target": "file:src/train.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/PRODUCTION_SETUP.md",
       "target": "file:src/evaluate.py",
       "type": "documents",
       "direction": "forward",
@@ -9696,13 +8946,6 @@
     },
     {
       "source": "document:docs/README.md",
-      "target": "document:docs/INTERVIEW_GUIDE.md",
-      "type": "related",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/README.md",
       "target": "document:docs/MODEL_CARD.md",
       "type": "related",
       "direction": "forward",
@@ -9711,13 +8954,6 @@
     {
       "source": "document:docs/README.md",
       "target": "document:docs/DESIGN.md",
-      "type": "related",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/README.md",
-      "target": "document:docs/TRACKER.md",
       "type": "related",
       "direction": "forward",
       "weight": 0.5
@@ -9745,13 +8981,6 @@
     },
     {
       "source": "document:docs/RETRAINING.md",
-      "target": "file:src/train.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/RETRAINING.md",
       "target": "file:src/evaluate.py",
       "type": "documents",
       "direction": "forward",
@@ -9772,20 +9001,6 @@
       "weight": 0.5
     },
     {
-      "source": "document:docs/RETRAINING.md",
-      "target": "file:src/shap_explain.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/RETRAINING.md",
-      "target": "file:src/registry.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
       "source": "document:docs/RULES.md",
       "target": "file:src/preprocess.py",
       "type": "documents",
@@ -9793,22 +9008,8 @@
       "weight": 0.5
     },
     {
-      "source": "document:docs/RULES.md",
-      "target": "file:src/train.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
       "source": "document:docs/SCHEMA.md",
       "target": "file:src/preprocess.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/SCHEMA.md",
-      "target": "file:src/train.py",
       "type": "documents",
       "direction": "forward",
       "weight": 0.5
@@ -9821,78 +9022,8 @@
       "weight": 0.5
     },
     {
-      "source": "document:docs/TRACKER.md",
-      "target": "file:api/main.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/TRACKER.md",
-      "target": "file:src/monitoring.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/TRACKER.md",
-      "target": "file:src/registry.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/TRACKER.md",
-      "target": "file:scripts/retrain.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/TRACKER.md",
-      "target": "file:scripts/llm_benchmark.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/TRACKER.md",
-      "target": "file:src/stats.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/TRACKER.md",
-      "target": "file:src/rag_news.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/TRACKER.md",
-      "target": "file:src/llm_provider.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/TRACKER.md",
-      "target": "document:docs/RETRAINING.md",
-      "type": "related",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
       "source": "document:docs/TRD.md",
       "target": "file:app/app.py",
-      "type": "documents",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "document:docs/TRD.md",
-      "target": "file:src/train.py",
       "type": "documents",
       "direction": "forward",
       "weight": 0.5
@@ -9916,7 +9047,7 @@
       "target": "function:api/main.py:require_api_key",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:api/main.py",
@@ -9930,14 +9061,14 @@
       "target": "function:api/main.py:_timing_middleware",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:api/main.py",
       "target": "function:api/main.py:health",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:api/main.py",
@@ -9951,7 +9082,7 @@
       "target": "function:api/main.py:models",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:api/main.py",
@@ -9965,7 +9096,7 @@
       "target": "function:api/main.py:predict",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:api/main.py",
@@ -9979,7 +9110,7 @@
       "target": "function:api/main.py:predict_batch",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:api/main.py",
@@ -9993,7 +9124,7 @@
       "target": "function:api/main.py:get_metrics",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:api/main.py",
@@ -10007,7 +9138,7 @@
       "target": "class:api/main.py:PredictRequest",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:api/main.py",
@@ -10021,7 +9152,7 @@
       "target": "class:api/main.py:BatchPredictRequest",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:api/main.py",
@@ -10035,7 +9166,7 @@
       "target": "class:api/main.py:PredictResponse",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:api/main.py",
@@ -10049,7 +9180,7 @@
       "target": "class:app/api_client.py:RemotePredictorError",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:app/api_client.py",
@@ -10063,7 +9194,7 @@
       "target": "class:app/api_client.py:RemotePredictor",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:app/api_client.py",
@@ -10077,7 +9208,7 @@
       "target": "function:app/api_client.py:remote_available_models",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:app/api_client.py",
@@ -10091,7 +9222,7 @@
       "target": "function:scripts/bootstrap_ci.py:main",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:scripts/bootstrap_ci.py",
@@ -10105,7 +9236,7 @@
       "target": "function:scripts/compare_ood.py:main",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:scripts/compare_ood.py",
@@ -10119,7 +9250,7 @@
       "target": "function:scripts/fetch_real_news_dataset.py:main",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:scripts/fetch_real_news_dataset.py",
@@ -10133,7 +9264,7 @@
       "target": "function:scripts/finetune_finbert_news.py:main",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:scripts/finetune_finbert_news.py",
@@ -10147,7 +9278,7 @@
       "target": "function:scripts/llm_benchmark.py:load_eval",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:scripts/llm_benchmark.py",
@@ -10161,7 +9292,7 @@
       "target": "function:scripts/llm_benchmark.py:dry_run",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:scripts/llm_benchmark.py",
@@ -10175,7 +9306,7 @@
       "target": "function:scripts/llm_benchmark.py:main",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:scripts/llm_benchmark.py",
@@ -10308,7 +9439,7 @@
       "target": "function:scripts/retrain.py:run_step",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:scripts/retrain.py",
@@ -10322,7 +9453,7 @@
       "target": "function:scripts/retrain.py:main",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:scripts/retrain.py",
@@ -10336,7 +9467,7 @@
       "target": "function:scripts/upload_finetuned_to_hf.py:main",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:scripts/upload_finetuned_to_hf.py",
@@ -10350,7 +9481,7 @@
       "target": "class:src/llm_enhanced.py:ReasoningStep",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/llm_enhanced.py",
@@ -10364,7 +9495,7 @@
       "target": "class:src/llm_enhanced.py:ThoughtStep",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/llm_enhanced.py",
@@ -10378,7 +9509,7 @@
       "target": "class:src/llm_enhanced.py:ChainOfThought",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/llm_enhanced.py",
@@ -10392,7 +9523,7 @@
       "target": "class:src/llm_enhanced.py:ChainOfThoughtReasoner",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/llm_enhanced.py",
@@ -10406,7 +9537,7 @@
       "target": "class:src/llm_enhanced.py:EliteExplanationGenerator",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/llm_enhanced.py",
@@ -10420,7 +9551,7 @@
       "target": "function:src/llm_enhanced.py:generate_elite_market_outlook",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/llm_enhanced.py",
@@ -10434,14 +9565,14 @@
       "target": "function:src/llm_enhanced.py:_generate_outlook_narrative",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/llm_enhanced.py",
       "target": "function:src/llm_enhanced.py:generate_explanation_template",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/llm_enhanced.py",
@@ -10455,7 +9586,7 @@
       "target": "function:src/llm_enhanced.py:generate_market_outlook",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/llm_enhanced.py",
@@ -10469,7 +9600,7 @@
       "target": "function:src/llm_enhanced.py:get_llm_explanation",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/llm_enhanced.py",
@@ -10483,7 +9614,7 @@
       "target": "function:src/llm_explain.py:generate_explanation_template",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/llm_explain.py",
@@ -10497,7 +9628,7 @@
       "target": "function:src/llm_explain.py:generate_market_outlook",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/llm_explain.py",
@@ -10511,7 +9642,7 @@
       "target": "function:src/llm_explain.py:get_llm_explanation",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/llm_explain.py",
@@ -10525,7 +9656,7 @@
       "target": "function:src/monitoring.py:log_event",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/monitoring.py",
@@ -10539,7 +9670,7 @@
       "target": "class:src/monitoring.py:MetricsRegistry",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/monitoring.py",
@@ -10553,7 +9684,7 @@
       "target": "class:src/nlp_advanced.py:TextFeatures",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/nlp_advanced.py",
@@ -10567,7 +9698,7 @@
       "target": "class:src/nlp_advanced.py:ProcessedText",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/nlp_advanced.py",
@@ -10581,7 +9712,7 @@
       "target": "class:src/nlp_advanced.py:AdvancedTextProcessor",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/nlp_advanced.py",
@@ -10595,7 +9726,7 @@
       "target": "class:src/nlp_advanced.py:FinancialTextAnalyzer",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/nlp_advanced.py",
@@ -10609,7 +9740,7 @@
       "target": "function:src/nlp_advanced.py:analyze_financial_text",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/nlp_advanced.py",
@@ -10623,7 +9754,7 @@
       "target": "function:src/nlp_advanced.py:extract_financial_features",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/nlp_advanced.py",
@@ -10637,7 +9768,7 @@
       "target": "function:src/nlp_advanced.py:get_lexicon_sentiment",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/nlp_advanced.py",
@@ -10651,7 +9782,7 @@
       "target": "function:src/stats.py:macro_f1",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/stats.py",
@@ -10665,7 +9796,7 @@
       "target": "function:src/stats.py:bootstrap_macro_f1",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/stats.py",
@@ -10679,7 +9810,7 @@
       "target": "function:src/stats.py:pairs_from_confusion",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:src/stats.py",
@@ -10693,7 +9824,7 @@
       "target": "function:tests/conftest.py:positive_texts",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/conftest.py",
@@ -10707,7 +9838,7 @@
       "target": "function:tests/conftest.py:negative_texts",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/conftest.py",
@@ -10721,7 +9852,7 @@
       "target": "function:tests/conftest.py:neutral_texts",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/conftest.py",
@@ -10735,7 +9866,7 @@
       "target": "function:tests/conftest.py:mixed_texts",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/conftest.py",
@@ -10749,7 +9880,7 @@
       "target": "function:tests/conftest.py:project_root",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/conftest.py",
@@ -10763,7 +9894,7 @@
       "target": "function:tests/conftest.py:models_dir",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/conftest.py",
@@ -10777,7 +9908,7 @@
       "target": "class:tests/test_api.py:TestInferenceAPI",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/test_api.py",
@@ -10791,7 +9922,7 @@
       "target": "function:tests/test_api_client.py:test_remote_predict_single",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/test_api_client.py",
@@ -10805,7 +9936,7 @@
       "target": "function:tests/test_api_client.py:test_remote_predict_batch",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/test_api_client.py",
@@ -10819,7 +9950,7 @@
       "target": "function:tests/test_api_client.py:test_remote_predict_raises_on_error",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/test_api_client.py",
@@ -10833,7 +9964,7 @@
       "target": "function:tests/test_api_client.py:test_remote_predict_raises_on_connection_failure",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/test_api_client.py",
@@ -10847,7 +9978,7 @@
       "target": "function:tests/test_api_client.py:test_remote_models_fallback_empty",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/test_api_client.py",
@@ -10910,231 +10041,224 @@
       "target": "function:tests/test_generalization.py:test_generalization_metrics_are_valid",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/test_integrate_news.py",
       "target": "class:tests/test_integrate_news.py:TestIntegrateNews",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/test_llm_enhanced.py",
       "target": "class:tests/test_llm_enhanced.py:TestChainOfThoughtReasoner",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/test_llm_enhanced.py",
       "target": "class:tests/test_llm_enhanced.py:TestExplanationGenerator",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/test_llm_enhanced.py",
       "target": "class:tests/test_llm_enhanced.py:TestMarketOutlook",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/test_llm_provider.py",
       "target": "function:tests/test_llm_provider.py:test_claude_chat_model_builds_without_calling_the_api",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/test_llm_provider.py",
       "target": "function:tests/test_llm_provider.py:test_openrouter_client_points_at_openrouter",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/test_llm_sentiment.py",
       "target": "class:tests/test_llm_sentiment.py:StubRunnable",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/test_llm_sentiment.py",
       "target": "function:tests/test_llm_sentiment.py:test_cache_prevents_paying_twice",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/test_llm_sentiment.py",
       "target": "function:tests/test_llm_sentiment.py:test_usage_summary_cost_only_with_prices",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/test_nlp_advanced.py",
       "target": "class:tests/test_nlp_advanced.py:TestAdvancedTextProcessor",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/test_nlp_advanced.py",
       "target": "class:tests/test_nlp_advanced.py:TestFinancialTextAnalyzer",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/test_nlp_advanced.py",
       "target": "class:tests/test_nlp_advanced.py:TestConvenienceFunctions",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/test_nlp_advanced.py",
       "target": "class:tests/test_nlp_advanced.py:TestLexicons",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/test_page_imports.py",
       "target": "function:tests/test_page_imports.py:_project_imports",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/test_page_imports.py",
       "target": "function:tests/test_page_imports.py:test_page_imports_resolve",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/test_predict.py",
       "target": "class:tests/test_predict.py:TestGetAvailableModels",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/test_predict.py",
       "target": "class:tests/test_predict.py:TestSentimentPredictor",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/test_preprocess.py",
       "target": "class:tests/test_preprocess.py:TestCleanText",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/test_preprocess.py",
       "target": "class:tests/test_preprocess.py:TestPreprocessDataframe",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/test_preprocess.py",
       "target": "class:tests/test_preprocess.py:TestCreateSplits",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/test_rag_news.py",
       "target": "class:tests/test_rag_news.py:StubAnswer",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/test_rag_news.py",
       "target": "function:tests/test_rag_news.py:corpus",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/test_rag_news.py",
       "target": "function:tests/test_rag_news.py:test_index_is_saved_and_reloaded",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/test_rag_news.py",
       "target": "function:tests/test_rag_news.py:test_local_embeddings_find_topical_headlines",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
-    },
-    {
-      "source": "file:tests/test_shap_explain.py",
-      "target": "class:tests/test_shap_explain.py:TestShapExplain",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/test_stock_extension.py",
       "target": "class:tests/test_stock_extension.py:TestStockExtension",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/test_stock_extension.py",
       "target": "function:tests/test_stock_extension.py:_build_stub_components",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/test_utils.py",
       "target": "class:tests/test_utils.py:TestGetProjectRoot",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/test_utils.py",
       "target": "class:tests/test_utils.py:TestPathHelpers",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/test_utils.py",
       "target": "class:tests/test_utils.py:TestSetupLogging",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/test_utils.py",
       "target": "class:tests/test_utils.py:TestConstants",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "file:tests/test_utils.py",
       "target": "class:tests/test_utils.py:TestGetModelInfo",
       "type": "contains",
       "direction": "forward",
-      "weight": 1.0
+      "weight": 1
     },
     {
       "source": "function:tests/test_page_imports.py:test_page_imports_resolve",
@@ -11202,14 +10326,6 @@
     {
       "source": "file:src/rag_news.py",
       "target": "file:tests/test_rag_news.py",
-      "type": "tested_by",
-      "direction": "forward",
-      "weight": 0.5,
-      "description": "Path-based pairing (deterministic)"
-    },
-    {
-      "source": "file:src/shap_explain.py",
-      "target": "file:tests/test_shap_explain.py",
       "type": "tested_by",
       "direction": "forward",
       "weight": 0.5,
@@ -11365,20 +10481,6 @@
       "weight": 0.7
     },
     {
-      "source": "file:tests/test_shap_explain.py",
-      "target": "file:src/shap_explain.py",
-      "type": "imports",
-      "direction": "forward",
-      "weight": 0.7
-    },
-    {
-      "source": "file:tests/test_shap_explain.py",
-      "target": "file:src/utils.py",
-      "type": "imports",
-      "direction": "forward",
-      "weight": 0.7
-    },
-    {
       "source": "file:tests/test_stock_extension.py",
       "target": "file:src/stock_extension.py",
       "type": "imports",
@@ -11405,6 +10507,1133 @@
       "type": "tested_by",
       "direction": "forward",
       "weight": 0.5
+    },
+    {
+      "source": "file:src/train.py",
+      "target": "file:src/model.py",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/registry.py",
+      "target": "function:src/registry.py:_hash_file",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/registry.py",
+      "target": "function:src/registry.py:_load_eval_metrics",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/registry.py",
+      "target": "function:src/registry.py:_finetune_metrics",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/registry.py",
+      "target": "function:src/registry.py:_discover_artifacts",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/registry.py",
+      "target": "function:src/registry.py:build_registry",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/registry.py",
+      "target": "function:src/registry.py:build_registry",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/registry.py",
+      "target": "function:src/registry.py:update_registry",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/registry.py",
+      "target": "function:src/registry.py:update_registry",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/registry.py",
+      "target": "function:src/registry.py:log_to_mlflow",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/registry.py",
+      "target": "function:src/registry.py:log_to_mlflow",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/registry.py",
+      "target": "function:src/registry.py:main",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/registry.py",
+      "target": "function:src/registry.py:main",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/registry.py:build_registry",
+      "target": "function:src/registry.py:_hash_file",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/registry.py:build_registry",
+      "target": "function:src/registry.py:_load_eval_metrics",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/registry.py:build_registry",
+      "target": "function:src/registry.py:_finetune_metrics",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/registry.py:build_registry",
+      "target": "function:src/registry.py:_discover_artifacts",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/registry.py:update_registry",
+      "target": "function:src/registry.py:build_registry",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/registry.py:main",
+      "target": "function:src/registry.py:update_registry",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/registry.py:main",
+      "target": "function:src/registry.py:log_to_mlflow",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/registry.py:_discover_artifacts",
+      "target": "function:src/utils.py:get_model_dir",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/registry.py:_discover_artifacts",
+      "target": "function:src/utils.py:get_project_root",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/registry.py:_load_eval_metrics",
+      "target": "function:src/utils.py:get_results_dir",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/registry.py:_finetune_metrics",
+      "target": "function:src/utils.py:get_results_dir",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/shap_explain.py",
+      "target": "function:src/shap_explain.py:_linear_shap",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/shap_explain.py",
+      "target": "function:src/shap_explain.py:_linear_shap",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/shap_explain.py",
+      "target": "function:src/shap_explain.py:_gradient_boosting_shap",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/shap_explain.py",
+      "target": "function:src/shap_explain.py:_gradient_boosting_shap",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/shap_explain.py",
+      "target": "function:src/shap_explain.py:compute_shap_values",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/shap_explain.py",
+      "target": "function:src/shap_explain.py:compute_shap_values",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/shap_explain.py",
+      "target": "function:src/shap_explain.py:get_shap_explanation",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/shap_explain.py",
+      "target": "function:src/shap_explain.py:get_shap_explanation",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/shap_explain.py",
+      "target": "function:src/shap_explain.py:save_shap_results",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/shap_explain.py",
+      "target": "function:src/shap_explain.py:save_shap_results",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/shap_explain.py",
+      "target": "function:src/shap_explain.py:generate_shap_plot",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/shap_explain.py",
+      "target": "function:src/shap_explain.py:generate_shap_plot",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/shap_explain.py:compute_shap_values",
+      "target": "function:src/shap_explain.py:_linear_shap",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/shap_explain.py:compute_shap_values",
+      "target": "function:src/shap_explain.py:_gradient_boosting_shap",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/shap_explain.py:get_shap_explanation",
+      "target": "function:src/shap_explain.py:compute_shap_values",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/shap_explain.py:generate_shap_plot",
+      "target": "function:src/shap_explain.py:compute_shap_values",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/shap_explain.py:save_shap_results",
+      "target": "function:src/shap_explain.py:get_shap_explanation",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/shap_explain.py:get_shap_explanation",
+      "target": "function:src/preprocess.py:load_processed_data",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/shap_explain.py:get_shap_explanation",
+      "target": "function:src/utils.py:get_model_dir",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/shap_explain.py:generate_shap_plot",
+      "target": "function:src/preprocess.py:load_processed_data",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/shap_explain.py:generate_shap_plot",
+      "target": "function:src/utils.py:get_model_dir",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/shap_explain.py:save_shap_results",
+      "target": "function:src/utils.py:get_results_dir",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/shap_explain.py:generate_shap_plot",
+      "target": "function:src/utils.py:get_results_dir",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/train.py",
+      "target": "function:src/train.py:create_baseline_pipeline",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/train.py",
+      "target": "function:src/train.py:create_baseline_pipeline",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/train.py",
+      "target": "function:src/train.py:train_baseline",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/train.py",
+      "target": "function:src/train.py:train_baseline",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/train.py",
+      "target": "function:src/train.py:train_all_baselines",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/train.py",
+      "target": "function:src/train.py:train_all_baselines",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/train.py",
+      "target": "function:src/train.py:train_ensemble",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/train.py",
+      "target": "function:src/train.py:train_ensemble",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/train.py",
+      "target": "function:src/train.py:load_model",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/train.py",
+      "target": "function:src/train.py:load_model",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/train.py",
+      "target": "function:src/train.py:train_transformer",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/train.py",
+      "target": "function:src/train.py:train_transformer",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/train.py",
+      "target": "function:src/train.py:train_all_models",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/train.py",
+      "target": "function:src/train.py:train_all_models",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/train.py",
+      "target": "function:src/train.py:cross_validate_baselines",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/train.py",
+      "target": "function:src/train.py:cross_validate_baselines",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/train.py",
+      "target": "function:src/train.py:tune_hyperparameters",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/train.py",
+      "target": "function:src/train.py:tune_hyperparameters",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/train.py:train_baseline",
+      "target": "function:src/train.py:create_baseline_pipeline",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/train.py:cross_validate_baselines",
+      "target": "function:src/train.py:create_baseline_pipeline",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/train.py:train_all_baselines",
+      "target": "function:src/train.py:train_baseline",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/train.py:train_all_models",
+      "target": "function:src/train.py:train_baseline",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/train.py:train_all_models",
+      "target": "function:src/train.py:train_transformer",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/train.py:train_transformer",
+      "target": "function:src/model.py:train_transformer",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/train.py:train_baseline",
+      "target": "function:src/preprocess.py:load_processed_data",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/train.py:train_ensemble",
+      "target": "function:src/preprocess.py:load_processed_data",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/train.py:cross_validate_baselines",
+      "target": "function:src/preprocess.py:load_processed_data",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/train.py:tune_hyperparameters",
+      "target": "function:src/preprocess.py:load_processed_data",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/train.py:train_baseline",
+      "target": "function:src/utils.py:get_model_dir",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/train.py:train_ensemble",
+      "target": "function:src/utils.py:get_model_dir",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/train.py:load_model",
+      "target": "function:src/utils.py:get_model_dir",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/train.py:tune_hyperparameters",
+      "target": "function:src/utils.py:get_model_dir",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/train.py:cross_validate_baselines",
+      "target": "function:src/utils.py:get_results_dir",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/train.py:tune_hyperparameters",
+      "target": "function:src/utils.py:get_results_dir",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:api/main.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:app/app.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:app/shared.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:scripts/fetch_real_news_dataset.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:scripts/finetune_finbert_news.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:scripts/llm_benchmark.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:scripts/retrain.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:scripts/upload_finetuned_to_hf.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:src/benchmark_finbert.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:src/evaluate.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:src/explain.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:src/finbert_pretrained.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:src/integrate_news.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:src/llm_explain.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:src/model.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:src/monitoring.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:src/nlp_advanced.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:src/predict.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:src/preprocess.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:src/rag_news.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:src/registry.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:src/shap_explain.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:src/stats.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:src/stock_extension.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:src/train.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:data_manifest.toml",
+      "target": "file:src/preprocess.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:data_manifest.toml",
+      "target": "file:src/train.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:data_manifest.toml",
+      "target": "file:src/evaluate.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:data_manifest.toml",
+      "target": "file:scripts/fetch_real_news_dataset.py",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "config:data_manifest.toml",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/INTERVIEW_GUIDE.md",
+      "target": "file:app/api_client.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/INTERVIEW_GUIDE.md",
+      "target": "file:app/app.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/INTERVIEW_GUIDE.md",
+      "target": "file:app/ui.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/INTERVIEW_GUIDE.md",
+      "target": "file:src/evaluate.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/INTERVIEW_GUIDE.md",
+      "target": "file:src/explain.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/INTERVIEW_GUIDE.md",
+      "target": "file:src/finbert_pretrained.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/INTERVIEW_GUIDE.md",
+      "target": "file:src/integrate_news.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/INTERVIEW_GUIDE.md",
+      "target": "file:src/llm_enhanced.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/INTERVIEW_GUIDE.md",
+      "target": "file:src/llm_provider.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/INTERVIEW_GUIDE.md",
+      "target": "file:src/llm_sentiment.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/INTERVIEW_GUIDE.md",
+      "target": "file:src/model.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/INTERVIEW_GUIDE.md",
+      "target": "file:src/monitoring.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/INTERVIEW_GUIDE.md",
+      "target": "file:src/nlp_advanced.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/INTERVIEW_GUIDE.md",
+      "target": "file:src/predict.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/INTERVIEW_GUIDE.md",
+      "target": "file:src/preprocess.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/INTERVIEW_GUIDE.md",
+      "target": "file:src/rag_news.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/INTERVIEW_GUIDE.md",
+      "target": "file:src/registry.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/INTERVIEW_GUIDE.md",
+      "target": "file:src/shap_explain.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/INTERVIEW_GUIDE.md",
+      "target": "file:src/stats.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/INTERVIEW_GUIDE.md",
+      "target": "file:src/train.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/INTERVIEW_GUIDE.md",
+      "target": "file:scripts/bootstrap_ci.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/INTERVIEW_GUIDE.md",
+      "target": "file:scripts/llm_benchmark.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/INTERVIEW_GUIDE.md",
+      "target": "file:scripts/retrain.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/INTERVIEW_GUIDE.md",
+      "target": "file:scripts/fetch_real_news_dataset.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/INTERVIEW_GUIDE.md",
+      "target": "file:tests/test_api.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/INTERVIEW_GUIDE.md",
+      "target": "file:tests/test_nlp_advanced.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/TRACKER.md",
+      "target": "file:api/main.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/TRACKER.md",
+      "target": "file:src/monitoring.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/TRACKER.md",
+      "target": "file:src/registry.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/TRACKER.md",
+      "target": "file:scripts/retrain.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/TRACKER.md",
+      "target": "file:scripts/llm_benchmark.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/TRACKER.md",
+      "target": "file:src/stats.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/TRACKER.md",
+      "target": "file:src/rag_news.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/TRACKER.md",
+      "target": "document:docs/RETRAINING.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/TRACKER.md",
+      "target": "pipeline:.github/workflows/retrain.yml",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/TRACKER.md",
+      "target": "document:docs/INTERVIEW_GUIDE.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/test_shap_explain.py",
+      "target": "class:tests/test_shap_explain.py:TestShapExplain",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:tests/test_shap_explain.py",
+      "target": "function:tests/test_shap_explain.py:_linear_case",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:tests/test_shap_explain.py",
+      "target": "function:tests/test_shap_explain.py:test_linear_shap_is_exact_and_additive",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:tests/test_shap_explain.py",
+      "target": "function:tests/test_shap_explain.py:test_gradient_boosting_shap_is_exact_and_additive",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "function:tests/test_shap_explain.py:test_linear_shap_is_exact_and_additive",
+      "target": "function:tests/test_shap_explain.py:_linear_case",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_shap_explain.py:test_gradient_boosting_shap_is_exact_and_additive",
+      "target": "function:tests/test_shap_explain.py:_linear_case",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/shap_explain.py",
+      "target": "file:tests/test_shap_explain.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5,
+      "description": "Path-based pairing (deterministic)"
+    },
+    {
+      "source": "file:app/views/3_Explainability.py",
+      "target": "file:app/shared.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7,
+      "recoveredFromImportMap": true
+    },
+    {
+      "source": "file:src/registry.py",
+      "target": "file:src/utils.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7,
+      "recoveredFromImportMap": true
+    },
+    {
+      "source": "file:src/shap_explain.py",
+      "target": "file:src/preprocess.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7,
+      "recoveredFromImportMap": true
+    },
+    {
+      "source": "file:src/shap_explain.py",
+      "target": "file:src/utils.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7,
+      "recoveredFromImportMap": true
+    },
+    {
+      "source": "file:src/train.py",
+      "target": "file:src/preprocess.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7,
+      "recoveredFromImportMap": true
+    },
+    {
+      "source": "file:src/train.py",
+      "target": "file:src/utils.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7,
+      "recoveredFromImportMap": true
     }
   ],
   "layers": [

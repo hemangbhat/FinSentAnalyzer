@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "gitCommitHash": "9ca2f62502a422c7fd813454b295116e830b4df1",
-  "generatedAt": "2026-11-14T05:18:37.716Z",
+  "gitCommitHash": "5d2f4e9b1259edbbfc8f22364d5236887fce6206",
+  "generatedAt": "2026-11-14T08:57:36.925Z",
   "files": {
     ".dockerignore": {
       "filePath": ".dockerignore",
@@ -95,12 +95,12 @@
     },
     "README.md": {
       "filePath": "README.md",
-      "contentHash": "f0659d6c11ab732e3fae04af28f97f419f08f6a8335fcc01ba860adb873811ca",
+      "contentHash": "31e78ec0e6710c0a057f8e01ac96c9f9730aab3b6f6b5f3b4ec14578836a0c96",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 1081,
+      "totalLines": 1094,
       "hasStructuralAnalysis": false
     },
     "api/__init__.py": {
@@ -1210,7 +1210,7 @@
     },
     "app/views/3_Explainability.py": {
       "filePath": "app/views/3_Explainability.py",
-      "contentHash": "eeabf0f9715246f6443f500a076f15d27da200d875c46d0ef61053de6bd2bb76",
+      "contentHash": "a2512b440097faef810d97cda397d9c018c2c5ea67e6c537c16b7f1055de6d10",
       "functions": [
         {
           "name": "_use_example",
@@ -1307,7 +1307,7 @@
         "_use_example",
         "_highlight"
       ],
-      "totalLines": 228,
+      "totalLines": 233,
       "hasStructuralAnalysis": true
     },
     "app/views/4_Word_Insights.py": {
@@ -1736,7 +1736,7 @@
     },
     "data_manifest.toml": {
       "filePath": "data_manifest.toml",
-      "contentHash": "75d1288b9d68e65f06f2306b4baf0936ee0e13db5e7fb6f6818586b8104250b1",
+      "contentHash": "d49a35bdda109997e39a79ee61937fc458c9a3195bfc04c9437c87dcb8a83360",
       "functions": [],
       "classes": [],
       "imports": [],
@@ -1796,12 +1796,12 @@
     },
     "docs/INTERVIEW_GUIDE.md": {
       "filePath": "docs/INTERVIEW_GUIDE.md",
-      "contentHash": "818125bba29305bb3d6d3cc43d5a43db5645bb9e79e312b49c75aa412756f1ba",
+      "contentHash": "10f27d434aa85284c08c108ce0e9c3843823bd9726bc15be415554f60e6605aa",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 965,
+      "totalLines": 977,
       "hasStructuralAnalysis": false
     },
     "docs/MODEL_CARD.md": {
@@ -1876,12 +1876,12 @@
     },
     "docs/TRACKER.md": {
       "filePath": "docs/TRACKER.md",
-      "contentHash": "468f4aa70e35324d446bdd80fbcc7684823e27bf4fa6125addea7dce57a928ab",
+      "contentHash": "0f3d6f0a2d6ce2752853583fec0e48bee61bfb3a62e4abd391b6afd123e2e2d5",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 79,
+      "totalLines": 86,
       "hasStructuralAnalysis": false
     },
     "docs/TRD.md": {
@@ -2118,7 +2118,7 @@
     },
     "scripts/finetune_finbert_news.py": {
       "filePath": "scripts/finetune_finbert_news.py",
-      "contentHash": "83812a9940540d2b72c11ca6b92396e2c65e3b0685faf714e3007fa873dab1c7",
+      "contentHash": "b3e889b0f7ff17a864571101ad873f74559ccee06b38485b2ac48044f52af7ce",
       "functions": [
         {
           "name": "_load_news_split",
@@ -2134,7 +2134,7 @@
           "params": [],
           "returnType": "None",
           "exported": true,
-          "lineCount": 88
+          "lineCount": 108
         }
       ],
       "classes": [],
@@ -2168,7 +2168,7 @@
         "_load_news_split",
         "main"
       ],
-      "totalLines": 143,
+      "totalLines": 163,
       "hasStructuralAnalysis": true
     },
     "scripts/kill_streamlit.ps1": {
@@ -4312,7 +4312,7 @@
     },
     "src/registry.py": {
       "filePath": "src/registry.py",
-      "contentHash": "ee5ddd365d5ca6bb22c55e89c62db64627db83ffed963660b9c4170cbd30e861",
+      "contentHash": "04ba28f322b9d350acf3a908791ee295ded67dfacd2dc8f21e8ff4ea025adb58",
       "functions": [
         {
           "name": "_hash_file",
@@ -4331,18 +4331,27 @@
           "lineCount": 20
         },
         {
+          "name": "_finetune_metrics",
+          "params": [
+            "key"
+          ],
+          "returnType": "Dict[str, Any]",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
           "name": "_discover_artifacts",
           "params": [],
           "returnType": "List[Path]",
           "exported": true,
-          "lineCount": 8
+          "lineCount": 9
         },
         {
           "name": "build_registry",
           "params": [],
           "returnType": "Dict[str, Any]",
           "exported": true,
-          "lineCount": 22
+          "lineCount": 25
         },
         {
           "name": "update_registry",
@@ -4422,19 +4431,52 @@
       "exports": [
         "_hash_file",
         "_load_eval_metrics",
+        "_finetune_metrics",
         "_discover_artifacts",
         "build_registry",
         "update_registry",
         "log_to_mlflow",
         "main"
       ],
-      "totalLines": 152,
+      "totalLines": 168,
       "hasStructuralAnalysis": true
     },
     "src/shap_explain.py": {
       "filePath": "src/shap_explain.py",
-      "contentHash": "9ce5ea1103e78f94aa30698297bd24ec49774f1ae29e65213d1051df22a2367f",
+      "contentHash": "7ed0ab8ca07f80252fd075a0b9fba03255e18614c557afa64fb432094e679b08",
       "functions": [
+        {
+          "name": "_linear_shap",
+          "params": [
+            "classifier",
+            "X_dense",
+            "background_mean"
+          ],
+          "returnType": "list[np.ndarray]",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "_gradient_boosting_shap",
+          "params": [
+            "classifier",
+            "X_dense"
+          ],
+          "returnType": "list[np.ndarray]",
+          "exported": true,
+          "lineCount": 16
+        },
+        {
+          "name": "compute_shap_values",
+          "params": [
+            "model_name",
+            "classifier",
+            "X_dense",
+            "background_mean"
+          ],
+          "exported": true,
+          "lineCount": 20
+        },
         {
           "name": "get_shap_explanation",
           "params": [
@@ -4444,7 +4486,7 @@
           ],
           "returnType": "dict",
           "exported": true,
-          "lineCount": 148
+          "lineCount": 90
         },
         {
           "name": "save_shap_results",
@@ -4464,7 +4506,7 @@
             "save"
           ],
           "exported": true,
-          "lineCount": 59
+          "lineCount": 55
         }
       ],
       "classes": [],
@@ -4504,11 +4546,14 @@
         }
       ],
       "exports": [
+        "_linear_shap",
+        "_gradient_boosting_shap",
+        "compute_shap_values",
         "get_shap_explanation",
         "save_shap_results",
         "generate_shap_plot"
       ],
-      "totalLines": 279,
+      "totalLines": 280,
       "hasStructuralAnalysis": true
     },
     "src/stats.py": {
@@ -4809,7 +4854,7 @@
     },
     "src/train.py": {
       "filePath": "src/train.py",
-      "contentHash": "d3949803849c42af6c89b9dbff52c5bf493d85dc3834ae3483d540dface22008",
+      "contentHash": "25a78345e1430548f658ee0ddbf29cfe5e0cf24c361c8bef93a24c2be4a08740",
       "functions": [
         {
           "name": "create_baseline_pipeline",
@@ -4888,10 +4933,12 @@
         },
         {
           "name": "tune_hyperparameters",
-          "params": [],
+          "params": [
+            "promote"
+          ],
           "returnType": "dict",
           "exported": true,
-          "lineCount": 104
+          "lineCount": 112
         }
       ],
       "classes": [],
@@ -5014,12 +5061,12 @@
         "cross_validate_baselines",
         "tune_hyperparameters"
       ],
-      "totalLines": 608,
+      "totalLines": 621,
       "hasStructuralAnalysis": true
     },
     "src/utils.py": {
       "filePath": "src/utils.py",
-      "contentHash": "64005b949a7e2a1f5b3e17d192ae62c1af677d9cd4902d49add59d7b4db824ea",
+      "contentHash": "d7daf3bf6c2287b2734c2713f708c07887ac38c59516375750a4e37f5cad8f9e",
       "functions": [
         {
           "name": "get_project_root",
@@ -6284,8 +6331,27 @@
     },
     "tests/test_shap_explain.py": {
       "filePath": "tests/test_shap_explain.py",
-      "contentHash": "dc88ab2c7aed3c27d7f90385af56f1bbeef72de602af6626f1b242923f2d34c5",
-      "functions": [],
+      "contentHash": "c382aa5700a223e628e16b0265fc17260a0894a377979889f45c83ededf5c29b",
+      "functions": [
+        {
+          "name": "_linear_case",
+          "params": [],
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "test_linear_shap_is_exact_and_additive",
+          "params": [],
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "test_gradient_boosting_shap_is_exact_and_additive",
+          "params": [],
+          "exported": true,
+          "lineCount": 16
+        }
+      ],
       "classes": [
         {
           "name": "TestShapExplain",
@@ -6329,9 +6395,12 @@
         }
       ],
       "exports": [
-        "TestShapExplain"
+        "TestShapExplain",
+        "_linear_case",
+        "test_linear_shap_is_exact_and_additive",
+        "test_gradient_boosting_shap_is_exact_and_additive"
       ],
-      "totalLines": 124,
+      "totalLines": 169,
       "hasStructuralAnalysis": true
     },
     "tests/test_stock_extension.py": {
