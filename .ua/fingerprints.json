@@ -1,0 +1,6499 @@
+{
+  "version": "1.0.0",
+  "gitCommitHash": "9ca2f62502a422c7fd813454b295116e830b4df1",
+  "generatedAt": "2026-11-14T05:18:37.716Z",
+  "files": {
+    ".dockerignore": {
+      "filePath": ".dockerignore",
+      "contentHash": "8813f4f006406c91727b2bd4a5e9f5ffa28277ca82373b24ed8f7dd2d04573c5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 24,
+      "hasStructuralAnalysis": false
+    },
+    ".gitattributes": {
+      "filePath": ".gitattributes",
+      "contentHash": "960a2428fc213b19b18e9891a22aca366937c7130b906b0dcc9e46124dc2a505",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 3,
+      "hasStructuralAnalysis": false
+    },
+    ".github/workflows/ci.yml": {
+      "filePath": ".github/workflows/ci.yml",
+      "contentHash": "b6a90592d87113dfef1689c385b31858c897419093abb33a1249a123674faea8",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 45,
+      "hasStructuralAnalysis": false
+    },
+    ".github/workflows/retrain.yml": {
+      "filePath": ".github/workflows/retrain.yml",
+      "contentHash": "906c212591627c821087123ba9140919e8d9a9108b940d813b26c3c98fc01316",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 40,
+      "hasStructuralAnalysis": false
+    },
+    ".streamlit/config.toml": {
+      "filePath": ".streamlit/config.toml",
+      "contentHash": "26fe207903aced6e44632bb25244f391f0d9f7191a4e8f34bceff773b5ece0a3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 68,
+      "hasStructuralAnalysis": false
+    },
+    "Dockerfile": {
+      "filePath": "Dockerfile",
+      "contentHash": "8b1f097e96156450738aa6cab9e3a2d510113733a957adbaf874afb9d3ad5134",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 48,
+      "hasStructuralAnalysis": false
+    },
+    "Dockerfile.api": {
+      "filePath": "Dockerfile.api",
+      "contentHash": "f37261e4fbc72c0a6a8eaa6c67c232336c97d86e21f6d82cf1f30b6023e0be87",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 30,
+      "hasStructuralAnalysis": false
+    },
+    "Makefile": {
+      "filePath": "Makefile",
+      "contentHash": "635a7a4330da953a3e867fa21f4f21f23ff81b31f19104cdc56617e71fce89ab",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 45,
+      "hasStructuralAnalysis": false
+    },
+    "PRODUCT.md": {
+      "filePath": "PRODUCT.md",
+      "contentHash": "8bb19cc594a3dc183c45834bbdc93f228b439a6092e546ea706d2d459909d3ef",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 47,
+      "hasStructuralAnalysis": false
+    },
+    "README.md": {
+      "filePath": "README.md",
+      "contentHash": "f0659d6c11ab732e3fae04af28f97f419f08f6a8335fcc01ba860adb873811ca",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1081,
+      "hasStructuralAnalysis": false
+    },
+    "api/__init__.py": {
+      "filePath": "api/__init__.py",
+      "contentHash": "eabf18f44e3fcbfd5ff16865e476bbfccc3e96376c40ad0e6b5027a5cf00d717",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 2,
+      "hasStructuralAnalysis": true
+    },
+    "api/main.py": {
+      "filePath": "api/main.py",
+      "contentHash": "f6983b5d38c5e5910ff9312accd33ef107ffd927cce0ff851f512e9527bd2c5e",
+      "functions": [
+        {
+          "name": "_client_key",
+          "params": [
+            "request"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "require_api_key",
+          "params": [
+            "x_api_key"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "_get_predictor",
+          "params": [
+            "model"
+          ],
+          "returnType": "SentimentPredictor",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "_rate_limit_handler",
+          "params": [
+            "request",
+            "exc"
+          ],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "_timing_middleware",
+          "params": [
+            "request",
+            "call_next"
+          ],
+          "exported": true,
+          "lineCount": 14
+        },
+        {
+          "name": "health",
+          "params": [],
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "models",
+          "params": [],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "predict",
+          "params": [
+            "request",
+            "payload"
+          ],
+          "exported": true,
+          "lineCount": 29
+        },
+        {
+          "name": "predict_batch",
+          "params": [
+            "request",
+            "payload"
+          ],
+          "exported": true,
+          "lineCount": 29
+        },
+        {
+          "name": "get_metrics",
+          "params": [],
+          "exported": true,
+          "lineCount": 2
+        }
+      ],
+      "classes": [
+        {
+          "name": "PredictRequest",
+          "methods": [
+            "_not_blank"
+          ],
+          "properties": [
+            "text",
+            "model"
+          ],
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "BatchPredictRequest",
+          "methods": [
+            "_validate_texts"
+          ],
+          "properties": [
+            "texts",
+            "model"
+          ],
+          "exported": true,
+          "lineCount": 14
+        },
+        {
+          "name": "PredictResponse",
+          "methods": [],
+          "properties": [
+            "label",
+            "confidence",
+            "probabilities",
+            "model"
+          ],
+          "exported": true,
+          "lineCount": 5
+        }
+      ],
+      "imports": [
+        {
+          "source": "os",
+          "specifiers": [
+            "os"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "time",
+          "specifiers": [
+            "time"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "List",
+            "Optional"
+          ]
+        },
+        {
+          "source": "fastapi",
+          "specifiers": [
+            "Depends",
+            "FastAPI",
+            "Header",
+            "HTTPException",
+            "Request"
+          ]
+        },
+        {
+          "source": "fastapi.responses",
+          "specifiers": [
+            "JSONResponse"
+          ]
+        },
+        {
+          "source": "pydantic",
+          "specifiers": [
+            "BaseModel",
+            "Field",
+            "field_validator"
+          ]
+        },
+        {
+          "source": "slowapi",
+          "specifiers": [
+            "Limiter"
+          ]
+        },
+        {
+          "source": "slowapi.errors",
+          "specifiers": [
+            "RateLimitExceeded"
+          ]
+        },
+        {
+          "source": "slowapi.util",
+          "specifiers": [
+            "get_remote_address"
+          ]
+        },
+        {
+          "source": "monitoring",
+          "specifiers": [
+            "log_event",
+            "logger",
+            "metrics"
+          ]
+        },
+        {
+          "source": "predict",
+          "specifiers": [
+            "SentimentPredictor",
+            "get_available_models"
+          ]
+        }
+      ],
+      "exports": [
+        "_client_key",
+        "require_api_key",
+        "_get_predictor",
+        "PredictRequest",
+        "BatchPredictRequest",
+        "PredictResponse",
+        "_rate_limit_handler",
+        "_timing_middleware",
+        "health",
+        "models",
+        "predict",
+        "predict_batch",
+        "get_metrics"
+      ],
+      "totalLines": 255,
+      "hasStructuralAnalysis": true
+    },
+    "app/api_client.py": {
+      "filePath": "app/api_client.py",
+      "contentHash": "19b6596839f44d08a3e50522a215e7e3286be6ecbae6cbc7e904e09f32a8f237",
+      "functions": [
+        {
+          "name": "remote_available_models",
+          "params": [
+            "base_url",
+            "api_key",
+            "timeout"
+          ],
+          "returnType": "List[str]",
+          "exported": true,
+          "lineCount": 10
+        }
+      ],
+      "classes": [
+        {
+          "name": "RemotePredictorError",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "RemotePredictor",
+          "methods": [
+            "__init__",
+            "_post",
+            "predict"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 24
+        }
+      ],
+      "imports": [
+        {
+          "source": "typing",
+          "specifiers": [
+            "List",
+            "Union"
+          ]
+        },
+        {
+          "source": "httpx",
+          "specifiers": [
+            "httpx"
+          ]
+        }
+      ],
+      "exports": [
+        "RemotePredictorError",
+        "RemotePredictor",
+        "remote_available_models"
+      ],
+      "totalLines": 61,
+      "hasStructuralAnalysis": true
+    },
+    "app/app.py": {
+      "filePath": "app/app.py",
+      "contentHash": "4382cf4cc7076034e614e4e94fa88309931290402dd3f0921bba8bb4d743976e",
+      "functions": [
+        {
+          "name": "_page",
+          "params": [
+            "file",
+            "title",
+            "icon",
+            "url_path",
+            "default"
+          ],
+          "exported": true,
+          "lineCount": 2
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "streamlit",
+          "specifiers": [
+            "st"
+          ]
+        },
+        {
+          "source": "shared",
+          "specifiers": [
+            "inject_css",
+            "setup_sidebar"
+          ]
+        }
+      ],
+      "exports": [
+        "_page"
+      ],
+      "totalLines": 66,
+      "hasStructuralAnalysis": true
+    },
+    "app/home.py": {
+      "filePath": "app/home.py",
+      "contentHash": "a0269fdb0a38e12c83036adb999f6c2e8b3d210a1b9f55473fcfea69b3d47b42",
+      "functions": [
+        {
+          "name": "headline_numbers",
+          "params": [],
+          "returnType": "dict",
+          "exported": true,
+          "lineCount": 34
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "streamlit",
+          "specifiers": [
+            "st"
+          ]
+        },
+        {
+          "source": "shared",
+          "specifiers": [
+            "COLORS",
+            "exhibit",
+            "interval_chart",
+            "kpi_strip",
+            "load_result",
+            "page_header",
+            "render_chart",
+            "section_header",
+            "source_note"
+          ]
+        }
+      ],
+      "exports": [
+        "headline_numbers"
+      ],
+      "totalLines": 226,
+      "hasStructuralAnalysis": true
+    },
+    "app/shared.py": {
+      "filePath": "app/shared.py",
+      "contentHash": "6f1cbbe4939d1aa5e6262f134e265b08c8cf6da8b14b21346135810eb5e668de",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "ui",
+          "specifiers": [
+            "CHART_SEQUENCE",
+            "COLORS",
+            "MODEL_LABELS",
+            "SENTIMENT_COLORS",
+            "SENTIMENT_GLYPHS",
+            "SENTIMENT_TINTS",
+            "active_model",
+            "chart_container",
+            "create_gauge_chart",
+            "create_probability_chart",
+            "empty_state",
+            "exhibit",
+            "get_sentiment_color",
+            "icon",
+            "inject_css",
+            "interval_chart",
+            "kpi_strip",
+            "load_predictor",
+            "load_result",
+            "metric_card",
+            "model_label",
+            "page_header",
+            "pill",
+            "probability_band",
+            "render_chart",
+            "section_header",
+            "sentiment_tag",
+            "setup_sidebar",
+            "source_note",
+            "status_banner",
+            "style_fig",
+            "term_table",
+            "verdict_card"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 90,
+      "hasStructuralAnalysis": true
+    },
+    "app/static/fonts/PublicSans-LICENSE.txt": {
+      "filePath": "app/static/fonts/PublicSans-LICENSE.txt",
+      "contentHash": "705a497c781f6463ff819abb513bb495f3fb05256f1d20321e3275813c0bafa5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 94,
+      "hasStructuralAnalysis": false
+    },
+    "app/ui.py": {
+      "filePath": "app/ui.py",
+      "contentHash": "80c31a7ab687ff24f766ff32741388ae3ee5d3c647e185153f2125f7df6deefe",
+      "functions": [
+        {
+          "name": "model_label",
+          "params": [
+            "key"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "get_sentiment_color",
+          "params": [
+            "label"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "sentiment_tag",
+          "params": [
+            "label",
+            "extra"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "load_result",
+          "params": [
+            "name"
+          ],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "icon",
+          "params": [
+            "name",
+            "size"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "inject_css",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "_register_template",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 18
+        },
+        {
+          "name": "style_fig",
+          "params": [
+            "fig",
+            "height",
+            "title",
+            "legend"
+          ],
+          "returnType": "go.Figure",
+          "exported": true,
+          "lineCount": 20
+        },
+        {
+          "name": "render_chart",
+          "params": [
+            "fig"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "page_header",
+          "params": [
+            "title",
+            "subtitle",
+            "eyebrow",
+            "meta",
+            "ruled"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 14
+        },
+        {
+          "name": "section_header",
+          "params": [
+            "title",
+            "caption"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "exhibit",
+          "params": [
+            "title",
+            "caption"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "source_note",
+          "params": [
+            "text"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "kpi_strip",
+          "params": [
+            "items"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 17
+        },
+        {
+          "name": "metric_card",
+          "params": [
+            "label",
+            "value",
+            "sub",
+            "accent"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "pill",
+          "params": [
+            "text",
+            "kind"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "status_banner",
+          "params": [
+            "text",
+            "kind",
+            "icon_name",
+            "**_ignored"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "empty_state",
+          "params": [
+            "title",
+            "body",
+            "icon"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "probability_band",
+          "params": [
+            "probabilities",
+            "predicted"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 23
+        },
+        {
+          "name": "verdict_card",
+          "params": [
+            "label",
+            "confidence",
+            "probabilities"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 16
+        },
+        {
+          "name": "term_table",
+          "params": [
+            "rows",
+            "show_class",
+            "weight_label"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 25
+        },
+        {
+          "name": "chart_container",
+          "params": [
+            "title",
+            "caption"
+          ],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "create_probability_chart",
+          "params": [
+            "probabilities"
+          ],
+          "returnType": "go.Figure",
+          "exported": true,
+          "lineCount": 21
+        },
+        {
+          "name": "create_gauge_chart",
+          "params": [
+            "probabilities",
+            "prediction"
+          ],
+          "returnType": "go.Figure",
+          "exported": true,
+          "lineCount": 19
+        },
+        {
+          "name": "interval_chart",
+          "params": [
+            "rows",
+            "reference",
+            "reference_label",
+            "axis_title",
+            "x_range",
+            "band_name"
+          ],
+          "returnType": "go.Figure",
+          "exported": true,
+          "lineCount": 94
+        },
+        {
+          "name": "load_predictor",
+          "params": [
+            "model_type"
+          ],
+          "exported": true,
+          "lineCount": 14
+        },
+        {
+          "name": "_list_models",
+          "params": [],
+          "returnType": "list[str]",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "setup_sidebar",
+          "params": [],
+          "exported": true,
+          "lineCount": 65
+        },
+        {
+          "name": "active_model",
+          "params": [],
+          "exported": true,
+          "lineCount": 16
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "html",
+          "specifiers": [
+            "html"
+          ]
+        },
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "os",
+          "specifiers": [
+            "os"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "contextlib",
+          "specifiers": [
+            "contextmanager"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "plotly.graph_objects",
+          "specifiers": [
+            "go"
+          ]
+        },
+        {
+          "source": "streamlit",
+          "specifiers": [
+            "st"
+          ]
+        },
+        {
+          "source": "predict",
+          "specifiers": [
+            "SentimentPredictor",
+            "get_available_models"
+          ]
+        }
+      ],
+      "exports": [
+        "model_label",
+        "get_sentiment_color",
+        "sentiment_tag",
+        "load_result",
+        "icon",
+        "inject_css",
+        "_register_template",
+        "style_fig",
+        "render_chart",
+        "page_header",
+        "section_header",
+        "exhibit",
+        "source_note",
+        "kpi_strip",
+        "metric_card",
+        "pill",
+        "status_banner",
+        "empty_state",
+        "probability_band",
+        "verdict_card",
+        "term_table",
+        "chart_container",
+        "create_probability_chart",
+        "create_gauge_chart",
+        "interval_chart",
+        "load_predictor",
+        "_list_models",
+        "setup_sidebar",
+        "active_model"
+      ],
+      "totalLines": 836,
+      "hasStructuralAnalysis": true
+    },
+    "app/views/10_Ask_the_News.py": {
+      "filePath": "app/views/10_Ask_the_News.py",
+      "contentHash": "47c09d24a08f3567354e7379f144c6e404fc9e208a5dc4686ae983ca9924c851",
+      "functions": [
+        {
+          "name": "_setting",
+          "params": [
+            "name"
+          ],
+          "returnType": "str | None",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "_store",
+          "params": [
+            "embedding_model",
+            "kind"
+          ],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "_answerer",
+          "params": [
+            "provider",
+            "model"
+          ],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "_use_example",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 3
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "html",
+          "specifiers": [
+            "html"
+          ]
+        },
+        {
+          "source": "os",
+          "specifiers": [
+            "os"
+          ]
+        },
+        {
+          "source": "re",
+          "specifiers": [
+            "re"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "streamlit",
+          "specifiers": [
+            "st"
+          ]
+        },
+        {
+          "source": "shared",
+          "specifiers": [
+            "active_model",
+            "empty_state",
+            "exhibit",
+            "get_sentiment_color",
+            "model_label",
+            "page_header",
+            "probability_band",
+            "source_note",
+            "status_banner"
+          ]
+        }
+      ],
+      "exports": [
+        "_setting",
+        "_store",
+        "_answerer",
+        "_use_example"
+      ],
+      "totalLines": 209,
+      "hasStructuralAnalysis": true
+    },
+    "app/views/1_Single_Analysis.py": {
+      "filePath": "app/views/1_Single_Analysis.py",
+      "contentHash": "143365cbe1fadf1e6fd2886f09573d0d9071fcda966a659a410bf8dfed78ac09",
+      "functions": [
+        {
+          "name": "_md_bold",
+          "params": [
+            "text"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "_use_example",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 5
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "html",
+          "specifiers": [
+            "html"
+          ]
+        },
+        {
+          "source": "re",
+          "specifiers": [
+            "re"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "streamlit",
+          "specifiers": [
+            "st"
+          ]
+        },
+        {
+          "source": "explain",
+          "specifiers": [
+            "explain_prediction_baseline"
+          ]
+        },
+        {
+          "source": "llm_explain",
+          "specifiers": [
+            "get_llm_explanation"
+          ]
+        },
+        {
+          "source": "shared",
+          "specifiers": [
+            "active_model",
+            "empty_state",
+            "model_label",
+            "page_header",
+            "section_header",
+            "status_banner",
+            "term_table",
+            "verdict_card"
+          ]
+        }
+      ],
+      "exports": [
+        "_md_bold",
+        "_use_example"
+      ],
+      "totalLines": 139,
+      "hasStructuralAnalysis": true
+    },
+    "app/views/2_Batch_Processing.py": {
+      "filePath": "app/views/2_Batch_Processing.py",
+      "contentHash": "94dace4db0abc2bb07120665c929cd638381c18e7cc6db0c7d6e3d093a1bddf2",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "os",
+          "specifiers": [
+            "os"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "io",
+          "specifiers": [
+            "StringIO"
+          ]
+        },
+        {
+          "source": "pandas",
+          "specifiers": [
+            "pd"
+          ]
+        },
+        {
+          "source": "streamlit",
+          "specifiers": [
+            "st"
+          ]
+        },
+        {
+          "source": "llm_explain",
+          "specifiers": [
+            "generate_market_outlook"
+          ]
+        },
+        {
+          "source": "shared",
+          "specifiers": [
+            "COLORS",
+            "SENTIMENT_GLYPHS",
+            "active_model",
+            "get_sentiment_color",
+            "kpi_strip",
+            "page_header",
+            "probability_band",
+            "section_header",
+            "status_banner"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 241,
+      "hasStructuralAnalysis": true
+    },
+    "app/views/3_Explainability.py": {
+      "filePath": "app/views/3_Explainability.py",
+      "contentHash": "eeabf0f9715246f6443f500a076f15d27da200d875c46d0ef61053de6bd2bb76",
+      "functions": [
+        {
+          "name": "_use_example",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "_highlight",
+          "params": [
+            "text",
+            "word_importance"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 19
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "html",
+          "specifiers": [
+            "html"
+          ]
+        },
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "re",
+          "specifiers": [
+            "re"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "plotly.graph_objects",
+          "specifiers": [
+            "go"
+          ]
+        },
+        {
+          "source": "streamlit",
+          "specifiers": [
+            "st"
+          ]
+        },
+        {
+          "source": "explain",
+          "specifiers": [
+            "explain_prediction_baseline"
+          ]
+        },
+        {
+          "source": "shared",
+          "specifiers": [
+            "COLORS",
+            "SENTIMENT_GLYPHS",
+            "SENTIMENT_TINTS",
+            "active_model",
+            "empty_state",
+            "exhibit",
+            "get_sentiment_color",
+            "model_label",
+            "page_header",
+            "render_chart",
+            "section_header",
+            "sentiment_tag",
+            "source_note",
+            "status_banner",
+            "style_fig",
+            "term_table",
+            "verdict_card"
+          ]
+        }
+      ],
+      "exports": [
+        "_use_example",
+        "_highlight"
+      ],
+      "totalLines": 228,
+      "hasStructuralAnalysis": true
+    },
+    "app/views/4_Word_Insights.py": {
+      "filePath": "app/views/4_Word_Insights.py",
+      "contentHash": "294124fbba53dc2721aa9882d856f8e4ce5623ae138a6cfa73d20cb1cacf103e",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "plotly.graph_objects",
+          "specifiers": [
+            "go"
+          ]
+        },
+        {
+          "source": "streamlit",
+          "specifiers": [
+            "st"
+          ]
+        },
+        {
+          "source": "plotly.subplots",
+          "specifiers": [
+            "make_subplots"
+          ]
+        },
+        {
+          "source": "explain",
+          "specifiers": [
+            "get_feature_importance_summary"
+          ]
+        },
+        {
+          "source": "shared",
+          "specifiers": [
+            "SENTIMENT_GLYPHS",
+            "active_model",
+            "exhibit",
+            "get_sentiment_color",
+            "model_label",
+            "page_header",
+            "render_chart",
+            "source_note",
+            "status_banner",
+            "style_fig",
+            "term_table"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 115,
+      "hasStructuralAnalysis": true
+    },
+    "app/views/5_Deep_Analysis.py": {
+      "filePath": "app/views/5_Deep_Analysis.py",
+      "contentHash": "3e8f01692c79e57ae1a4bb96ef55b5546e93a455eab464230f018903358fb359",
+      "functions": [
+        {
+          "name": "_use_deep_example",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 5
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "html",
+          "specifiers": [
+            "html"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "streamlit",
+          "specifiers": [
+            "st"
+          ]
+        },
+        {
+          "source": "shared",
+          "specifiers": [
+            "active_model",
+            "empty_state",
+            "page_header",
+            "section_header",
+            "sentiment_tag",
+            "status_banner",
+            "verdict_card"
+          ]
+        }
+      ],
+      "exports": [
+        "_use_deep_example"
+      ],
+      "totalLines": 217,
+      "hasStructuralAnalysis": true
+    },
+    "app/views/6_Model_Info.py": {
+      "filePath": "app/views/6_Model_Info.py",
+      "contentHash": "f914cb353058aae893260355006a7b933975f8a95c471a43b6c68b4f2be24aa8",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "pandas",
+          "specifiers": [
+            "pd"
+          ]
+        },
+        {
+          "source": "streamlit",
+          "specifiers": [
+            "st"
+          ]
+        },
+        {
+          "source": "predict",
+          "specifiers": [
+            "get_available_models"
+          ]
+        },
+        {
+          "source": "utils",
+          "specifiers": [
+            "get_model_info"
+          ]
+        },
+        {
+          "source": "shared",
+          "specifiers": [
+            "COLORS",
+            "active_model",
+            "exhibit",
+            "interval_chart",
+            "kpi_strip",
+            "load_result",
+            "model_label",
+            "page_header",
+            "render_chart",
+            "section_header",
+            "sentiment_tag",
+            "source_note"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 165,
+      "hasStructuralAnalysis": true
+    },
+    "app/views/7_Sentiment_Trends.py": {
+      "filePath": "app/views/7_Sentiment_Trends.py",
+      "contentHash": "1a909500596f40e5eafc9662d653ff0ef5759d99e2760ea81131bc912e2088a9",
+      "functions": [
+        {
+          "name": "model_label_for",
+          "params": [
+            "key"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 2
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "plotly.graph_objects",
+          "specifiers": [
+            "go"
+          ]
+        },
+        {
+          "source": "streamlit",
+          "specifiers": [
+            "st"
+          ]
+        },
+        {
+          "source": "plotly.subplots",
+          "specifiers": [
+            "make_subplots"
+          ]
+        },
+        {
+          "source": "shared",
+          "specifiers": [
+            "MODEL_LABELS",
+            "active_model",
+            "empty_state",
+            "exhibit",
+            "interval_chart",
+            "kpi_strip",
+            "load_result",
+            "page_header",
+            "render_chart",
+            "section_header",
+            "source_note",
+            "status_banner",
+            "style_fig"
+          ]
+        }
+      ],
+      "exports": [
+        "model_label_for"
+      ],
+      "totalLines": 496,
+      "hasStructuralAnalysis": true
+    },
+    "app/views/8_Error_Analysis.py": {
+      "filePath": "app/views/8_Error_Analysis.py",
+      "contentHash": "322a5d10e662658a525347792e3bb78551abd852f969247ec9fdb476bd166a16",
+      "functions": [
+        {
+          "name": "get_error_analysis",
+          "params": [
+            "model_name",
+            "data_split"
+          ],
+          "exported": true,
+          "lineCount": 59
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "html",
+          "specifiers": [
+            "html"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "joblib",
+          "specifiers": [
+            "joblib"
+          ]
+        },
+        {
+          "source": "numpy",
+          "specifiers": [
+            "np"
+          ]
+        },
+        {
+          "source": "pandas",
+          "specifiers": [
+            "pd"
+          ]
+        },
+        {
+          "source": "plotly.graph_objects",
+          "specifiers": [
+            "go"
+          ]
+        },
+        {
+          "source": "streamlit",
+          "specifiers": [
+            "st"
+          ]
+        },
+        {
+          "source": "preprocess",
+          "specifiers": [
+            "load_processed_data"
+          ]
+        },
+        {
+          "source": "utils",
+          "specifiers": [
+            "LABEL_MAP_INV",
+            "get_model_dir"
+          ]
+        },
+        {
+          "source": "shared",
+          "specifiers": [
+            "SENTIMENT_COLORS",
+            "active_model",
+            "empty_state",
+            "exhibit",
+            "kpi_strip",
+            "page_header",
+            "section_header",
+            "sentiment_tag",
+            "source_note",
+            "status_banner"
+          ]
+        }
+      ],
+      "exports": [
+        "get_error_analysis"
+      ],
+      "totalLines": 331,
+      "hasStructuralAnalysis": true
+    },
+    "app/views/9_Stock_Prediction_Extension.py": {
+      "filePath": "app/views/9_Stock_Prediction_Extension.py",
+      "contentHash": "e9db68543510c0542667dffbd9af9202e74a7b6439dae2478cc697a3b446973d",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "os",
+          "specifiers": [
+            "os"
+          ]
+        },
+        {
+          "source": "plotly.graph_objects",
+          "specifiers": [
+            "go"
+          ]
+        },
+        {
+          "source": "streamlit",
+          "specifiers": [
+            "st"
+          ]
+        },
+        {
+          "source": "plotly.subplots",
+          "specifiers": [
+            "make_subplots"
+          ]
+        },
+        {
+          "source": "shared",
+          "specifiers": [
+            "active_model",
+            "page_header",
+            "section_header",
+            "status_banner"
+          ]
+        },
+        {
+          "source": "stock_extension",
+          "specifiers": [
+            "get_stock_project_root",
+            "result_to_summary_dict",
+            "run_stock_prediction_extension"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 342,
+      "hasStructuralAnalysis": true
+    },
+    "data_manifest.toml": {
+      "filePath": "data_manifest.toml",
+      "contentHash": "75d1288b9d68e65f06f2306b4baf0936ee0e13db5e7fb6f6818586b8104250b1",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 56,
+      "hasStructuralAnalysis": false
+    },
+    "deploy/nginx.conf": {
+      "filePath": "deploy/nginx.conf",
+      "contentHash": "095cd232a12f8bc5797a81086738596a6b9eb2da3e84c39752b884baa5391ac9",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 30,
+      "hasStructuralAnalysis": false
+    },
+    "docker-compose.yml": {
+      "filePath": "docker-compose.yml",
+      "contentHash": "4d0aa4898eebd3f85da1757cc8eccaa9f17bb2f7ebb940ea3c3e1003f4ffd0c0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 55,
+      "hasStructuralAnalysis": false
+    },
+    "docs/APP_FLOW.md": {
+      "filePath": "docs/APP_FLOW.md",
+      "contentHash": "3c3f6437d724763535b57a5c75f05c3fb47395ca8d53f3f1cfb377cb8ed8b22e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 64,
+      "hasStructuralAnalysis": false
+    },
+    "docs/DESIGN.md": {
+      "filePath": "docs/DESIGN.md",
+      "contentHash": "b3fc8e61d95896fe83d8186c34cebe16dbc652b560ed2c93392558d5a336051b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 315,
+      "hasStructuralAnalysis": false
+    },
+    "docs/IMPLEMENTATION_PLAN.md": {
+      "filePath": "docs/IMPLEMENTATION_PLAN.md",
+      "contentHash": "ca1f5da7530bc51d3b9b3477ea291c63c7b9960d3257b311a7dc38afa800bd9d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 41,
+      "hasStructuralAnalysis": false
+    },
+    "docs/INTERVIEW_GUIDE.md": {
+      "filePath": "docs/INTERVIEW_GUIDE.md",
+      "contentHash": "818125bba29305bb3d6d3cc43d5a43db5645bb9e79e312b49c75aa412756f1ba",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 965,
+      "hasStructuralAnalysis": false
+    },
+    "docs/MODEL_CARD.md": {
+      "filePath": "docs/MODEL_CARD.md",
+      "contentHash": "a9e38d91b54a1ee2fafda777a2b6a9db8b4ce39427645a4a9874720cf924a7ee",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 84,
+      "hasStructuralAnalysis": false
+    },
+    "docs/PRD.md": {
+      "filePath": "docs/PRD.md",
+      "contentHash": "59598118e66d5231e2e024c053b123186f8aab3ab9c507ed54d119247dbe50b4",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 48,
+      "hasStructuralAnalysis": false
+    },
+    "docs/PRODUCTION_SETUP.md": {
+      "filePath": "docs/PRODUCTION_SETUP.md",
+      "contentHash": "620f1afbfe5b2ba69529c5c4db10cdf86fe8703ca571babdc314a3d12e432f4d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 53,
+      "hasStructuralAnalysis": false
+    },
+    "docs/README.md": {
+      "filePath": "docs/README.md",
+      "contentHash": "6cd9aefb41602e428d1031b64878377a97c1f36bc590b900c0be22fe6b919b60",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 43,
+      "hasStructuralAnalysis": false
+    },
+    "docs/RETRAINING.md": {
+      "filePath": "docs/RETRAINING.md",
+      "contentHash": "9304b0919e5d198c23b296f3927375401d5fd998f2bdf98fa67e7e4b16f696ec",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 48,
+      "hasStructuralAnalysis": false
+    },
+    "docs/RULES.md": {
+      "filePath": "docs/RULES.md",
+      "contentHash": "250bf45198f9850b223bd60ee96174e9f2d2c1eddfc242beb027765494635d29",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 43,
+      "hasStructuralAnalysis": false
+    },
+    "docs/SCHEMA.md": {
+      "filePath": "docs/SCHEMA.md",
+      "contentHash": "fe2b9c28f517d611dd5e9c623854885c6204790da62b7b8c546581c01384035a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 58,
+      "hasStructuralAnalysis": false
+    },
+    "docs/TRACKER.md": {
+      "filePath": "docs/TRACKER.md",
+      "contentHash": "468f4aa70e35324d446bdd80fbcc7684823e27bf4fa6125addea7dce57a928ab",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 79,
+      "hasStructuralAnalysis": false
+    },
+    "docs/TRD.md": {
+      "filePath": "docs/TRD.md",
+      "contentHash": "e7c253dd3327808a4a178311d33c1dc6669708006651ca0b0a5eee224ba31ee3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 50,
+      "hasStructuralAnalysis": false
+    },
+    "pyproject.toml": {
+      "filePath": "pyproject.toml",
+      "contentHash": "91264909ba9cb587fa3f16d3b9418b635e44924455f8aec6a08eec37d365ef14",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 33,
+      "hasStructuralAnalysis": false
+    },
+    "requirements-ci.txt": {
+      "filePath": "requirements-ci.txt",
+      "contentHash": "3fe0f30b8727ee520b82129c484d2f7cbdd144063281241d80a1740837164160",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 31,
+      "hasStructuralAnalysis": false
+    },
+    "requirements-deploy.txt": {
+      "filePath": "requirements-deploy.txt",
+      "contentHash": "b632b1dad5299ce79e5c8d2eb67baf0bb723a83890709f9118e8e02ee725a3e7",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 46,
+      "hasStructuralAnalysis": false
+    },
+    "requirements-full.txt": {
+      "filePath": "requirements-full.txt",
+      "contentHash": "b4a97567276e5086bec8893f43fa80a3e7f491d00d97adbf0e17eae79984267d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 90,
+      "hasStructuralAnalysis": false
+    },
+    "requirements.txt": {
+      "filePath": "requirements.txt",
+      "contentHash": "88cfb4fd618ff0ec7b85f4b1c619f8e0af19d7b2a69efceb5a3e841673ac3465",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 46,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/bootstrap_ci.py": {
+      "filePath": "scripts/bootstrap_ci.py",
+      "contentHash": "7b1976a5d032e658124146a2cb8faffceee304b4e780fd41d1f31a7357ea2c57",
+      "functions": [
+        {
+          "name": "_ci",
+          "params": [
+            "y_true",
+            "y_pred",
+            "rng"
+          ],
+          "returnType": "dict",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "_predict",
+          "params": [
+            "model",
+            "texts"
+          ],
+          "returnType": "np.ndarray",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "main",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 25
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "numpy",
+          "specifiers": [
+            "np"
+          ]
+        },
+        {
+          "source": "preprocess",
+          "specifiers": [
+            "load_processed_data"
+          ]
+        },
+        {
+          "source": "stats",
+          "specifiers": [
+            "bootstrap_macro_f1",
+            "pairs_from_confusion"
+          ]
+        },
+        {
+          "source": "utils",
+          "specifiers": [
+            "get_model_dir",
+            "get_results_dir"
+          ]
+        }
+      ],
+      "exports": [
+        "_ci",
+        "_predict",
+        "main"
+      ],
+      "totalLines": 80,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/compare_ood.py": {
+      "filePath": "scripts/compare_ood.py",
+      "contentHash": "9b6414d56744ddded95accd9e4abffbfe40cb0f9c764a7213b307d1356944d64",
+      "functions": [
+        {
+          "name": "main",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 66
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "utils",
+          "specifiers": [
+            "get_results_dir"
+          ]
+        }
+      ],
+      "exports": [
+        "main"
+      ],
+      "totalLines": 97,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/fetch_real_news_dataset.py": {
+      "filePath": "scripts/fetch_real_news_dataset.py",
+      "contentHash": "81b53aa8b3e8f805a4ffc8ea7580388adb5667f4b9948807643e8caf9fb88158",
+      "functions": [
+        {
+          "name": "main",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 33
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "pandas",
+          "specifiers": [
+            "pd"
+          ]
+        }
+      ],
+      "exports": [
+        "main"
+      ],
+      "totalLines": 77,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/finetune_finbert_news.py": {
+      "filePath": "scripts/finetune_finbert_news.py",
+      "contentHash": "83812a9940540d2b72c11ca6b92396e2c65e3b0685faf714e3007fa873dab1c7",
+      "functions": [
+        {
+          "name": "_load_news_split",
+          "params": [
+            "split",
+            "max_n"
+          ],
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "main",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 88
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "argparse",
+          "specifiers": [
+            "argparse"
+          ]
+        },
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        }
+      ],
+      "exports": [
+        "_load_news_split",
+        "main"
+      ],
+      "totalLines": 143,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/kill_streamlit.ps1": {
+      "filePath": "scripts/kill_streamlit.ps1",
+      "contentHash": "1a5d37f1c08467dd420cd2a0de21507d47cb139251026960c4288044baf31a62",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 64,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/llm_benchmark.py": {
+      "filePath": "scripts/llm_benchmark.py",
+      "contentHash": "92aff04bf9c5dcb61ffa4cfc0fcd6b4dc647544296ccfd2858874af836add0d9",
+      "functions": [
+        {
+          "name": "load_eval",
+          "params": [
+            "limit",
+            "seed"
+          ],
+          "returnType": "pd.DataFrame",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "dry_run",
+          "params": [
+            "df",
+            "modes"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 15
+        },
+        {
+          "name": "main",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 83
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "argparse",
+          "specifiers": [
+            "argparse"
+          ]
+        },
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "datetime",
+          "specifiers": [
+            "datetime",
+            "timezone"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "numpy",
+          "specifiers": [
+            "np"
+          ]
+        },
+        {
+          "source": "pandas",
+          "specifiers": [
+            "pd"
+          ]
+        },
+        {
+          "source": "sklearn.metrics",
+          "specifiers": [
+            "accuracy_score",
+            "confusion_matrix"
+          ]
+        },
+        {
+          "source": "llm_provider",
+          "specifiers": [
+            "KEY_ENV",
+            "PROVIDERS",
+            "get_provider",
+            "has_api_key"
+          ]
+        },
+        {
+          "source": "llm_sentiment",
+          "specifiers": [
+            "MODES",
+            "PROMPT_VERSION",
+            "AnswerCache",
+            "build_messages",
+            "classify",
+            "few_shot_examples",
+            "get_model_name",
+            "make_runnable",
+            "summarize_usage"
+          ]
+        },
+        {
+          "source": "stats",
+          "specifiers": [
+            "bootstrap_macro_f1"
+          ]
+        },
+        {
+          "source": "utils",
+          "specifiers": [
+            "LABEL_MAP",
+            "get_results_dir"
+          ]
+        }
+      ],
+      "exports": [
+        "load_eval",
+        "dry_run",
+        "main"
+      ],
+      "totalLines": 173,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/retrain.py": {
+      "filePath": "scripts/retrain.py",
+      "contentHash": "d67403dad0ca8a5dae5c01019394eb79b7314c4787cebf66c8bb2671ad4f1765",
+      "functions": [
+        {
+          "name": "run_step",
+          "params": [
+            "name",
+            "args"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "main",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 17
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "argparse",
+          "specifiers": [
+            "argparse"
+          ]
+        },
+        {
+          "source": "subprocess",
+          "specifiers": [
+            "subprocess"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "time",
+          "specifiers": [
+            "time"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        }
+      ],
+      "exports": [
+        "run_step",
+        "main"
+      ],
+      "totalLines": 62,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/upload_finetuned_to_hf.py": {
+      "filePath": "scripts/upload_finetuned_to_hf.py",
+      "contentHash": "8132be1f28114176bb945b4d4d235d8e75aecbb2dc1399fbe5532218c17feca5",
+      "functions": [
+        {
+          "name": "main",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 39
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "argparse",
+          "specifiers": [
+            "argparse"
+          ]
+        },
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "utils",
+          "specifiers": [
+            "LABEL_MAP_INV",
+            "get_model_dir"
+          ]
+        }
+      ],
+      "exports": [
+        "main"
+      ],
+      "totalLines": 79,
+      "hasStructuralAnalysis": true
+    },
+    "src/benchmark_finbert.py": {
+      "filePath": "src/benchmark_finbert.py",
+      "contentHash": "bda1144c6876fa4eb101fe1a29bc273f54748d68f678f0843e96560abf247c2c",
+      "functions": [
+        {
+          "name": "load_test_set",
+          "params": [],
+          "returnType": "pd.DataFrame",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "run_finbert_benchmark",
+          "params": [],
+          "returnType": "dict",
+          "exported": true,
+          "lineCount": 34
+        },
+        {
+          "name": "save_to_evaluation_results",
+          "params": [
+            "finbert_metrics"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 17
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "pandas",
+          "specifiers": [
+            "pd"
+          ]
+        },
+        {
+          "source": "sklearn.metrics",
+          "specifiers": [
+            "accuracy_score",
+            "f1_score",
+            "precision_score",
+            "recall_score"
+          ]
+        },
+        {
+          "source": "utils",
+          "specifiers": [
+            "get_project_root",
+            "get_results_dir",
+            "setup_logging"
+          ]
+        }
+      ],
+      "exports": [
+        "load_test_set",
+        "run_finbert_benchmark",
+        "save_to_evaluation_results"
+      ],
+      "totalLines": 108,
+      "hasStructuralAnalysis": true
+    },
+    "src/evaluate.py": {
+      "filePath": "src/evaluate.py",
+      "contentHash": "c4420a7652ac4d6334f30d00c752b53dd92b28dd8367448ad1954f904e0cf7a7",
+      "functions": [
+        {
+          "name": "evaluate_baseline",
+          "params": [
+            "model_name",
+            "split"
+          ],
+          "returnType": "dict",
+          "exported": true,
+          "lineCount": 28
+        },
+        {
+          "name": "evaluate_transformer",
+          "params": [
+            "model_name",
+            "split"
+          ],
+          "returnType": "dict",
+          "exported": true,
+          "lineCount": 35
+        },
+        {
+          "name": "compute_metrics",
+          "params": [
+            "y_true",
+            "y_pred",
+            "model_name"
+          ],
+          "returnType": "dict",
+          "exported": true,
+          "lineCount": 24
+        },
+        {
+          "name": "print_evaluation_report",
+          "params": [
+            "metrics"
+          ],
+          "exported": true,
+          "lineCount": 16
+        },
+        {
+          "name": "plot_confusion_matrix",
+          "params": [
+            "metrics",
+            "save_path"
+          ],
+          "exported": true,
+          "lineCount": 24
+        },
+        {
+          "name": "compare_models",
+          "params": [
+            "model_names",
+            "split"
+          ],
+          "returnType": "list",
+          "exported": true,
+          "lineCount": 59
+        },
+        {
+          "name": "error_analysis",
+          "params": [
+            "model_name",
+            "split",
+            "num_samples"
+          ],
+          "returnType": "dict",
+          "exported": true,
+          "lineCount": 90
+        },
+        {
+          "name": "save_results",
+          "params": [
+            "results",
+            "filename"
+          ],
+          "exported": true,
+          "lineCount": 18
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "joblib",
+          "specifiers": [
+            "joblib"
+          ]
+        },
+        {
+          "source": "matplotlib.pyplot",
+          "specifiers": [
+            "plt"
+          ]
+        },
+        {
+          "source": "numpy",
+          "specifiers": [
+            "np"
+          ]
+        },
+        {
+          "source": "sklearn.metrics",
+          "specifiers": [
+            "ConfusionMatrixDisplay",
+            "accuracy_score",
+            "classification_report",
+            "confusion_matrix",
+            "f1_score",
+            "precision_score",
+            "recall_score"
+          ]
+        },
+        {
+          "source": "preprocess",
+          "specifiers": [
+            "load_processed_data"
+          ]
+        },
+        {
+          "source": "utils",
+          "specifiers": [
+            "LABEL_MAP_INV",
+            "get_model_dir",
+            "get_results_dir",
+            "setup_logging"
+          ]
+        }
+      ],
+      "exports": [
+        "evaluate_baseline",
+        "evaluate_transformer",
+        "compute_metrics",
+        "print_evaluation_report",
+        "plot_confusion_matrix",
+        "compare_models",
+        "error_analysis",
+        "save_results"
+      ],
+      "totalLines": 371,
+      "hasStructuralAnalysis": true
+    },
+    "src/explain.py": {
+      "filePath": "src/explain.py",
+      "contentHash": "47288ebdd8799409b5b769e4a25970b225187fb440c29e879cac8d2e51266538",
+      "functions": [
+        {
+          "name": "get_word_importance_baseline",
+          "params": [
+            "text",
+            "model_name"
+          ],
+          "returnType": "List[Tuple[str, float, str]]",
+          "exported": true,
+          "lineCount": 83
+        },
+        {
+          "name": "explain_prediction_baseline",
+          "params": [
+            "text",
+            "model_name"
+          ],
+          "returnType": "dict",
+          "exported": true,
+          "lineCount": 68
+        },
+        {
+          "name": "highlight_text",
+          "params": [
+            "text",
+            "word_importance"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 38
+        },
+        {
+          "name": "get_feature_importance_summary",
+          "params": [
+            "model_name"
+          ],
+          "returnType": "dict",
+          "exported": true,
+          "lineCount": 33
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "re",
+          "specifiers": [
+            "re"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "List",
+            "Tuple"
+          ]
+        },
+        {
+          "source": "joblib",
+          "specifiers": [
+            "joblib"
+          ]
+        },
+        {
+          "source": "numpy",
+          "specifiers": [
+            "np"
+          ]
+        },
+        {
+          "source": "utils",
+          "specifiers": [
+            "LABEL_MAP_INV",
+            "get_model_dir",
+            "setup_logging"
+          ]
+        }
+      ],
+      "exports": [
+        "get_word_importance_baseline",
+        "explain_prediction_baseline",
+        "highlight_text",
+        "get_feature_importance_summary"
+      ],
+      "totalLines": 280,
+      "hasStructuralAnalysis": true
+    },
+    "src/finbert_pretrained.py": {
+      "filePath": "src/finbert_pretrained.py",
+      "contentHash": "4cfe28efef26e4a448f8ade20ed33756643aa9ff28f7809224cbd6b30178b189",
+      "functions": [
+        {
+          "name": "get_finbert",
+          "params": [],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "predict_with_finbert",
+          "params": [
+            "texts"
+          ],
+          "returnType": "Union[dict, List[dict]]",
+          "exported": true,
+          "lineCount": 16
+        }
+      ],
+      "classes": [
+        {
+          "name": "PretrainedFinBERT",
+          "methods": [
+            "__init__",
+            "predict"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 85
+        }
+      ],
+      "imports": [
+        {
+          "source": "typing",
+          "specifiers": [
+            "List",
+            "Union"
+          ]
+        },
+        {
+          "source": "numpy",
+          "specifiers": [
+            "np"
+          ]
+        },
+        {
+          "source": "torch",
+          "specifiers": [
+            "torch"
+          ]
+        },
+        {
+          "source": "transformers",
+          "specifiers": [
+            "AutoModelForSequenceClassification",
+            "AutoTokenizer"
+          ]
+        },
+        {
+          "source": "utils",
+          "specifiers": [
+            "setup_logging"
+          ]
+        }
+      ],
+      "exports": [
+        "PretrainedFinBERT",
+        "get_finbert",
+        "predict_with_finbert"
+      ],
+      "totalLines": 150,
+      "hasStructuralAnalysis": true
+    },
+    "src/integrate_news.py": {
+      "filePath": "src/integrate_news.py",
+      "contentHash": "c5068f093791f8dbc076b80f9635ff648192692c0f4294cdeb2b75e6bf756ab0",
+      "functions": [
+        {
+          "name": "load_news_headlines",
+          "params": [],
+          "returnType": "pd.DataFrame",
+          "exported": true,
+          "lineCount": 20
+        },
+        {
+          "name": "load_stock_data",
+          "params": [],
+          "returnType": "pd.DataFrame",
+          "exported": true,
+          "lineCount": 15
+        },
+        {
+          "name": "predict_news_sentiment",
+          "params": [
+            "model_name"
+          ],
+          "returnType": "pd.DataFrame",
+          "exported": true,
+          "lineCount": 45
+        },
+        {
+          "name": "compute_daily_sentiment",
+          "params": [
+            "news_df"
+          ],
+          "returnType": "pd.DataFrame",
+          "exported": true,
+          "lineCount": 30
+        },
+        {
+          "name": "compute_sentiment_stock_correlation",
+          "params": [
+            "model_name"
+          ],
+          "returnType": "dict",
+          "exported": true,
+          "lineCount": 78
+        },
+        {
+          "name": "run_cross_dataset_evaluation",
+          "params": [
+            "model_name"
+          ],
+          "returnType": "dict",
+          "exported": true,
+          "lineCount": 54
+        },
+        {
+          "name": "get_sentiment_trends",
+          "params": [
+            "model_name",
+            "ticker"
+          ],
+          "returnType": "pd.DataFrame",
+          "exported": true,
+          "lineCount": 49
+        },
+        {
+          "name": "evaluate_generalization",
+          "params": [
+            "model_name"
+          ],
+          "returnType": "dict",
+          "exported": true,
+          "lineCount": 84
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Optional"
+          ]
+        },
+        {
+          "source": "joblib",
+          "specifiers": [
+            "joblib"
+          ]
+        },
+        {
+          "source": "numpy",
+          "specifiers": [
+            "np"
+          ]
+        },
+        {
+          "source": "pandas",
+          "specifiers": [
+            "pd"
+          ]
+        },
+        {
+          "source": "utils",
+          "specifiers": [
+            "LABEL_MAP_INV",
+            "get_model_dir",
+            "get_project_root",
+            "get_results_dir",
+            "setup_logging"
+          ]
+        }
+      ],
+      "exports": [
+        "load_news_headlines",
+        "load_stock_data",
+        "predict_news_sentiment",
+        "compute_daily_sentiment",
+        "compute_sentiment_stock_correlation",
+        "run_cross_dataset_evaluation",
+        "get_sentiment_trends",
+        "evaluate_generalization"
+      ],
+      "totalLines": 465,
+      "hasStructuralAnalysis": true
+    },
+    "src/lexicons.py": {
+      "filePath": "src/lexicons.py",
+      "contentHash": "dc28529ad06965ecaa2f4ab140b55b0627ee9fb729f2d6bcc9ca08094bfd0601",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1567,
+      "hasStructuralAnalysis": true
+    },
+    "src/llm_enhanced.py": {
+      "filePath": "src/llm_enhanced.py",
+      "contentHash": "395588c971fd1dc6ff036011c30be08edd755c2039a13618b3293318e5f12110",
+      "functions": [
+        {
+          "name": "generate_elite_market_outlook",
+          "params": [
+            "texts",
+            "predictions",
+            "confidences",
+            "include_reasoning"
+          ],
+          "returnType": "Dict[str, Any]",
+          "exported": true,
+          "lineCount": 92
+        },
+        {
+          "name": "_generate_outlook_narrative",
+          "params": [
+            "trend",
+            "pos",
+            "neg",
+            "neu",
+            "total",
+            "confidence"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 58
+        },
+        {
+          "name": "generate_explanation_template",
+          "params": [
+            "text",
+            "prediction",
+            "confidence",
+            "positive_words",
+            "negative_words",
+            "neutral_words"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 14
+        },
+        {
+          "name": "generate_market_outlook",
+          "params": [
+            "sentiment_counts",
+            "total_texts",
+            "avg_confidence",
+            "sample_texts"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 17
+        },
+        {
+          "name": "get_llm_explanation",
+          "params": [
+            "text",
+            "prediction",
+            "probabilities",
+            "word_importance",
+            "use_api",
+            "api_key"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 12
+        }
+      ],
+      "classes": [
+        {
+          "name": "ReasoningStep",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "ThoughtStep",
+          "methods": [
+            "to_dict"
+          ],
+          "properties": [
+            "step",
+            "observation",
+            "reasoning",
+            "conclusion",
+            "confidence"
+          ],
+          "exported": true,
+          "lineCount": 17
+        },
+        {
+          "name": "ChainOfThought",
+          "methods": [
+            "to_dict",
+            "get_reasoning_trace"
+          ],
+          "properties": [
+            "text",
+            "steps",
+            "final_sentiment",
+            "final_confidence",
+            "explanation",
+            "key_factors"
+          ],
+          "exported": true,
+          "lineCount": 30
+        },
+        {
+          "name": "ChainOfThoughtReasoner",
+          "methods": [
+            "__init__",
+            "analyze",
+            "_step_comprehension",
+            "_step_entity_extraction",
+            "_step_sentiment_detection",
+            "_step_context_analysis",
+            "_step_confidence_calibration",
+            "_step_final_synthesis",
+            "_generate_explanation",
+            "_extract_key_factors"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 423
+        },
+        {
+          "name": "EliteExplanationGenerator",
+          "methods": [
+            "__init__",
+            "generate_comprehensive_explanation",
+            "_generate_summary",
+            "_explain_confidence",
+            "generate_quick_explanation"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 127
+        }
+      ],
+      "imports": [
+        {
+          "source": "re",
+          "specifiers": [
+            "re"
+          ]
+        },
+        {
+          "source": "dataclasses",
+          "specifiers": [
+            "dataclass",
+            "field"
+          ]
+        },
+        {
+          "source": "enum",
+          "specifiers": [
+            "Enum"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Any",
+            "Dict",
+            "List",
+            "Optional",
+            "Tuple"
+          ]
+        }
+      ],
+      "exports": [
+        "ReasoningStep",
+        "ThoughtStep",
+        "ChainOfThought",
+        "ChainOfThoughtReasoner",
+        "EliteExplanationGenerator",
+        "generate_elite_market_outlook",
+        "_generate_outlook_narrative",
+        "generate_explanation_template",
+        "generate_market_outlook",
+        "get_llm_explanation"
+      ],
+      "totalLines": 915,
+      "hasStructuralAnalysis": true
+    },
+    "src/llm_explain.py": {
+      "filePath": "src/llm_explain.py",
+      "contentHash": "9d16adc2f958fb61bdaeb4fdb09adfca722a565888deaa7e36fa6081e68d8283",
+      "functions": [
+        {
+          "name": "generate_explanation_template",
+          "params": [
+            "text",
+            "prediction",
+            "confidence",
+            "positive_words",
+            "negative_words",
+            "neutral_words"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 85
+        },
+        {
+          "name": "generate_market_outlook",
+          "params": [
+            "sentiment_counts",
+            "total_texts",
+            "avg_confidence",
+            "sample_texts"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 109
+        },
+        {
+          "name": "get_llm_explanation",
+          "params": [
+            "text",
+            "prediction",
+            "probabilities",
+            "word_importance",
+            "use_api",
+            "api_key"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 39
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "typing",
+          "specifiers": [
+            "Dict",
+            "List",
+            "Optional",
+            "Tuple"
+          ]
+        }
+      ],
+      "exports": [
+        "generate_explanation_template",
+        "generate_market_outlook",
+        "get_llm_explanation"
+      ],
+      "totalLines": 273,
+      "hasStructuralAnalysis": true
+    },
+    "src/llm_provider.py": {
+      "filePath": "src/llm_provider.py",
+      "contentHash": "4fc8ae531fc543a5df7d4a8fb39bffb2eb73b2a1c07be6130dd0beb2c7371a46",
+      "functions": [
+        {
+          "name": "get_provider",
+          "params": [
+            "provider"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "get_model_name",
+          "params": [
+            "model",
+            "provider"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "get_temperature",
+          "params": [
+            "default"
+          ],
+          "returnType": "float | None",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "has_api_key",
+          "params": [
+            "provider"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "make_chat_model",
+          "params": [
+            "model",
+            "provider",
+            "timeout",
+            "max_retries",
+            "max_tokens"
+          ],
+          "exported": true,
+          "lineCount": 27
+        },
+        {
+          "name": "with_structured_output",
+          "params": [
+            "llm",
+            "schema",
+            "provider",
+            "include_raw"
+          ],
+          "exported": true,
+          "lineCount": 10
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "os",
+          "specifiers": [
+            "os"
+          ]
+        }
+      ],
+      "exports": [
+        "get_provider",
+        "get_model_name",
+        "get_temperature",
+        "has_api_key",
+        "make_chat_model",
+        "with_structured_output"
+      ],
+      "totalLines": 100,
+      "hasStructuralAnalysis": true
+    },
+    "src/llm_sentiment.py": {
+      "filePath": "src/llm_sentiment.py",
+      "contentHash": "5d50d983f64d0af9a46fe79ce303aa12cbb7d847d76e2b5db7075fef07256aa7",
+      "functions": [
+        {
+          "name": "few_shot_examples",
+          "params": [
+            "per_class",
+            "seed"
+          ],
+          "returnType": "list[tuple[str, str]]",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "build_messages",
+          "params": [
+            "text",
+            "mode",
+            "examples"
+          ],
+          "returnType": "list[tuple[str, str]]",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "make_runnable",
+          "params": [
+            "model",
+            "provider",
+            "timeout",
+            "max_retries"
+          ],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "_cache_key",
+          "params": [
+            "model",
+            "mode",
+            "text"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "_call_one",
+          "params": [
+            "runnable",
+            "messages"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 19
+        },
+        {
+          "name": "classify",
+          "params": [
+            "texts",
+            "runnable",
+            "model",
+            "mode",
+            "cache",
+            "max_concurrency",
+            "examples"
+          ],
+          "returnType": "list[dict[str, Any]]",
+          "exported": true,
+          "lineCount": 36
+        },
+        {
+          "name": "summarize_usage",
+          "params": [
+            "records",
+            "price_in",
+            "price_out"
+          ],
+          "returnType": "dict",
+          "exported": true,
+          "lineCount": 30
+        }
+      ],
+      "classes": [
+        {
+          "name": "SentimentLabel",
+          "methods": [],
+          "properties": [
+            "label"
+          ],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "AnswerCache",
+          "methods": [
+            "__init__",
+            "get",
+            "put"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 23
+        }
+      ],
+      "imports": [
+        {
+          "source": "hashlib",
+          "specifiers": [
+            "hashlib"
+          ]
+        },
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "time",
+          "specifiers": [
+            "time"
+          ]
+        },
+        {
+          "source": "concurrent.futures",
+          "specifiers": [
+            "ThreadPoolExecutor"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Any",
+            "Literal"
+          ]
+        },
+        {
+          "source": "pydantic",
+          "specifiers": [
+            "BaseModel",
+            "Field"
+          ]
+        },
+        {
+          "source": "llm_provider",
+          "specifiers": [
+            "get_model_name",
+            "make_chat_model",
+            "with_structured_output"
+          ]
+        },
+        {
+          "source": "utils",
+          "specifiers": [
+            "LABEL_MAP",
+            "get_project_root"
+          ]
+        }
+      ],
+      "exports": [
+        "SentimentLabel",
+        "few_shot_examples",
+        "build_messages",
+        "make_runnable",
+        "_cache_key",
+        "AnswerCache",
+        "_call_one",
+        "classify",
+        "summarize_usage"
+      ],
+      "totalLines": 207,
+      "hasStructuralAnalysis": true
+    },
+    "src/model.py": {
+      "filePath": "src/model.py",
+      "contentHash": "cc91ca000a9c46cc8fce028b1608e50949f7d06387fc2e74a30795c1212e5266",
+      "functions": [
+        {
+          "name": "train_transformer",
+          "params": [
+            "model_name",
+            "epochs",
+            "batch_size",
+            "learning_rate",
+            "save"
+          ],
+          "returnType": "dict",
+          "exported": true,
+          "lineCount": 63
+        }
+      ],
+      "classes": [
+        {
+          "name": "SentimentDataset",
+          "methods": [
+            "__init__",
+            "__len__",
+            "__getitem__"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 29
+        },
+        {
+          "name": "FinancialSentimentModel",
+          "methods": [
+            "__init__",
+            "create_dataloader",
+            "train",
+            "evaluate",
+            "predict",
+            "predict_single",
+            "save",
+            "load"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 280
+        }
+      ],
+      "imports": [
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "numpy",
+          "specifiers": [
+            "np"
+          ]
+        },
+        {
+          "source": "torch",
+          "specifiers": [
+            "torch"
+          ]
+        },
+        {
+          "source": "sklearn.metrics",
+          "specifiers": [
+            "accuracy_score",
+            "classification_report",
+            "f1_score"
+          ]
+        },
+        {
+          "source": "torch.utils.data",
+          "specifiers": [
+            "DataLoader",
+            "Dataset"
+          ]
+        },
+        {
+          "source": "tqdm",
+          "specifiers": [
+            "tqdm"
+          ]
+        },
+        {
+          "source": "transformers",
+          "specifiers": [
+            "AutoModelForSequenceClassification",
+            "AutoTokenizer",
+            "get_linear_schedule_with_warmup"
+          ]
+        },
+        {
+          "source": "utils",
+          "specifiers": [
+            "LABEL_MAP_INV",
+            "get_project_root",
+            "setup_logging"
+          ]
+        }
+      ],
+      "exports": [
+        "SentimentDataset",
+        "FinancialSentimentModel",
+        "train_transformer"
+      ],
+      "totalLines": 414,
+      "hasStructuralAnalysis": true
+    },
+    "src/monitoring.py": {
+      "filePath": "src/monitoring.py",
+      "contentHash": "bd0112f2c17348152c79aee534afbb9d7b8c7baad1ce5f849cf6d0a60eafb1aa",
+      "functions": [
+        {
+          "name": "_now_iso",
+          "params": [],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "log_event",
+          "params": [
+            "event"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 9
+        }
+      ],
+      "classes": [
+        {
+          "name": "MetricsRegistry",
+          "methods": [
+            "__init__",
+            "incr",
+            "observe_latency",
+            "snapshot"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 39
+        }
+      ],
+      "imports": [
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "logging",
+          "specifiers": [
+            "logging"
+          ]
+        },
+        {
+          "source": "threading",
+          "specifiers": [
+            "threading"
+          ]
+        },
+        {
+          "source": "time",
+          "specifiers": [
+            "time"
+          ]
+        },
+        {
+          "source": "collections",
+          "specifiers": [
+            "deque"
+          ]
+        },
+        {
+          "source": "datetime",
+          "specifiers": [
+            "datetime",
+            "timezone"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Any",
+            "Deque",
+            "Dict",
+            "Optional"
+          ]
+        }
+      ],
+      "exports": [
+        "_now_iso",
+        "log_event",
+        "MetricsRegistry"
+      ],
+      "totalLines": 98,
+      "hasStructuralAnalysis": true
+    },
+    "src/nlp_advanced.py": {
+      "filePath": "src/nlp_advanced.py",
+      "contentHash": "968622fee3874082cdbdbc6348075780286298d2216a414669b8ed0336365d62",
+      "functions": [
+        {
+          "name": "analyze_financial_text",
+          "params": [
+            "text"
+          ],
+          "returnType": "Dict[str, Any]",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "extract_financial_features",
+          "params": [
+            "text"
+          ],
+          "returnType": "TextFeatures",
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "get_lexicon_sentiment",
+          "params": [
+            "text"
+          ],
+          "returnType": "Dict[str, Any]",
+          "exported": true,
+          "lineCount": 21
+        }
+      ],
+      "classes": [
+        {
+          "name": "TextFeatures",
+          "methods": [
+            "to_dict"
+          ],
+          "properties": [
+            "word_count",
+            "char_count",
+            "sentence_count",
+            "avg_word_length",
+            "positive_word_count",
+            "negative_word_count",
+            "uncertainty_word_count",
+            "litigious_word_count",
+            "positive_words",
+            "negative_words",
+            "uncertainty_words",
+            "percentages",
+            "currencies",
+            "numbers",
+            "companies",
+            "sentiment_score",
+            "uncertainty_score",
+            "subjectivity_score",
+            "has_negation",
+            "negation_count",
+            "exclamation_count",
+            "question_count"
+          ],
+          "exported": true,
+          "lineCount": 59
+        },
+        {
+          "name": "ProcessedText",
+          "methods": [
+            "to_dict"
+          ],
+          "properties": [
+            "original",
+            "cleaned",
+            "normalized",
+            "tokens",
+            "features"
+          ],
+          "exported": true,
+          "lineCount": 18
+        },
+        {
+          "name": "AdvancedTextProcessor",
+          "methods": [
+            "__init__",
+            "process",
+            "_clean_text",
+            "_normalize_text",
+            "_tokenize",
+            "_extract_features",
+            "get_sentiment_explanation"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 370
+        },
+        {
+          "name": "FinancialTextAnalyzer",
+          "methods": [
+            "__init__",
+            "analyze",
+            "_calculate_confidence",
+            "batch_analyze",
+            "get_aggregate_sentiment"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 125
+        }
+      ],
+      "imports": [
+        {
+          "source": "re",
+          "specifiers": [
+            "re"
+          ]
+        },
+        {
+          "source": "string",
+          "specifiers": [
+            "string"
+          ]
+        },
+        {
+          "source": "collections",
+          "specifiers": [
+            "Counter"
+          ]
+        },
+        {
+          "source": "dataclasses",
+          "specifiers": [
+            "dataclass",
+            "field"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Any",
+            "Dict",
+            "List"
+          ]
+        },
+        {
+          "source": "numpy",
+          "specifiers": [
+            "np"
+          ]
+        },
+        {
+          "source": "lexicons",
+          "specifiers": [
+            "FINANCIAL_LITIGIOUS",
+            "FINANCIAL_NEGATIVE",
+            "FINANCIAL_POSITIVE",
+            "FINANCIAL_UNCERTAINTY"
+          ]
+        }
+      ],
+      "exports": [
+        "TextFeatures",
+        "ProcessedText",
+        "AdvancedTextProcessor",
+        "FinancialTextAnalyzer",
+        "analyze_financial_text",
+        "extract_financial_features",
+        "get_lexicon_sentiment"
+      ],
+      "totalLines": 721,
+      "hasStructuralAnalysis": true
+    },
+    "src/predict.py": {
+      "filePath": "src/predict.py",
+      "contentHash": "d320d592872275b4dbd44c33972659d3ab767582052d674fb3bc659f4f62e531",
+      "functions": [
+        {
+          "name": "_finetuned_hf_repo",
+          "params": [
+            "model_type"
+          ],
+          "returnType": "str | None",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "_has_usable_local_weights",
+          "params": [
+            "model_path"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 17
+        },
+        {
+          "name": "predict_single",
+          "params": [
+            "text",
+            "model_type"
+          ],
+          "returnType": "dict",
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "predict_batch",
+          "params": [
+            "texts",
+            "model_type"
+          ],
+          "returnType": "List[dict]",
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "get_available_models",
+          "params": [],
+          "returnType": "List[str]",
+          "exported": true,
+          "lineCount": 23
+        }
+      ],
+      "classes": [
+        {
+          "name": "SentimentPredictor",
+          "methods": [
+            "__init__",
+            "_load_model",
+            "predict",
+            "_predict_batch",
+            "_predict_baseline",
+            "_predict_ensemble",
+            "_predict_transformer",
+            "predict_file"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 204
+        }
+      ],
+      "imports": [
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "List",
+            "Union"
+          ]
+        },
+        {
+          "source": "joblib",
+          "specifiers": [
+            "joblib"
+          ]
+        },
+        {
+          "source": "numpy",
+          "specifiers": [
+            "np"
+          ]
+        },
+        {
+          "source": "pandas",
+          "specifiers": [
+            "pd"
+          ]
+        },
+        {
+          "source": "utils",
+          "specifiers": [
+            "LABEL_MAP_INV",
+            "get_model_dir",
+            "setup_logging"
+          ]
+        }
+      ],
+      "exports": [
+        "_finetuned_hf_repo",
+        "_has_usable_local_weights",
+        "SentimentPredictor",
+        "predict_single",
+        "predict_batch",
+        "get_available_models"
+      ],
+      "totalLines": 368,
+      "hasStructuralAnalysis": true
+    },
+    "src/preprocess.py": {
+      "filePath": "src/preprocess.py",
+      "contentHash": "a13870bc573abe4dc98c4d050089c4b3a550470bacf7acaa2971746682ccdf9c",
+      "functions": [
+        {
+          "name": "load_raw_data",
+          "params": [
+            "agreement_level"
+          ],
+          "returnType": "pd.DataFrame",
+          "exported": true,
+          "lineCount": 28
+        },
+        {
+          "name": "load_processed_data",
+          "params": [
+            "split"
+          ],
+          "returnType": "pd.DataFrame",
+          "exported": true,
+          "lineCount": 17
+        },
+        {
+          "name": "clean_text",
+          "params": [
+            "text"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 20
+        },
+        {
+          "name": "preprocess_dataframe",
+          "params": [
+            "df",
+            "clean"
+          ],
+          "returnType": "pd.DataFrame",
+          "exported": true,
+          "lineCount": 27
+        },
+        {
+          "name": "create_splits",
+          "params": [
+            "df",
+            "test_size",
+            "val_size",
+            "random_state"
+          ],
+          "returnType": "tuple",
+          "exported": true,
+          "lineCount": 31
+        },
+        {
+          "name": "save_processed_data",
+          "params": [
+            "train_df",
+            "val_df",
+            "test_df"
+          ],
+          "exported": true,
+          "lineCount": 14
+        },
+        {
+          "name": "prepare_data",
+          "params": [
+            "clean",
+            "save"
+          ],
+          "returnType": "tuple",
+          "exported": true,
+          "lineCount": 27
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "re",
+          "specifiers": [
+            "re"
+          ]
+        },
+        {
+          "source": "pandas",
+          "specifiers": [
+            "pd"
+          ]
+        },
+        {
+          "source": "sklearn.model_selection",
+          "specifiers": [
+            "train_test_split"
+          ]
+        },
+        {
+          "source": "utils",
+          "specifiers": [
+            "LABEL_MAP",
+            "get_project_root",
+            "setup_logging"
+          ]
+        }
+      ],
+      "exports": [
+        "load_raw_data",
+        "load_processed_data",
+        "clean_text",
+        "preprocess_dataframe",
+        "create_splits",
+        "save_processed_data",
+        "prepare_data"
+      ],
+      "totalLines": 197,
+      "hasStructuralAnalysis": true
+    },
+    "src/rag_news.py": {
+      "filePath": "src/rag_news.py",
+      "contentHash": "f103b478b2932b60fcd8dba459630c4b8ec8d065c783eeea64c4ed03fc473996",
+      "functions": [
+        {
+          "name": "get_embedding_kind",
+          "params": [
+            "kind"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "get_embedding_model",
+          "params": [
+            "model",
+            "kind"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "load_corpus",
+          "params": [
+            "path"
+          ],
+          "returnType": "pd.DataFrame",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "_index_path",
+          "params": [
+            "embedding_model",
+            "corpus",
+            "cache_dir"
+          ],
+          "returnType": "Path",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "build_index",
+          "params": [
+            "embeddings",
+            "corpus",
+            "embedding_model",
+            "cache_dir"
+          ],
+          "exported": true,
+          "lineCount": 20
+        },
+        {
+          "name": "retrieve",
+          "params": [
+            "store",
+            "question",
+            "k"
+          ],
+          "returnType": "list[dict[str, Any]]",
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "build_messages",
+          "params": [
+            "question",
+            "sources"
+          ],
+          "returnType": "list[tuple[str, str]]",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "make_answer_runnable",
+          "params": [
+            "model",
+            "provider",
+            "timeout"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "make_embeddings",
+          "params": [
+            "model",
+            "kind",
+            "corpus"
+          ],
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "answer_question",
+          "params": [
+            "question",
+            "sources",
+            "runnable"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 19
+        },
+        {
+          "name": "sentiment_mix",
+          "params": [
+            "labels"
+          ],
+          "returnType": "dict[str, float]",
+          "exported": true,
+          "lineCount": 4
+        }
+      ],
+      "classes": [
+        {
+          "name": "NewsAnswer",
+          "methods": [],
+          "properties": [
+            "answer",
+            "citations"
+          ],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "LocalLSAEmbeddings",
+          "methods": [
+            "__init__",
+            "_embed",
+            "embed_documents",
+            "embed_query",
+            "aembed_documents",
+            "aembed_query"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 39
+        }
+      ],
+      "imports": [
+        {
+          "source": "hashlib",
+          "specifiers": [
+            "hashlib"
+          ]
+        },
+        {
+          "source": "os",
+          "specifiers": [
+            "os"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Any"
+          ]
+        },
+        {
+          "source": "numpy",
+          "specifiers": [
+            "np"
+          ]
+        },
+        {
+          "source": "pandas",
+          "specifiers": [
+            "pd"
+          ]
+        },
+        {
+          "source": "pydantic",
+          "specifiers": [
+            "BaseModel",
+            "Field"
+          ]
+        },
+        {
+          "source": "llm_provider",
+          "specifiers": [
+            "make_chat_model",
+            "with_structured_output"
+          ]
+        },
+        {
+          "source": "utils",
+          "specifiers": [
+            "get_project_root"
+          ]
+        }
+      ],
+      "exports": [
+        "NewsAnswer",
+        "get_embedding_kind",
+        "get_embedding_model",
+        "LocalLSAEmbeddings",
+        "load_corpus",
+        "_index_path",
+        "build_index",
+        "retrieve",
+        "build_messages",
+        "make_answer_runnable",
+        "make_embeddings",
+        "answer_question",
+        "sentiment_mix"
+      ],
+      "totalLines": 217,
+      "hasStructuralAnalysis": true
+    },
+    "src/registry.py": {
+      "filePath": "src/registry.py",
+      "contentHash": "ee5ddd365d5ca6bb22c55e89c62db64627db83ffed963660b9c4170cbd30e861",
+      "functions": [
+        {
+          "name": "_hash_file",
+          "params": [
+            "path"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "_load_eval_metrics",
+          "params": [],
+          "returnType": "Dict[str, Dict[str, Any]]",
+          "exported": true,
+          "lineCount": 20
+        },
+        {
+          "name": "_discover_artifacts",
+          "params": [],
+          "returnType": "List[Path]",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "build_registry",
+          "params": [],
+          "returnType": "Dict[str, Any]",
+          "exported": true,
+          "lineCount": 22
+        },
+        {
+          "name": "update_registry",
+          "params": [],
+          "returnType": "Dict[str, Any]",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "log_to_mlflow",
+          "params": [
+            "registry"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 19
+        },
+        {
+          "name": "main",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 19
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "argparse",
+          "specifiers": [
+            "argparse"
+          ]
+        },
+        {
+          "source": "hashlib",
+          "specifiers": [
+            "hashlib"
+          ]
+        },
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "datetime",
+          "specifiers": [
+            "datetime",
+            "timezone"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Any",
+            "Dict",
+            "List"
+          ]
+        },
+        {
+          "source": "utils",
+          "specifiers": [
+            "get_model_dir",
+            "get_project_root",
+            "get_results_dir",
+            "setup_logging"
+          ]
+        }
+      ],
+      "exports": [
+        "_hash_file",
+        "_load_eval_metrics",
+        "_discover_artifacts",
+        "build_registry",
+        "update_registry",
+        "log_to_mlflow",
+        "main"
+      ],
+      "totalLines": 152,
+      "hasStructuralAnalysis": true
+    },
+    "src/shap_explain.py": {
+      "filePath": "src/shap_explain.py",
+      "contentHash": "9ce5ea1103e78f94aa30698297bd24ec49774f1ae29e65213d1051df22a2367f",
+      "functions": [
+        {
+          "name": "get_shap_explanation",
+          "params": [
+            "model_name",
+            "split",
+            "max_samples"
+          ],
+          "returnType": "dict",
+          "exported": true,
+          "lineCount": 148
+        },
+        {
+          "name": "save_shap_results",
+          "params": [
+            "model_name",
+            "split"
+          ],
+          "returnType": "dict",
+          "exported": true,
+          "lineCount": 22
+        },
+        {
+          "name": "generate_shap_plot",
+          "params": [
+            "model_name",
+            "split",
+            "save"
+          ],
+          "exported": true,
+          "lineCount": 59
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "joblib",
+          "specifiers": [
+            "joblib"
+          ]
+        },
+        {
+          "source": "numpy",
+          "specifiers": [
+            "np"
+          ]
+        },
+        {
+          "source": "preprocess",
+          "specifiers": [
+            "load_processed_data"
+          ]
+        },
+        {
+          "source": "utils",
+          "specifiers": [
+            "LABEL_MAP_INV",
+            "get_model_dir",
+            "get_results_dir",
+            "setup_logging"
+          ]
+        }
+      ],
+      "exports": [
+        "get_shap_explanation",
+        "save_shap_results",
+        "generate_shap_plot"
+      ],
+      "totalLines": 279,
+      "hasStructuralAnalysis": true
+    },
+    "src/stats.py": {
+      "filePath": "src/stats.py",
+      "contentHash": "8d342a3556a796a8dec1080a746e0684fd5f4ab4cbf8e8b6c8cf1b9abfde16c4",
+      "functions": [
+        {
+          "name": "macro_f1",
+          "params": [
+            "y_true",
+            "y_pred"
+          ],
+          "returnType": "float",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "bootstrap_macro_f1",
+          "params": [
+            "y_true",
+            "y_pred",
+            "n_boot",
+            "seed",
+            "confidence",
+            "rng"
+          ],
+          "returnType": "dict",
+          "exported": true,
+          "lineCount": 27
+        },
+        {
+          "name": "pairs_from_confusion",
+          "params": [
+            "cm"
+          ],
+          "returnType": "tuple[np.ndarray, np.ndarray]",
+          "exported": true,
+          "lineCount": 8
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "numpy",
+          "specifiers": [
+            "np"
+          ]
+        },
+        {
+          "source": "sklearn.metrics",
+          "specifiers": [
+            "f1_score"
+          ]
+        }
+      ],
+      "exports": [
+        "macro_f1",
+        "bootstrap_macro_f1",
+        "pairs_from_confusion"
+      ],
+      "totalLines": 59,
+      "hasStructuralAnalysis": true
+    },
+    "src/stock_extension.py": {
+      "filePath": "src/stock_extension.py",
+      "contentHash": "a06e2fa2e7f39d03795986c02843b93fa9548d55c9c2c2b9318262c39d14e5d2",
+      "functions": [
+        {
+          "name": "get_stock_project_root",
+          "params": [],
+          "returnType": "Path",
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "get_lstm_model_path",
+          "params": [
+            "ticker"
+          ],
+          "returnType": "Path",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "_save_trained_model",
+          "params": [
+            "training_result",
+            "ticker"
+          ],
+          "returnType": "Optional[str]",
+          "exported": true,
+          "lineCount": 23
+        },
+        {
+          "name": "_ensure_stock_project_import_path",
+          "params": [],
+          "returnType": "Path",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "_load_stock_components",
+          "params": [],
+          "returnType": "Dict[str, Any]",
+          "exported": true,
+          "lineCount": 28
+        },
+        {
+          "name": "_normalize_price_dataframe",
+          "params": [
+            "df"
+          ],
+          "returnType": "pd.DataFrame",
+          "exported": true,
+          "lineCount": 18
+        },
+        {
+          "name": "_filter_news_by_range",
+          "params": [
+            "news_df",
+            "start_date",
+            "end_date"
+          ],
+          "returnType": "pd.DataFrame",
+          "exported": true,
+          "lineCount": 16
+        },
+        {
+          "name": "_build_neutral_daily_sentiment",
+          "params": [
+            "prices"
+          ],
+          "returnType": "pd.DataFrame",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "_get_sample_news_fallback",
+          "params": [
+            "components",
+            "ticker",
+            "start_date",
+            "end_date"
+          ],
+          "returnType": "tuple[pd.DataFrame, str]",
+          "exported": true,
+          "lineCount": 49
+        },
+        {
+          "name": "_align_sentiment_to_prices",
+          "params": [
+            "daily_sentiment",
+            "prices"
+          ],
+          "returnType": "pd.DataFrame",
+          "exported": true,
+          "lineCount": 50
+        },
+        {
+          "name": "_compute_sentiment_coverage",
+          "params": [
+            "supervised"
+          ],
+          "returnType": "tuple[int, float, float]",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "run_stock_prediction_extension",
+          "params": [
+            "ticker",
+            "start_date",
+            "end_date",
+            "days_back",
+            "epochs",
+            "seq_len",
+            "use_live_news",
+            "fallback_to_sample_news",
+            "save_model"
+          ],
+          "returnType": "StockPredictionExtensionResult",
+          "exported": true,
+          "lineCount": 155
+        },
+        {
+          "name": "result_to_summary_dict",
+          "params": [
+            "result"
+          ],
+          "returnType": "Dict[str, Any]",
+          "exported": true,
+          "lineCount": 19
+        },
+        {
+          "name": "_build_arg_parser",
+          "params": [],
+          "returnType": "argparse.ArgumentParser",
+          "exported": true,
+          "lineCount": 14
+        }
+      ],
+      "classes": [
+        {
+          "name": "StockPredictionExtensionResult",
+          "methods": [],
+          "properties": [
+            "ticker",
+            "start_date",
+            "end_date",
+            "news_source",
+            "prediction_label",
+            "prediction_direction",
+            "probability_up",
+            "num_price_rows",
+            "num_news_rows",
+            "num_supervised_rows",
+            "prices",
+            "daily_sentiment",
+            "supervised",
+            "headlines",
+            "num_nonzero_sentiment_rows",
+            "daily_sentiment_min",
+            "daily_sentiment_max",
+            "model_path",
+            "test_accuracy"
+          ],
+          "exported": true,
+          "lineCount": 22
+        }
+      ],
+      "imports": [
+        {
+          "source": "argparse",
+          "specifiers": [
+            "argparse"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "dataclasses",
+          "specifiers": [
+            "dataclass"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Any",
+            "Dict",
+            "Optional"
+          ]
+        },
+        {
+          "source": "pandas",
+          "specifiers": [
+            "pd"
+          ]
+        },
+        {
+          "source": "utils",
+          "specifiers": [
+            "get_model_dir",
+            "get_project_root",
+            "setup_logging"
+          ]
+        }
+      ],
+      "exports": [
+        "StockPredictionExtensionResult",
+        "get_stock_project_root",
+        "get_lstm_model_path",
+        "_save_trained_model",
+        "_ensure_stock_project_import_path",
+        "_load_stock_components",
+        "_normalize_price_dataframe",
+        "_filter_news_by_range",
+        "_build_neutral_daily_sentiment",
+        "_get_sample_news_fallback",
+        "_align_sentiment_to_prices",
+        "_compute_sentiment_coverage",
+        "run_stock_prediction_extension",
+        "result_to_summary_dict",
+        "_build_arg_parser"
+      ],
+      "totalLines": 516,
+      "hasStructuralAnalysis": true
+    },
+    "src/train.py": {
+      "filePath": "src/train.py",
+      "contentHash": "d3949803849c42af6c89b9dbff52c5bf493d85dc3834ae3483d540dface22008",
+      "functions": [
+        {
+          "name": "create_baseline_pipeline",
+          "params": [
+            "classifier_name"
+          ],
+          "returnType": "Pipeline",
+          "exported": true,
+          "lineCount": 45
+        },
+        {
+          "name": "train_baseline",
+          "params": [
+            "classifier_name",
+            "save"
+          ],
+          "returnType": "dict",
+          "exported": true,
+          "lineCount": 63
+        },
+        {
+          "name": "train_all_baselines",
+          "params": [],
+          "returnType": "list",
+          "exported": true,
+          "lineCount": 28
+        },
+        {
+          "name": "train_ensemble",
+          "params": [
+            "save"
+          ],
+          "returnType": "dict",
+          "exported": true,
+          "lineCount": 89
+        },
+        {
+          "name": "load_model",
+          "params": [
+            "model_name"
+          ],
+          "exported": true,
+          "lineCount": 16
+        },
+        {
+          "name": "train_transformer",
+          "params": [
+            "model_name",
+            "epochs",
+            "batch_size",
+            "learning_rate",
+            "save"
+          ],
+          "returnType": "dict",
+          "exported": true,
+          "lineCount": 23
+        },
+        {
+          "name": "train_all_models",
+          "params": [
+            "include_transformers",
+            "transformer_epochs"
+          ],
+          "returnType": "dict",
+          "exported": true,
+          "lineCount": 63
+        },
+        {
+          "name": "cross_validate_baselines",
+          "params": [
+            "k"
+          ],
+          "returnType": "dict",
+          "exported": true,
+          "lineCount": 99
+        },
+        {
+          "name": "tune_hyperparameters",
+          "params": [],
+          "returnType": "dict",
+          "exported": true,
+          "lineCount": 104
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "argparse",
+          "specifiers": [
+            "argparse"
+          ]
+        },
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "joblib",
+          "specifiers": [
+            "joblib"
+          ]
+        },
+        {
+          "source": "numpy",
+          "specifiers": [
+            "np"
+          ]
+        },
+        {
+          "source": "sklearn.calibration",
+          "specifiers": [
+            "CalibratedClassifierCV"
+          ]
+        },
+        {
+          "source": "sklearn.ensemble",
+          "specifiers": [
+            "GradientBoostingClassifier",
+            "RandomForestClassifier",
+            "VotingClassifier"
+          ]
+        },
+        {
+          "source": "sklearn.feature_extraction.text",
+          "specifiers": [
+            "TfidfVectorizer"
+          ]
+        },
+        {
+          "source": "sklearn.linear_model",
+          "specifiers": [
+            "LogisticRegression"
+          ]
+        },
+        {
+          "source": "sklearn.metrics",
+          "specifiers": [
+            "accuracy_score",
+            "classification_report",
+            "f1_score",
+            "make_scorer"
+          ]
+        },
+        {
+          "source": "sklearn.model_selection",
+          "specifiers": [
+            "GridSearchCV",
+            "StratifiedKFold",
+            "cross_validate"
+          ]
+        },
+        {
+          "source": "sklearn.naive_bayes",
+          "specifiers": [
+            "MultinomialNB"
+          ]
+        },
+        {
+          "source": "sklearn.neural_network",
+          "specifiers": [
+            "MLPClassifier"
+          ]
+        },
+        {
+          "source": "sklearn.pipeline",
+          "specifiers": [
+            "Pipeline"
+          ]
+        },
+        {
+          "source": "sklearn.svm",
+          "specifiers": [
+            "LinearSVC"
+          ]
+        },
+        {
+          "source": "preprocess",
+          "specifiers": [
+            "load_processed_data"
+          ]
+        },
+        {
+          "source": "utils",
+          "specifiers": [
+            "LABEL_MAP_INV",
+            "get_model_dir",
+            "get_results_dir",
+            "setup_logging"
+          ]
+        }
+      ],
+      "exports": [
+        "create_baseline_pipeline",
+        "train_baseline",
+        "train_all_baselines",
+        "train_ensemble",
+        "load_model",
+        "train_transformer",
+        "train_all_models",
+        "cross_validate_baselines",
+        "tune_hyperparameters"
+      ],
+      "totalLines": 608,
+      "hasStructuralAnalysis": true
+    },
+    "src/utils.py": {
+      "filePath": "src/utils.py",
+      "contentHash": "64005b949a7e2a1f5b3e17d192ae62c1af677d9cd4902d49add59d7b4db824ea",
+      "functions": [
+        {
+          "name": "get_project_root",
+          "params": [],
+          "returnType": "Path",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "get_model_dir",
+          "params": [],
+          "returnType": "Path",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "get_data_dir",
+          "params": [
+            "subdir"
+          ],
+          "returnType": "Path",
+          "exported": true,
+          "lineCount": 14
+        },
+        {
+          "name": "get_results_dir",
+          "params": [],
+          "returnType": "Path",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "setup_logging",
+          "params": [
+            "name",
+            "level",
+            "fmt",
+            "datefmt"
+          ],
+          "returnType": "logging.Logger",
+          "exported": true,
+          "lineCount": 34
+        },
+        {
+          "name": "get_model_info",
+          "params": [
+            "model_name"
+          ],
+          "returnType": "Dict[str, Any]",
+          "exported": true,
+          "lineCount": 38
+        },
+        {
+          "name": "get_all_model_info",
+          "params": [
+            "available_models"
+          ],
+          "returnType": "Dict[str, Dict[str, Any]]",
+          "exported": true,
+          "lineCount": 11
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "logging",
+          "specifiers": [
+            "logging"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Any",
+            "Dict"
+          ]
+        }
+      ],
+      "exports": [
+        "get_project_root",
+        "get_model_dir",
+        "get_data_dir",
+        "get_results_dir",
+        "setup_logging",
+        "get_model_info",
+        "get_all_model_info"
+      ],
+      "totalLines": 282,
+      "hasStructuralAnalysis": true
+    },
+    "tests/__init__.py": {
+      "filePath": "tests/__init__.py",
+      "contentHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1,
+      "hasStructuralAnalysis": true
+    },
+    "tests/conftest.py": {
+      "filePath": "tests/conftest.py",
+      "contentHash": "0ce40b3760354aefc559659838ef51a1aed68f4a52f00125a84bd76aa6423926",
+      "functions": [
+        {
+          "name": "positive_texts",
+          "params": [],
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "negative_texts",
+          "params": [],
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "neutral_texts",
+          "params": [],
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "mixed_texts",
+          "params": [
+            "positive_texts",
+            "negative_texts",
+            "neutral_texts"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "project_root",
+          "params": [],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "models_dir",
+          "params": [
+            "project_root"
+          ],
+          "exported": true,
+          "lineCount": 3
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        }
+      ],
+      "exports": [
+        "positive_texts",
+        "negative_texts",
+        "neutral_texts",
+        "mixed_texts",
+        "project_root",
+        "models_dir"
+      ],
+      "totalLines": 66,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_api.py": {
+      "filePath": "tests/test_api.py",
+      "contentHash": "bd66fe3e5d4af923c7f5f094091026646f9f812e41389362297354d1bac695ac",
+      "functions": [],
+      "classes": [
+        {
+          "name": "TestInferenceAPI",
+          "methods": [
+            "test_health",
+            "test_models",
+            "test_predict_single",
+            "test_predict_rejects_blank_text",
+            "test_predict_rejects_oversized_text",
+            "test_predict_batch",
+            "test_batch_rejects_empty_list",
+            "test_metrics",
+            "test_auth_enforced_when_key_set",
+            "test_health_reports_auth_flag"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 72
+        }
+      ],
+      "imports": [
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        },
+        {
+          "source": "fastapi.testclient",
+          "specifiers": [
+            "TestClient"
+          ]
+        },
+        {
+          "source": "api.main",
+          "specifiers": [
+            "app"
+          ]
+        }
+      ],
+      "exports": [
+        "TestInferenceAPI"
+      ],
+      "totalLines": 98,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_api_client.py": {
+      "filePath": "tests/test_api_client.py",
+      "contentHash": "cd031c67c784fc3e31479bc58b8b28c677a42aee821f6ad5043ab00197b97cd3",
+      "functions": [
+        {
+          "name": "test_remote_predict_single",
+          "params": [
+            "monkeypatch"
+          ],
+          "exported": true,
+          "lineCount": 16
+        },
+        {
+          "name": "test_remote_predict_batch",
+          "params": [
+            "monkeypatch"
+          ],
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "test_remote_predict_raises_on_error",
+          "params": [
+            "monkeypatch"
+          ],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_remote_predict_raises_on_connection_failure",
+          "params": [
+            "monkeypatch"
+          ],
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "test_remote_models_fallback_empty",
+          "params": [
+            "monkeypatch"
+          ],
+          "exported": true,
+          "lineCount": 6
+        }
+      ],
+      "classes": [
+        {
+          "name": "_FakeResponse",
+          "methods": [
+            "__init__",
+            "json"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 8
+        }
+      ],
+      "imports": [
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        },
+        {
+          "source": "httpx",
+          "specifiers": [
+            "httpx"
+          ]
+        },
+        {
+          "source": "api_client",
+          "specifiers": [
+            "RemotePredictor",
+            "RemotePredictorError",
+            "remote_available_models"
+          ]
+        }
+      ],
+      "exports": [
+        "_FakeResponse",
+        "test_remote_predict_single",
+        "test_remote_predict_batch",
+        "test_remote_predict_raises_on_error",
+        "test_remote_predict_raises_on_connection_failure",
+        "test_remote_models_fallback_empty"
+      ],
+      "totalLines": 82,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_generalization.py": {
+      "filePath": "tests/test_generalization.py",
+      "contentHash": "4d1d0dfc463a810f7fedda2556885fe51bcfe63b348e5cbea6b83634f7ef345a",
+      "functions": [
+        {
+          "name": "test_generalization_metrics_are_valid",
+          "params": [],
+          "exported": true,
+          "lineCount": 10
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        },
+        {
+          "source": "integrate_news",
+          "specifiers": [
+            "REAL_NEWS_PATH",
+            "evaluate_generalization"
+          ]
+        },
+        {
+          "source": "utils",
+          "specifiers": [
+            "get_model_dir"
+          ]
+        }
+      ],
+      "exports": [
+        "test_generalization_metrics_are_valid"
+      ],
+      "totalLines": 31,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_integrate_news.py": {
+      "filePath": "tests/test_integrate_news.py",
+      "contentHash": "05e340f2febde9f1bd7df6b06a92b7ba3db5480cea033559fa674c863ddeca0c",
+      "functions": [],
+      "classes": [
+        {
+          "name": "TestIntegrateNews",
+          "methods": [
+            "test_import_module",
+            "test_news_data_path_exists",
+            "test_load_news_headlines",
+            "test_load_stock_data",
+            "test_predict_news_sentiment",
+            "test_compute_daily_sentiment",
+            "test_get_sentiment_trends"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 81
+        }
+      ],
+      "imports": [
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "pandas",
+          "specifiers": [
+            "pd"
+          ]
+        },
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        }
+      ],
+      "exports": [
+        "TestIntegrateNews"
+      ],
+      "totalLines": 96,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_llm_enhanced.py": {
+      "filePath": "tests/test_llm_enhanced.py",
+      "contentHash": "6540ae047a65fa0de4d8b814ed0d732007f7e1553f62dbd5c0f5b2cee6557d44",
+      "functions": [],
+      "classes": [
+        {
+          "name": "TestChainOfThoughtReasoner",
+          "methods": [
+            "setup_method",
+            "test_analyze_returns_chain",
+            "test_final_sentiment_valid",
+            "test_confidence_in_range",
+            "test_explanation_not_empty",
+            "test_reasoning_trace_not_empty",
+            "test_with_model_prediction",
+            "test_key_factors_list"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 38
+        },
+        {
+          "name": "TestExplanationGenerator",
+          "methods": [
+            "setup_method",
+            "test_comprehensive_explanation",
+            "test_quick_explanation"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 24
+        },
+        {
+          "name": "TestMarketOutlook",
+          "methods": [
+            "test_generate_outlook",
+            "test_bullish_trend",
+            "test_bearish_trend"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 25
+        },
+        {
+          "name": "TestThoughtStep",
+          "methods": [
+            "test_to_dict"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 12
+        }
+      ],
+      "imports": [
+        {
+          "source": "llm_enhanced",
+          "specifiers": [
+            "ChainOfThought",
+            "ChainOfThoughtReasoner",
+            "EliteExplanationGenerator",
+            "ReasoningStep",
+            "ThoughtStep",
+            "generate_elite_market_outlook"
+          ]
+        }
+      ],
+      "exports": [
+        "TestChainOfThoughtReasoner",
+        "TestExplanationGenerator",
+        "TestMarketOutlook",
+        "TestThoughtStep"
+      ],
+      "totalLines": 118,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_llm_provider.py": {
+      "filePath": "tests/test_llm_provider.py",
+      "contentHash": "8421a9da0d0da43ca6a16997b8e1d23e3e57bb14d37c7ae66ff63e4333b67e7f",
+      "functions": [
+        {
+          "name": "clean_env",
+          "params": [
+            "monkeypatch"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_claude_is_the_default_provider_with_a_default_model",
+          "params": [],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_provider_follows_the_key_that_is_set",
+          "params": [
+            "monkeypatch"
+          ],
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "test_openai_needs_an_explicit_model",
+          "params": [
+            "monkeypatch"
+          ],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "test_unknown_provider_rejected",
+          "params": [],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_temperature_can_be_omitted",
+          "params": [
+            "monkeypatch"
+          ],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "test_claude_chat_model_builds_without_calling_the_api",
+          "params": [
+            "monkeypatch"
+          ],
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "test_openrouter_key_selects_openrouter_and_needs_a_model",
+          "params": [
+            "monkeypatch"
+          ],
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "test_openrouter_client_points_at_openrouter",
+          "params": [
+            "monkeypatch"
+          ],
+          "exported": true,
+          "lineCount": 11
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        },
+        {
+          "source": "llm_provider",
+          "specifiers": [
+            "get_model_name",
+            "get_provider",
+            "get_temperature",
+            "make_chat_model"
+          ]
+        }
+      ],
+      "exports": [
+        "clean_env",
+        "test_claude_is_the_default_provider_with_a_default_model",
+        "test_provider_follows_the_key_that_is_set",
+        "test_openai_needs_an_explicit_model",
+        "test_unknown_provider_rejected",
+        "test_temperature_can_be_omitted",
+        "test_claude_chat_model_builds_without_calling_the_api",
+        "test_openrouter_key_selects_openrouter_and_needs_a_model",
+        "test_openrouter_client_points_at_openrouter"
+      ],
+      "totalLines": 94,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_llm_sentiment.py": {
+      "filePath": "tests/test_llm_sentiment.py",
+      "contentHash": "b8c908b1da6d940ceda3bdf33632e4ccf48c91d582c6845201b6c0be7d61c8cc",
+      "functions": [
+        {
+          "name": "test_zero_shot_prompt_is_system_plus_headline",
+          "params": [],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_few_shot_examples_are_balanced_and_never_from_the_evaluation_set",
+          "params": [],
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "test_invalid_mode_rejected",
+          "params": [],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_classify_records_labels_invalid_answers_and_failures_in_order",
+          "params": [],
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "test_cache_prevents_paying_twice",
+          "params": [
+            "tmp_path"
+          ],
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "test_invalid_answers_are_not_cached",
+          "params": [
+            "tmp_path"
+          ],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "test_usage_summary_cost_only_with_prices",
+          "params": [],
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "test_invalid_predictions_count_as_wrong_in_macro_f1",
+          "params": [],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "test_bootstrap_interval_brackets_the_point_estimate",
+          "params": [],
+          "exported": true,
+          "lineCount": 6
+        }
+      ],
+      "classes": [
+        {
+          "name": "StubRunnable",
+          "methods": [
+            "__init__",
+            "invoke"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 17
+        }
+      ],
+      "imports": [
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "types",
+          "specifiers": [
+            "SimpleNamespace"
+          ]
+        },
+        {
+          "source": "pandas",
+          "specifiers": [
+            "pd"
+          ]
+        },
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        },
+        {
+          "source": "llm_sentiment",
+          "specifiers": [
+            "LABELS",
+            "SYSTEM_PROMPT",
+            "AnswerCache",
+            "build_messages",
+            "classify",
+            "few_shot_examples",
+            "summarize_usage"
+          ]
+        },
+        {
+          "source": "stats",
+          "specifiers": [
+            "bootstrap_macro_f1",
+            "macro_f1"
+          ]
+        }
+      ],
+      "exports": [
+        "StubRunnable",
+        "test_zero_shot_prompt_is_system_plus_headline",
+        "test_few_shot_examples_are_balanced_and_never_from_the_evaluation_set",
+        "test_invalid_mode_rejected",
+        "test_classify_records_labels_invalid_answers_and_failures_in_order",
+        "test_cache_prevents_paying_twice",
+        "test_invalid_answers_are_not_cached",
+        "test_usage_summary_cost_only_with_prices",
+        "test_invalid_predictions_count_as_wrong_in_macro_f1",
+        "test_bootstrap_interval_brackets_the_point_estimate"
+      ],
+      "totalLines": 123,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_model_artifacts.py": {
+      "filePath": "tests/test_model_artifacts.py",
+      "contentHash": "8170201e66295ea1b7c62d07338b9e94be96c083b0094b05b01291c6ee405d6f",
+      "functions": [
+        {
+          "name": "test_finetuned_finbert_config_labels_match_project_mapping",
+          "params": [],
+          "exported": true,
+          "lineCount": 8
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "utils",
+          "specifiers": [
+            "LABEL_MAP_INV"
+          ]
+        }
+      ],
+      "exports": [
+        "test_finetuned_finbert_config_labels_match_project_mapping"
+      ],
+      "totalLines": 21,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_nlp_advanced.py": {
+      "filePath": "tests/test_nlp_advanced.py",
+      "contentHash": "df7feca69bd55c80bb796e2bfe1afeb3f7ccf963bd376b3e46f5ab4fe552329d",
+      "functions": [],
+      "classes": [
+        {
+          "name": "TestAdvancedTextProcessor",
+          "methods": [
+            "setup_method",
+            "test_process_returns_processed_text",
+            "test_clean_text_removes_urls",
+            "test_normalize_replaces_percentages",
+            "test_feature_extraction_counts_words",
+            "test_feature_extraction_detects_negation",
+            "test_feature_extraction_detects_positive_words",
+            "test_feature_extraction_detects_negative_words"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 33
+        },
+        {
+          "name": "TestFinancialTextAnalyzer",
+          "methods": [
+            "setup_method",
+            "test_analyze_returns_dict",
+            "test_positive_text_detected",
+            "test_negative_text_detected",
+            "test_batch_analyze",
+            "test_aggregate_sentiment",
+            "test_company_extraction_does_not_fragment_ordinary_words",
+            "test_company_extraction_finds_tickers_and_suffixed_names",
+            "test_company_extraction_skips_currency_codes"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 45
+        },
+        {
+          "name": "TestConvenienceFunctions",
+          "methods": [
+            "test_analyze_financial_text",
+            "test_extract_financial_features",
+            "test_get_lexicon_sentiment"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "TestLexicons",
+          "methods": [
+            "test_positive_lexicon_populated",
+            "test_negative_lexicon_populated",
+            "test_uncertainty_lexicon_populated",
+            "test_growth_is_positive",
+            "test_loss_is_negative",
+            "test_may_is_uncertain"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 18
+        }
+      ],
+      "imports": [
+        {
+          "source": "lexicons",
+          "specifiers": [
+            "FINANCIAL_NEGATIVE",
+            "FINANCIAL_POSITIVE",
+            "FINANCIAL_UNCERTAINTY"
+          ]
+        },
+        {
+          "source": "nlp_advanced",
+          "specifiers": [
+            "AdvancedTextProcessor",
+            "FinancialTextAnalyzer",
+            "TextFeatures",
+            "analyze_financial_text",
+            "extract_financial_features",
+            "get_lexicon_sentiment"
+          ]
+        }
+      ],
+      "exports": [
+        "TestAdvancedTextProcessor",
+        "TestFinancialTextAnalyzer",
+        "TestConvenienceFunctions",
+        "TestLexicons"
+      ],
+      "totalLines": 128,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_page_imports.py": {
+      "filePath": "tests/test_page_imports.py",
+      "contentHash": "71a7a075001bb933040dcc9626c8231f007d02814e0f8ce09024a2d095f406b2",
+      "functions": [
+        {
+          "name": "_project_imports",
+          "params": [
+            "path"
+          ],
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "test_page_imports_resolve",
+          "params": [
+            "page"
+          ],
+          "exported": true,
+          "lineCount": 13
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "ast",
+          "specifiers": [
+            "ast"
+          ]
+        },
+        {
+          "source": "importlib",
+          "specifiers": [
+            "importlib"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        }
+      ],
+      "exports": [
+        "_project_imports",
+        "test_page_imports_resolve"
+      ],
+      "totalLines": 55,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_predict.py": {
+      "filePath": "tests/test_predict.py",
+      "contentHash": "6b67f91caee3c943a5271ea57f45701e9eecc82923ab541174f3b7425e057cf9",
+      "functions": [],
+      "classes": [
+        {
+          "name": "TestGetAvailableModels",
+          "methods": [
+            "test_returns_list",
+            "test_finds_trained_models"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "TestSentimentPredictor",
+          "methods": [
+            "predictor",
+            "test_predict_single",
+            "test_predict_returns_probabilities",
+            "test_predict_batch",
+            "test_predict_confidence_range"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 32
+        }
+      ],
+      "imports": [
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        },
+        {
+          "source": "predict",
+          "specifiers": [
+            "SentimentPredictor",
+            "get_available_models"
+          ]
+        }
+      ],
+      "exports": [
+        "TestGetAvailableModels",
+        "TestSentimentPredictor"
+      ],
+      "totalLines": 53,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_preprocess.py": {
+      "filePath": "tests/test_preprocess.py",
+      "contentHash": "fbc5177e7b3af072917a5e584ebcb0e7a7ef0349251f18a50479340f92877126",
+      "functions": [],
+      "classes": [
+        {
+          "name": "TestCleanText",
+          "methods": [
+            "test_lowercase",
+            "test_whitespace_normalization",
+            "test_removes_special_characters",
+            "test_empty_string",
+            "test_preserves_meaningful_content"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 18
+        },
+        {
+          "name": "TestPreprocessDataframe",
+          "methods": [
+            "test_basic_preprocessing",
+            "test_label_encoding",
+            "test_drops_empty_sentences"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 32
+        },
+        {
+          "name": "TestCreateSplits",
+          "methods": [
+            "test_split_sizes",
+            "test_no_overlap"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 27
+        }
+      ],
+      "imports": [
+        {
+          "source": "pandas",
+          "specifiers": [
+            "pd"
+          ]
+        },
+        {
+          "source": "preprocess",
+          "specifiers": [
+            "clean_text",
+            "create_splits",
+            "preprocess_dataframe"
+          ]
+        }
+      ],
+      "exports": [
+        "TestCleanText",
+        "TestPreprocessDataframe",
+        "TestCreateSplits"
+      ],
+      "totalLines": 89,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_rag_news.py": {
+      "filePath": "tests/test_rag_news.py",
+      "contentHash": "e8d5944cdbc76fd9540ed54a77a9141772048bdb6e06256dd20a40f41a44a3e2",
+      "functions": [
+        {
+          "name": "corpus",
+          "params": [],
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "test_corpus_has_stable_ids",
+          "params": [],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_exact_headline_is_retrieved_first",
+          "params": [
+            "corpus"
+          ],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "test_index_is_saved_and_reloaded",
+          "params": [
+            "corpus",
+            "tmp_path"
+          ],
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "test_prompt_numbers_sources_and_guards_against_injection",
+          "params": [
+            "corpus"
+          ],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "test_invented_citations_are_dropped",
+          "params": [],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "test_no_sources_means_no_llm_call",
+          "params": [],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "test_empty_question_rejected",
+          "params": [],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_sentiment_mix_sums_to_one",
+          "params": [],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "test_local_embeddings_find_topical_headlines",
+          "params": [],
+          "exported": true,
+          "lineCount": 10
+        }
+      ],
+      "classes": [
+        {
+          "name": "StubAnswer",
+          "methods": [
+            "__init__",
+            "invoke"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 8
+        }
+      ],
+      "imports": [
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "types",
+          "specifiers": [
+            "SimpleNamespace"
+          ]
+        },
+        {
+          "source": "pandas",
+          "specifiers": [
+            "pd"
+          ]
+        },
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        },
+        {
+          "source": "langchain_core.embeddings",
+          "specifiers": [
+            "DeterministicFakeEmbedding"
+          ]
+        },
+        {
+          "source": "rag_news",
+          "specifiers": [
+            "NOT_FOUND",
+            "answer_question",
+            "build_index",
+            "build_messages",
+            "load_corpus",
+            "retrieve",
+            "sentiment_mix"
+          ]
+        }
+      ],
+      "exports": [
+        "corpus",
+        "StubAnswer",
+        "test_corpus_has_stable_ids",
+        "test_exact_headline_is_retrieved_first",
+        "test_index_is_saved_and_reloaded",
+        "test_prompt_numbers_sources_and_guards_against_injection",
+        "test_invented_citations_are_dropped",
+        "test_no_sources_means_no_llm_call",
+        "test_empty_question_rejected",
+        "test_sentiment_mix_sums_to_one",
+        "test_local_embeddings_find_topical_headlines"
+      ],
+      "totalLines": 122,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_shap_explain.py": {
+      "filePath": "tests/test_shap_explain.py",
+      "contentHash": "dc88ab2c7aed3c27d7f90385af56f1bbeef72de602af6626f1b242923f2d34c5",
+      "functions": [],
+      "classes": [
+        {
+          "name": "TestShapExplain",
+          "methods": [
+            "test_import_module",
+            "test_shap_available",
+            "test_get_shap_explanation_gradient_boosting",
+            "test_get_shap_explanation_logreg",
+            "test_shap_results_contain_class_features",
+            "test_save_shap_results"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 109
+        }
+      ],
+      "imports": [
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        }
+      ],
+      "exports": [
+        "TestShapExplain"
+      ],
+      "totalLines": 124,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_stock_extension.py": {
+      "filePath": "tests/test_stock_extension.py",
+      "contentHash": "4a2034b82f46849e674d82aee5e0a4dfdad103eefce949d44f9486cb759cd650",
+      "functions": [
+        {
+          "name": "_build_stub_components",
+          "params": [
+            "live_news_df",
+            "sample_news_df"
+          ],
+          "exported": true,
+          "lineCount": 95
+        }
+      ],
+      "classes": [
+        {
+          "name": "TestStockExtension",
+          "methods": [
+            "test_get_stock_project_root_exists",
+            "test_run_stock_extension_with_live_news",
+            "test_run_stock_extension_falls_back_to_sample_news",
+            "test_run_stock_extension_market_sample_fallback_for_any_ticker",
+            "test_get_lstm_model_path_uses_ticker",
+            "test_save_model_is_graceful_without_real_torch_model"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 134
+        }
+      ],
+      "imports": [
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "pandas",
+          "specifiers": [
+            "pd"
+          ]
+        }
+      ],
+      "exports": [
+        "_build_stub_components",
+        "TestStockExtension"
+      ],
+      "totalLines": 245,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_utils.py": {
+      "filePath": "tests/test_utils.py",
+      "contentHash": "842d02654b34e74713e32690d9882f1be69677a3d2ee67e40678a7222972b89d",
+      "functions": [],
+      "classes": [
+        {
+          "name": "TestGetProjectRoot",
+          "methods": [
+            "test_returns_path",
+            "test_contains_src_dir",
+            "test_contains_app_dir"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "TestPathHelpers",
+          "methods": [
+            "test_get_model_dir",
+            "test_get_data_dir",
+            "test_get_data_dir_with_subdir",
+            "test_get_results_dir"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 20
+        },
+        {
+          "name": "TestSetupLogging",
+          "methods": [
+            "test_returns_logger",
+            "test_logger_has_handler",
+            "test_logger_level_is_info",
+            "test_no_duplicate_handlers"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 19
+        },
+        {
+          "name": "TestConstants",
+          "methods": [
+            "test_label_map_has_three_entries",
+            "test_label_map_values",
+            "test_label_map_inv_roundtrips",
+            "test_baseline_classifiers",
+            "test_transformer_models"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 20
+        },
+        {
+          "name": "TestGetModelInfo",
+          "methods": [
+            "test_known_model_returns_dict",
+            "test_unknown_model_returns_defaults",
+            "test_finbert_pretrained_info"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 16
+        }
+      ],
+      "imports": [
+        {
+          "source": "logging",
+          "specifiers": [
+            "logging"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "utils",
+          "specifiers": [
+            "BASELINE_CLASSIFIERS",
+            "LABEL_MAP",
+            "LABEL_MAP_INV",
+            "TRANSFORMER_MODELS",
+            "get_data_dir",
+            "get_model_dir",
+            "get_model_info",
+            "get_project_root",
+            "get_results_dir",
+            "setup_logging"
+          ]
+        }
+      ],
+      "exports": [
+        "TestGetProjectRoot",
+        "TestPathHelpers",
+        "TestSetupLogging",
+        "TestConstants",
+        "TestGetModelInfo"
+      ],
+      "totalLines": 115,
+      "hasStructuralAnalysis": true
+    }
+  }
+}
